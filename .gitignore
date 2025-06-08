@@ -21,14 +21,24 @@ CLAUDE.md
 .claude/
 
 # Development and backup files
-*.backup
-*.backup[0-9]
+*.backup*
 *.bak
 *.tmp
 *.temp
 bub.sh
 main.py
 test_*.py
+
+# Project temporary analysis files
+alpaca_implementation_plan.txt
+alpaca_mcp_review.txt
+current_tools.txt
+original_tools.txt
+analyze_alpaca_for_prompts.sh
+extract_alpaca_files.sh
+
+# UV package manager
+uv.lock
 
 # IDE
 .vscode/
