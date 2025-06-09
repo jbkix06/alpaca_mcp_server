@@ -2,6 +2,7 @@
 
 from typing import Optional, Union, List
 from datetime import datetime, timedelta
+import pytz
 from ..config.settings import get_stock_historical_client
 
 # Alpaca imports for market data
@@ -15,6 +16,45 @@ from alpaca.data.requests import (
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.data.enums import DataFeed, Adjustment
 from alpaca.common.enums import SupportedCurrencies
+
+
+def get_smart_date_range():
+    """
+    Get a smart date range for intraday data that considers market hours and days.
+
+    Returns:
+        tuple: (start_date, end_date, is_market_open) in YYYY-MM-DD format
+    """
+    eastern = pytz.timezone("US/Eastern")
+    now_et = datetime.now(eastern)
+
+    # Check if today is a weekday (Monday=0, Sunday=6)
+    is_weekday = now_et.weekday() < 5
+
+    # Market hours: 9:30 AM - 4:00 PM ET (regular), 4:00 AM - 8:00 PM ET (extended)
+    market_open = now_et.replace(hour=9, minute=30, second=0, microsecond=0)
+    market_close = now_et.replace(hour=16, minute=0, second=0, microsecond=0)
+
+    is_market_hours = market_open <= now_et <= market_close
+    is_market_open = is_weekday and is_market_hours
+
+    if is_weekday and now_et.hour >= 4:
+        # Today, if it's a weekday and after 4 AM ET
+        return now_et.strftime("%Y-%m-%d"), now_et.strftime("%Y-%m-%d"), is_market_open
+    else:
+        # Most recent trading day
+        days_back = 1
+        while days_back <= 7:  # Look back up to a week
+            check_date = now_et - timedelta(days=days_back)
+            if check_date.weekday() < 5:  # Found a weekday
+                date_str = check_date.strftime("%Y-%m-%d")
+                return date_str, date_str, False
+            days_back += 1
+
+        # Fallback: last Friday
+        last_friday = now_et - timedelta(days=(now_et.weekday() + 3) % 7)
+        date_str = last_friday.strftime("%Y-%m-%d")
+        return date_str, date_str, False
 
 
 async def get_stock_quote(symbol: str) -> str:
@@ -124,11 +164,11 @@ async def get_stock_bars_intraday(
     Retrieves comprehensive intraday historical bars with professional analysis.
 
     Args:
-        symbol (str): Stock ticker symbol (e.g., AAPL, MSFT)
+        symbol (str): Stock ticker symbol(s) - can be comma-separated (e.g., AAPL, MSFT or AAPL,MSFT,GOOGL)
         timeframe (str): Timeframe for bars (1Min, 5Min, 15Min, 30Min, 1Hour)
         start_date (Optional[str]): Start date in YYYY-MM-DD format (default: today)
         end_date (Optional[str]): End date in YYYY-MM-DD format (default: now)
-        limit (int): Maximum number of bars to return (default: 100)
+        limit (int): Maximum number of bars to return per symbol (default: 10000)
         adjustment (str): Price adjustment type (raw, split, dividend, all)
         feed (str): Data feed (sip, iex, otc)
         currency (str): Currency for international symbols
@@ -139,6 +179,12 @@ async def get_stock_bars_intraday(
     """
     try:
         client = get_stock_historical_client()
+
+        # Parse symbols - handle comma-separated list
+        if "," in symbol:
+            symbol_list = [s.strip().upper() for s in symbol.split(",")]
+        else:
+            symbol_list = [symbol.strip().upper()]
 
         # Parse timeframe
         timeframe_map = {
@@ -155,18 +201,46 @@ async def get_stock_bars_intraday(
 
         tf = timeframe_map[timeframe]
 
-        # Parse dates - support extended hours trading (4 AM - 8 PM EST)
-        if start_date:
-            # If only date provided, set to extended hours start (4 AM EST)
-            start = datetime.strptime(start_date, "%Y-%m-%d").replace(hour=4, minute=0)
-        else:
-            start = datetime.now().replace(hour=4, minute=0, second=0, microsecond=0)
+        # Parse dates - the SDK requires timezone-aware datetime objects
+        eastern = pytz.timezone("US/Eastern")
 
-        if end_date:
-            # If only date provided, set to extended hours end (8 PM EST)
-            end = datetime.strptime(end_date, "%Y-%m-%d").replace(hour=20, minute=0)
+        if start_date and end_date:
+            # User provided both dates
+            start = eastern.localize(
+                datetime.strptime(start_date, "%Y-%m-%d").replace(hour=4, minute=0)
+            )
+            end = eastern.localize(
+                datetime.strptime(end_date, "%Y-%m-%d").replace(hour=20, minute=0)
+            )
+        elif start_date:
+            # User provided start date only
+            start = eastern.localize(
+                datetime.strptime(start_date, "%Y-%m-%d").replace(hour=4, minute=0)
+            )
+            end = datetime.now(eastern)
+        elif end_date:
+            # User provided end date only
+            end = eastern.localize(
+                datetime.strptime(end_date, "%Y-%m-%d").replace(hour=20, minute=0)
+            )
+            # Default to same day
+            start = eastern.localize(
+                datetime.strptime(end_date, "%Y-%m-%d").replace(hour=4, minute=0)
+            )
         else:
-            end = datetime.now()
+            # No dates provided - use smart defaults
+            smart_start, smart_end, is_market_open = get_smart_date_range()
+            start = eastern.localize(
+                datetime.strptime(smart_start, "%Y-%m-%d").replace(hour=4, minute=0)
+            )
+            if is_market_open:
+                # Market is open, use current time
+                end = datetime.now(eastern)
+            else:
+                # Market closed, use end of trading day
+                end = eastern.localize(
+                    datetime.strptime(smart_end, "%Y-%m-%d").replace(hour=20, minute=0)
+                )
 
         # Parse enums
         adjustment_enum = getattr(Adjustment, adjustment.upper(), Adjustment.RAW)
@@ -176,7 +250,7 @@ async def get_stock_bars_intraday(
         )
 
         request_params = StockBarsRequest(
-            symbol_or_symbols=symbol,
+            symbol_or_symbols=symbol_list,
             timeframe=tf,
             start=start,
             end=end,
@@ -188,61 +262,92 @@ async def get_stock_bars_intraday(
 
         bars_data = client.get_stock_bars(request_params)
 
-        if symbol not in bars_data.data or not bars_data.data[symbol]:
-            return f"No intraday data found for {symbol} in timeframe {timeframe}."
+        # Check if we have any data at all
+        if not bars_data.data:
+            return f"""No intraday data found for symbols {', '.join(symbol_list)} in timeframe {timeframe}.
 
-        bars = list(bars_data.data[symbol])
+Possible reasons:
+• Market is closed or symbols traded on non-trading day (weekends/holidays)
+• Invalid symbol(s) - check ticker spelling
+• {feed.upper()} feed may have limited data for these symbols
+• Time range may be outside available data period
 
-        # Professional analysis starts here
-        result = f"""# Professional Intraday Analysis: {symbol}
+Suggestions:
+• Try a recent trading day (Monday-Friday)
+• Use SIP feed for most comprehensive data
+• Verify symbols are valid and actively traded
+• Check if market was open during specified time range"""
+
+        # For single symbol, provide detailed analysis
+        if len(symbol_list) == 1:
+            symbol = symbol_list[0]
+            if symbol not in bars_data.data or not bars_data.data[symbol]:
+                return f"""No intraday data found for {symbol} in timeframe {timeframe}.
+
+Possible reasons:
+• Market is closed or {symbol} traded on non-trading day (weekends/holidays)
+• Invalid symbol - check ticker spelling for {symbol}
+• {feed.upper()} feed may have limited data for {symbol}
+• Time range may be outside available data period
+
+Suggestions:
+• Try a recent trading day (Monday-Friday)
+• Use SIP feed for most comprehensive data
+• Verify {symbol} is valid and actively traded
+• Check if market was open during specified time range"""
+
+            bars = list(bars_data.data[symbol])
+
+            # Professional analysis starts here
+            result = f"""# Professional Intraday Analysis: {symbol}
         
 ## Market Data Summary
 Symbol: {symbol}
 Timeframe: {timeframe}
-Period: {start.strftime('%Y-%m-%d %H:%M')} to {end.strftime('%Y-%m-%d %H:%M')}
+Period: {start.strftime('%Y-%m-%d %H:%M')} to {end.strftime('%Y-%m-%d %H:%M')} ET
 Total Bars: {len(bars)}
 Data Feed: {feed.upper()}
 Adjustment: {adjustment.title()}
 
 """
 
-        if len(bars) < 2:
-            return result + "Insufficient data for analysis."
+            if len(bars) < 2:
+                return result + "Insufficient data for analysis."
 
-        # Calculate key metrics
-        first_bar = bars[0]
-        last_bar = bars[-1]
-        open_price = float(first_bar.open)
-        close_price = float(last_bar.close)
+            # Calculate key metrics
+            first_bar = bars[0]
+            last_bar = bars[-1]
+            open_price = float(first_bar.open)
+            close_price = float(last_bar.close)
 
-        # Find high and low
-        high_price = max(float(bar.high) for bar in bars)
-        low_price = min(float(bar.low) for bar in bars)
+            # Find high and low
+            high_price = max(float(bar.high) for bar in bars)
+            low_price = min(float(bar.low) for bar in bars)
 
-        # Calculate returns
-        total_return = ((close_price - open_price) / open_price) * 100
+            # Calculate returns
+            total_return = ((close_price - open_price) / open_price) * 100
 
-        # Volume analysis
-        total_volume = sum(bar.volume for bar in bars)
-        avg_volume = total_volume / len(bars)
+            # Volume analysis
+            total_volume = sum(bar.volume for bar in bars)
+            avg_volume = total_volume / len(bars)
 
-        # Recent bars for momentum
-        recent_bars = bars[-min(10, len(bars)) :]
-        recent_prices = [float(bar.close) for bar in recent_bars]
+            # Recent bars for momentum
+            recent_bars = bars[-min(10, len(bars)) :]
+            recent_prices = [float(bar.close) for bar in recent_bars]
 
-        # Simple momentum calculation
-        if len(recent_prices) >= 3:
-            early_avg = sum(recent_prices[: len(recent_prices) // 2]) / (
-                len(recent_prices) // 2
-            )
-            late_avg = sum(recent_prices[len(recent_prices) // 2 :]) / (
-                len(recent_prices) - len(recent_prices) // 2
-            )
-            momentum = "BULLISH" if late_avg > early_avg else "BEARISH"
-        else:
-            momentum = "NEUTRAL"
+            # Simple momentum calculation
+            if len(recent_prices) >= 3:
+                early_avg = sum(recent_prices[: len(recent_prices) // 2]) / (
+                    len(recent_prices) // 2
+                )
+                late_avg = sum(recent_prices[len(recent_prices) // 2 :]) / (
+                    len(recent_prices) - len(recent_prices) // 2
+                )
+                momentum = "BULLISH" if late_avg > early_avg else "BEARISH"
+            else:
+                momentum = "NEUTRAL"
 
-        result += f"""## Key Metrics
+            result += f"""## Key Metrics
 Period Return: {total_return:+.2f}%
 Opening Price: ${open_price:.2f}
 Closing Price: ${close_price:.2f}
@@ -262,19 +367,21 @@ Price Action: {'Trending Up' if close_price > open_price else 'Trending Down' if
 
 """
 
-        # Recent bars detail
-        result += f"## Recent Price Action (Last {min(5, len(bars))} bars):\n"
-        for bar in bars[-5:]:
-            bar_change = ((float(bar.close) - float(bar.open)) / float(bar.open)) * 100
-            trend_arrow = (
-                "🟢" if bar_change > 0.5 else "🔴" if bar_change < -0.5 else "🟡"
-            )
+            # Recent bars detail
+            result += f"## Recent Price Action (Last {min(5, len(bars))} bars):\n"
+            for bar in bars[-5:]:
+                bar_change = (
+                    (float(bar.close) - float(bar.open)) / float(bar.open)
+                ) * 100
+                trend_arrow = (
+                    "🟢" if bar_change > 0.5 else "🔴" if bar_change < -0.5 else "🟡"
+                )
 
-            result += f"""{trend_arrow} {bar.timestamp.strftime('%H:%M')} | O:${float(bar.open):.2f} H:${float(bar.high):.2f} L:${float(bar.low):.2f} C:${float(bar.close):.2f} | Vol:{bar.volume:,} | {bar_change:+.2f}%
+                result += f"""{trend_arrow} {bar.timestamp.strftime('%H:%M')} | O:${float(bar.open):.2f} H:${float(bar.high):.2f} L:${float(bar.low):.2f} C:${float(bar.close):.2f} | Vol:{bar.volume:,} | {bar_change:+.2f}%
 """
 
-        # Trading insights
-        result += f"""
+            # Trading insights
+            result += f"""
 ## Trading Insights
 
 Support/Resistance Levels:
@@ -295,10 +402,136 @@ Risk Considerations:
 Analysis Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 """
 
-        return result
+            return result
+
+        else:
+            # Multiple symbols - provide summary analysis
+            result = f"""# Intraday Analysis: Multiple Symbols
+            
+## Summary
+Symbols: {', '.join(symbol_list)}
+Timeframe: {timeframe}
+Period: {start.strftime('%Y-%m-%d %H:%M')} to {end.strftime('%Y-%m-%d %H:%M')} ET
+Data Feed: {feed.upper()}
+
+"""
+
+            # Analyze each symbol
+            for symbol in symbol_list:
+                if symbol not in bars_data.data or not bars_data.data[symbol]:
+                    result += f"\n## {symbol} - No Data Available\n"
+                    continue
+
+                bars = list(bars_data.data[symbol])
+                if len(bars) < 2:
+                    result += f"\n## {symbol} - Insufficient Data\n"
+                    continue
+
+                # Calculate key metrics for each symbol
+                first_bar = bars[0]
+                last_bar = bars[-1]
+                open_price = float(first_bar.open)
+                close_price = float(last_bar.close)
+
+                # Find high and low
+                high_price = max(float(bar.high) for bar in bars)
+                low_price = min(float(bar.low) for bar in bars)
+
+                # Calculate returns
+                total_return = ((close_price - open_price) / open_price) * 100
+
+                # Volume analysis
+                total_volume = sum(bar.volume for bar in bars)
+                avg_volume_per_bar = total_volume / len(bars)
+
+                # Recent momentum
+                recent_bars = bars[-min(5, len(bars)) :]
+                recent_change = (
+                    (float(recent_bars[-1].close) - float(recent_bars[0].open))
+                    / float(recent_bars[0].open)
+                ) * 100
+
+                result += f"""## {symbol}
+                
+### Performance
+• Period Return: {total_return:+.2f}%
+• Open: ${open_price:.2f} → Close: ${close_price:.2f}
+• High: ${high_price:.2f} | Low: ${low_price:.2f}
+• Range: ${high_price - low_price:.2f} ({((high_price - low_price) / open_price) * 100:.2f}%)
+
+### Volume
+• Total: {total_volume:,} shares
+• Avg/Bar: {avg_volume_per_bar:,.0f} shares
+• Bars: {len(bars)}
+
+### Recent Action (Last {len(recent_bars)} bars)
+• Momentum: {recent_change:+.2f}%
+• Last Price: ${float(last_bar.close):.2f}
+• Last Volume: {last_bar.volume:,}
+
+---
+"""
+
+            # Add summary rankings
+            result += "\n## Summary Rankings\n\n"
+
+            # Collect metrics for ranking
+            symbol_metrics = []
+            for symbol in symbol_list:
+                if symbol in bars_data.data and bars_data.data[symbol]:
+                    bars = list(bars_data.data[symbol])
+                    if len(bars) >= 2:
+                        first_bar = bars[0]
+                        last_bar = bars[-1]
+                        total_return = (
+                            (float(last_bar.close) - float(first_bar.open))
+                            / float(first_bar.open)
+                        ) * 100
+                        total_volume = sum(bar.volume for bar in bars)
+                        volatility = (
+                            (
+                                max(float(bar.high) for bar in bars)
+                                - min(float(bar.low) for bar in bars)
+                            )
+                            / float(first_bar.open)
+                            * 100
+                        )
+
+                        symbol_metrics.append(
+                            {
+                                "symbol": symbol,
+                                "return": total_return,
+                                "volume": total_volume,
+                                "volatility": volatility,
+                                "last_price": float(last_bar.close),
+                            }
+                        )
+
+            # Sort by return
+            symbol_metrics.sort(key=lambda x: x["return"], reverse=True)
+
+            result += "### By Performance\n"
+            for i, m in enumerate(symbol_metrics[:10], 1):
+                result += f"{i}. {m['symbol']}: {m['return']:+.2f}% (${m['last_price']:.2f})\n"
+
+            # Sort by volume
+            symbol_metrics.sort(key=lambda x: x["volume"], reverse=True)
+
+            result += "\n### By Volume\n"
+            for i, m in enumerate(symbol_metrics[:10], 1):
+                result += f"{i}. {m['symbol']}: {m['volume']:,} shares\n"
+
+            # Sort by volatility
+            symbol_metrics.sort(key=lambda x: x["volatility"], reverse=True)
+
+            result += "\n### By Volatility\n"
+            for i, m in enumerate(symbol_metrics[:10], 1):
+                result += f"{i}. {m['symbol']}: {m['volatility']:.2f}% range\n"
+
+            return result
 
     except Exception as e:
-        return f"Error fetching intraday data for {symbol}: {str(e)}"
+        return f"Error fetching intraday data: {str(e)}"
 
 
 async def get_stock_snapshots(symbols: Union[str, List[str]]) -> str:
