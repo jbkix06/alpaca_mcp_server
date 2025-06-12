@@ -137,13 +137,13 @@ Latest Trade:
   Exchange: {snapshot.latest_trade.exchange}
   
 Greeks (if available):
-  Delta: {getattr(snapshot, 'delta', 'N/A')}
-  Gamma: {getattr(snapshot, 'gamma', 'N/A')}
-  Theta: {getattr(snapshot, 'theta', 'N/A')}
-  Vega: {getattr(snapshot, 'vega', 'N/A')}
+  Delta: {getattr(snapshot, "delta", "N/A")}
+  Gamma: {getattr(snapshot, "gamma", "N/A")}
+  Theta: {getattr(snapshot, "theta", "N/A")}
+  Vega: {getattr(snapshot, "vega", "N/A")}
   
-Implied Volatility: {getattr(snapshot, 'implied_volatility', 'N/A')}
-Open Interest: {getattr(snapshot, 'open_interest', 'N/A')}
+Implied Volatility: {getattr(snapshot, "implied_volatility", "N/A")}
+Open Interest: {getattr(snapshot, "open_interest", "N/A")}
 """
 
     except Exception as e:

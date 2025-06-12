@@ -341,11 +341,11 @@ async def place_option_market_order(
             try:
                 # Validate required fields
                 if "symbol" not in leg:
-                    return f"Error: Leg {i+1} missing required field 'symbol'."
+                    return f"Error: Leg {i + 1} missing required field 'symbol'."
                 if "side" not in leg:
-                    return f"Error: Leg {i+1} missing required field 'side'."
+                    return f"Error: Leg {i + 1} missing required field 'side'."
                 if "ratio_qty" not in leg:
-                    return f"Error: Leg {i+1} missing required field 'ratio_qty'."
+                    return f"Error: Leg {i + 1} missing required field 'ratio_qty'."
 
                 # Validate side
                 side_str = leg["side"].lower()
@@ -354,7 +354,7 @@ async def place_option_market_order(
                 elif side_str == "sell":
                     side_enum = OrderSide.SELL
                 else:
-                    return f"Error: Leg {i+1} has invalid side '{leg['side']}'. Must be 'buy' or 'sell'."
+                    return f"Error: Leg {i + 1} has invalid side '{leg['side']}'. Must be 'buy' or 'sell'."
 
                 # Create option leg
                 option_leg = OptionLegRequest(
@@ -363,7 +363,7 @@ async def place_option_market_order(
                 option_legs.append(option_leg)
 
             except Exception as leg_error:
-                return f"Error processing leg {i+1}: {str(leg_error)}"
+                return f"Error processing leg {i + 1}: {str(leg_error)}"
 
         # Create the order request
         from alpaca.trading.requests import OptionMarketOrderRequest
@@ -394,7 +394,7 @@ Legs:"""
 
         for i, leg in enumerate(legs):
             result += f"""
-Leg {i+1}: {leg['side'].upper()} {leg['ratio_qty']} {leg['symbol']}"""
+Leg {i + 1}: {leg["side"].upper()} {leg["ratio_qty"]} {leg["symbol"]}"""
 
         return result
 

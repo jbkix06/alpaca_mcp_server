@@ -1,4 +1,4 @@
-"""Real-time streaming tools for day trading."""
+"""Real-time streaming tools for day trading - fixed version."""
 
 import time
 import threading
@@ -8,7 +8,7 @@ from typing import List, Optional, Dict
 from collections import deque, defaultdict
 from alpaca.data.live import StockDataStream
 from alpaca.data.enums import DataFeed
-from ..config.settings import settings
+import os
 
 # Global streaming state
 _global_stock_stream = None
@@ -123,7 +123,7 @@ def _get_or_create_stock_buffer(
 
 
 # Event handlers for streaming data
-def handle_stock_trade(trade):
+async def handle_stock_trade(trade):
     """Handle incoming stock trade data"""
     global _stock_stream_stats
     try:
@@ -152,7 +152,7 @@ def handle_stock_trade(trade):
         print(f"Error handling stock trade: {e}")
 
 
-def handle_stock_quote(quote):
+async def handle_stock_quote(quote):
     """Handle incoming stock quote data"""
     global _stock_stream_stats
     try:
@@ -183,7 +183,7 @@ def handle_stock_quote(quote):
         print(f"Error handling stock quote: {e}")
 
 
-def handle_stock_bar(bar):
+async def handle_stock_bar(bar):
     """Handle incoming stock bar data"""
     global _stock_stream_stats
     try:
@@ -215,7 +215,7 @@ def handle_stock_bar(bar):
         print(f"Error handling stock bar: {e}")
 
 
-def handle_stock_status(status):
+async def handle_stock_status(status):
     """Handle incoming stock status data"""
     global _stock_stream_stats
     try:
@@ -272,7 +272,12 @@ async def start_global_stock_stream(
     Returns:
         str: Confirmation with stock stream details and data access instructions
     """
-    global _global_stock_stream, _stock_stream_thread, _stock_stream_active, _stock_stream_start_time, _stock_stream_end_time
+    global \
+        _global_stock_stream, \
+        _stock_stream_thread, \
+        _stock_stream_active, \
+        _stock_stream_start_time, \
+        _stock_stream_end_time
 
     try:
         # Check if stock stream already exists
@@ -285,10 +290,10 @@ async def start_global_stock_stream(
 ❌ Global stock stream already active!
 
 Current Stock Stream:
-└── Symbols: {', '.join(sorted(current_symbols)) if current_symbols else 'None'}
+└── Symbols: {", ".join(sorted(current_symbols)) if current_symbols else "None"}
 └── Data Types: {[dt for dt, symbols in _stock_stream_subscriptions.items() if symbols]}
-└── Feed: {_stock_stream_config['feed'].upper()}
-└── Runtime: {(time.time() - _stock_stream_start_time)/60:.1f} minutes
+└── Feed: {_stock_stream_config["feed"].upper()}
+└── Runtime: {(time.time() - _stock_stream_start_time) / 60:.1f} minutes
 
 Options:
 └── Use add_symbols_to_stock_stream() to add more symbols
@@ -332,10 +337,17 @@ Options:
         # Create data feed enum
         feed_enum = DataFeed.SIP if feed.lower() == "sip" else DataFeed.IEX
 
+        # Get API credentials directly from environment
+        api_key = os.getenv("APCA_API_KEY_ID") or os.getenv("ALPACA_API_KEY")
+        api_secret = os.getenv("APCA_API_SECRET_KEY") or os.getenv("ALPACA_SECRET_KEY")
+
+        if not api_key or not api_secret:
+            return "Error: Alpaca API credentials not found in environment variables. Please set APCA_API_KEY_ID and APCA_API_SECRET_KEY."
+
         # Create the single global stock stream
         _global_stock_stream = StockDataStream(
-            api_key=settings.alpaca_api_key,
-            secret_key=settings.alpaca_secret_key,
+            api_key=api_key,
+            secret_key=api_secret,
             feed=feed_enum,
             raw_data=False,
         )
@@ -369,7 +381,10 @@ Options:
 
         # Function to run the stock stream with duration monitoring
         def run_stock_stream():
-            global _stock_stream_active, _stock_stream_start_time, _stock_stream_end_time
+            global \
+                _stock_stream_active, \
+                _stock_stream_start_time, \
+                _stock_stream_end_time
 
             try:
                 _stock_stream_active = True
@@ -412,12 +427,12 @@ Options:
 🚀 GLOBAL STOCK STREAM STARTED SUCCESSFULLY!
 
 📊 Stock Stream Configuration:
-└── Symbols: {', '.join(symbols)} ({len(symbols)} stock symbols)
-└── Data Types: {', '.join(data_types)}
+└── Symbols: {", ".join(symbols)} ({len(symbols)} stock symbols)
+└── Data Types: {", ".join(data_types)}
 └── Feed: {feed.upper()}
 └── Duration: {duration_info}
 └── Buffer Size per Symbol: {buffer_info}
-└── Start Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+└── Start Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 💾 Stock Data Access:
 └── get_stock_stream_data("AAPL", "trades") - Recent stock trades
@@ -447,7 +462,11 @@ async def stop_global_stock_stream() -> str:
     Returns:
         str: Final statistics and confirmation message
     """
-    global _global_stock_stream, _stock_stream_thread, _stock_stream_active, _stock_stream_subscriptions
+    global \
+        _global_stock_stream, \
+        _stock_stream_thread, \
+        _stock_stream_active, \
+        _stock_stream_subscriptions
 
     try:
         if not _stock_stream_active:
@@ -488,7 +507,9 @@ async def stop_global_stock_stream() -> str:
         result += f"  Items in Buffers: {total_buffered_items:,}\n"
 
         if runtime_minutes > 0:
-            result += f"  Average Rate: {total_events/runtime_minutes:.1f} events/min\n"
+            result += (
+                f"  Average Rate: {total_events / runtime_minutes:.1f} events/min\n"
+            )
 
         # Breakdown by data type
         result += "\n📈 Event Breakdown:\n"
@@ -587,14 +608,14 @@ async def add_symbols_to_stock_stream(
         return f"""
 ✅ SYMBOLS ADDED TO STOCK STREAM
 
-📈 Added: {', '.join(symbols)}
-📊 Data Types: {', '.join(added_subscriptions)}
+📈 Added: {", ".join(symbols)}
+📊 Data Types: {", ".join(added_subscriptions)}
 🔢 Total Stock Symbols: {len(all_symbols)}
 💾 Buffers Created: {len(symbols) * len(data_types)}
 
 Current Stock Stream:
-└── All Symbols: {', '.join(sorted(all_symbols))}
-└── Runtime: {(time.time() - _stock_stream_start_time)/60:.1f} minutes
+└── All Symbols: {", ".join(sorted(all_symbols))}
+└── Runtime: {(time.time() - _stock_stream_start_time) / 60:.1f} minutes
 └── Total Events: {sum(_stock_stream_stats.values()):,}
         """
 
@@ -688,7 +709,7 @@ async def get_stock_stream_data(
             result += f"  Price Range: ${min(prices):.4f} - ${max(prices):.4f}\n"
             result += f"  Last Price: ${prices[-1]:.4f}\n"
             result += f"  Total Volume: {sum(volumes):,} shares\n"
-            result += f"  Avg Trade Size: {sum(volumes)/len(volumes):.0f} shares\n"
+            result += f"  Avg Trade Size: {sum(volumes) / len(volumes):.0f} shares\n"
 
         return result
 
@@ -732,7 +753,7 @@ async def list_active_stock_streams() -> str:
                 _stock_stream_config["duration_seconds"]
                 - (time.time() - _stock_stream_start_time)
             ) / 60
-            result += f"  Duration: {_stock_stream_config['duration_seconds']/60:.1f} min ({remaining:.1f} min remaining)\n"
+            result += f"  Duration: {_stock_stream_config['duration_seconds'] / 60:.1f} min ({remaining:.1f} min remaining)\n"
         else:
             result += "  Duration: Indefinite\n"
 
@@ -752,7 +773,7 @@ async def list_active_stock_streams() -> str:
         result += "\n📈 Streaming Statistics:\n"
         result += f"  Total Events: {total_events:,}\n"
         if runtime_minutes > 0:
-            result += f"  Rate: {total_events/runtime_minutes:.1f} events/min\n"
+            result += f"  Rate: {total_events / runtime_minutes:.1f} events/min\n"
 
         for data_type, count in _stock_stream_stats.items():
             if count > 0:
@@ -815,7 +836,7 @@ async def get_stock_stream_buffer_stats() -> str:
         result += f"  Total Buffers: {total_buffers}\n"
         result += f"  Total Items: {total_items:,}\n"
         result += f"  Unique Symbols: {len(symbol_stats)}\n"
-        result += f"  Avg Items per Buffer: {total_items/total_buffers:.1f}\n\n"
+        result += f"  Avg Items per Buffer: {total_items / total_buffers:.1f}\n\n"
 
         # Per-symbol breakdown
         result += "📈 Per-Symbol Breakdown:\n"
@@ -826,7 +847,7 @@ async def get_stock_stream_buffer_stats() -> str:
             )
             result += f"    Items: {stats['total_items']:,}\n"
             result += (
-                f"    Avg per Buffer: {stats['total_items']/stats['buffers']:.1f}\n"
+                f"    Avg per Buffer: {stats['total_items'] / stats['buffers']:.1f}\n"
             )
 
         # Detailed buffer info

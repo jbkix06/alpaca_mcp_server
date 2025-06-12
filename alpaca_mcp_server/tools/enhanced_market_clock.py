@@ -110,9 +110,9 @@ async def get_extended_market_clock() -> str:
         return f"""
 Enhanced Market Clock
 ====================
-Current Time (ET): {now_et.strftime('%Y-%m-%d %H:%M:%S %Z')}
+Current Time (ET): {now_et.strftime("%Y-%m-%d %H:%M:%S %Z")}
 Current Session: {session_status}
-Extended Hours: {'Yes' if extended_hours else 'No'}
+Extended Hours: {"Yes" if extended_hours else "No"}
 Volatility: {volatility_notes[session]}
 
 Session Schedule:
@@ -126,8 +126,8 @@ Time Remaining: {hours}h {minutes}m
 
 Alpaca API Status:
 • Market Open: {clock.is_open}
-• Next Open: {clock.next_open.strftime('%Y-%m-%d %H:%M:%S %Z')}
-• Next Close: {clock.next_close.strftime('%Y-%m-%d %H:%M:%S %Z')}
+• Next Open: {clock.next_open.strftime("%Y-%m-%d %H:%M:%S %Z")}
+• Next Close: {clock.next_close.strftime("%Y-%m-%d %H:%M:%S %Z")}
 
 Trading Recommendations:
 {chr(10).join(trading_recommendations[session])}

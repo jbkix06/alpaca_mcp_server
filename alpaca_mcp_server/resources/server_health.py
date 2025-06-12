@@ -121,7 +121,7 @@ async def get_server_health() -> dict:
         return {
             "server_status": overall_status,
             "uptime_seconds": uptime_seconds,
-            "uptime_formatted": f"{uptime_seconds//3600}h {(uptime_seconds%3600)//60}m",
+            "uptime_formatted": f"{uptime_seconds // 3600}h {(uptime_seconds % 3600) // 60}m",
             "process_metrics": {
                 "memory_usage_mb": round(memory_mb, 1),
                 "cpu_usage_percent": round(cpu_percent, 1),

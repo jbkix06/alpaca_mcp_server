@@ -82,7 +82,7 @@ async def get_session_status() -> dict:
         time_to_next = next_event_time - now_et
         time_to_next_minutes = int(time_to_next.total_seconds() / 60)
         time_to_next_formatted = (
-            f"{time_to_next_minutes//60}h {time_to_next_minutes%60}m"
+            f"{time_to_next_minutes // 60}h {time_to_next_minutes % 60}m"
         )
 
         # Session phase for regular market

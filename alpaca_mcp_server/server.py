@@ -16,6 +16,9 @@ from .tools import (
     corporate_action_tools,
     streaming_tools,
 )
+from .tools.peak_trough_analysis_tool import (
+    analyze_peaks_and_troughs as peak_trough_analysis,
+)
 
 # Import all prompt modules
 from .prompts import (
@@ -23,6 +26,7 @@ from .prompts import (
     account_analysis_prompt,
     position_management_prompt,
     market_analysis_prompt,
+    tools_reference_prompt,
 )
 
 # Import resource modules
@@ -78,6 +82,12 @@ async def market_analysis(
     return await market_analysis_prompt.market_analysis(
         symbols, timeframe, analysis_type
     )
+
+
+@mcp.prompt()
+async def list_all_tools() -> str:
+    """List all available MCP tools with descriptions and usage examples."""
+    return await tools_reference_prompt.list_all_tools()
 
 
 # ============================================================================
@@ -213,6 +223,48 @@ async def get_option_latest_quote(symbol: str) -> str:
 async def get_option_snapshot(symbol: str) -> str:
     """Get comprehensive option snapshot with Greeks."""
     return await options_tools.get_option_snapshot(symbol)
+
+
+# Stock Technical Analysis Tool
+@mcp.tool()
+async def get_stock_peak_trough_analysis(
+    symbols: str,
+    timeframe: str = "1Min",
+    days: int = 1,
+    limit: int = 1000,
+    window_len: int = 11,
+    lookahead: int = 1,
+    delta: float = 0.0,
+    min_peak_distance: int = 5,
+) -> str:
+    """
+    Get stock peak and trough analysis for day trading signals using zero-phase Hanning filtering.
+
+    This professional technical analysis tool:
+    1. Fetches intraday bar data for specified symbols
+    2. Applies zero-phase low-pass Hanning filtering to remove noise
+    3. Detects peaks/troughs using advanced algorithms
+    4. Returns precise entry/exit levels for day trading
+
+    Perfect for identifying support/resistance levels and timing entries based on
+    yesterday's trading lessons: "SCAN LONGER before entry" - this tool provides
+    the technical analysis to find optimal entry points.
+
+    Args:
+        symbols: Stock symbols (e.g., "CGTL" or "AAPL,MSFT,NVDA")
+        timeframe: "1Min", "5Min", "15Min", "30Min", "1Hour" (default: "1Min")
+        days: Historical days to analyze (1-30, default: 1)
+        limit: Max bars to fetch (1-10000, default: 1000)
+        window_len: Hanning filter smoothing (3-101, default: 11)
+        lookahead: Peak detection sensitivity (1-50, default: 1)
+        delta: Minimum peak amplitude (default: 0.0 for penny stocks)
+        min_peak_distance: Min bars between peaks (default: 5)
+
+    Returns detailed analysis with BUY/LONG and SELL/SHORT signals.
+    """
+    return await peak_trough_analysis(
+        symbols, timeframe, days, limit, window_len, lookahead, delta, min_peak_distance
+    )
 
 
 # Watchlist Tools
@@ -578,7 +630,9 @@ async def health_check() -> str:
         status_emoji = (
             "🟢"
             if health.get("server_status") == "healthy"
-            else "🟡" if health.get("server_status") == "degraded" else "🔴"
+            else "🟡"
+            if health.get("server_status") == "degraded"
+            else "🔴"
         )
         market_emoji = "🔔" if session.get("alpaca_market_open") else "🔕"
 

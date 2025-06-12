@@ -153,12 +153,12 @@ async def place_extended_hours_order(
             return f"""
 ❌ Order Validation Failed:
 Symbol: {symbol}
-Reason: {', '.join(validation.get('warnings', ['Unknown error']))}
+Reason: {", ".join(validation.get("warnings", ["Unknown error"]))}
 
 Recommendations:
-{chr(10).join(f"• {rec}" for rec in validation.get('recommendations', []))}
+{chr(10).join(f"• {rec}" for rec in validation.get("recommendations", []))}
 
-Current Session: {validation.get('session_info', {}).get('session', 'unknown')}
+Current Session: {validation.get("session_info", {}).get("session", "unknown")}
             """
 
         # Import the original order placement function
@@ -193,10 +193,10 @@ Current Session: {validation.get('session_info', {}).get('session', 'unknown')}
         risk_info = validation.get("risk_factors", {})
         risk_text = f"""
 📊 Risk Assessment:
-• Liquidity: {risk_info.get('liquidity', 'Unknown')}
-• Spread Width: {risk_info.get('spread_width', 'Unknown')}
-• Volatility: {risk_info.get('volatility', 'Unknown')}
-• News Sensitivity: {risk_info.get('news_sensitivity', 'Unknown')}
+• Liquidity: {risk_info.get("liquidity", "Unknown")}
+• Spread Width: {risk_info.get("spread_width", "Unknown")}
+• Volatility: {risk_info.get("volatility", "Unknown")}
+• News Sensitivity: {risk_info.get("news_sensitivity", "Unknown")}
         """
 
         # Enhanced result with session info
@@ -206,9 +206,9 @@ Extended Hours Order Placement:
 {result}
 
 Session Information:
-• Extended Hours: {'Yes' if extended_hours else 'No'}
-• Current Session: {validation.get('session_info', {}).get('session', 'unknown')}
-• Time: {validation.get('session_info', {}).get('time_et', 'unknown')}
+• Extended Hours: {"Yes" if extended_hours else "No"}
+• Current Session: {validation.get("session_info", {}).get("session", "unknown")}
+• Time: {validation.get("session_info", {}).get("time_et", "unknown")}
 
 {warning_text}
 
@@ -231,7 +231,7 @@ async def get_extended_hours_info() -> str:
     return f"""
 Extended Hours Trading Information
 =================================
-Current Time: {now_et.strftime('%Y-%m-%d %H:%M:%S ET')}
+Current Time: {now_et.strftime("%Y-%m-%d %H:%M:%S ET")}
 
 Trading Sessions:
 • Pre-market:  4:00 AM - 9:30 AM ET

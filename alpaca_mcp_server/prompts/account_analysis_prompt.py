@@ -75,7 +75,7 @@ async def account_analysis() -> str:
         
 ## Account Overview
 Portfolio Value: ${total_portfolio_value:,.2f}
-Cash Available: ${cash_balance:,.2f} ({cash_balance/total_portfolio_value*100:.1f}%)
+Cash Available: ${cash_balance:,.2f} ({cash_balance / total_portfolio_value * 100:.1f}%)
 Buying Power: ${buying_power:,.2f}
 Equity: ${equity:,.2f}
 
@@ -110,7 +110,7 @@ Risk Factors:"""
 • Use position_management() to review individual holdings
 • Use market_analysis() to identify new opportunities
 
-Analysis Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Analysis Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 """
 
         return result

@@ -35,8 +35,8 @@ Portfolio Value: ${float(account.portfolio_value):.2f}
 Equity: ${float(account.equity):.2f}
 Long Market Value: ${float(account.long_market_value):.2f}
 Short Market Value: ${float(account.short_market_value):.2f}
-Pattern Day Trader: {'Yes' if account.pattern_day_trader else 'No'}
-Day Trades Remaining: {account.daytrade_count if hasattr(account, 'daytrade_count') else 'Unknown'}"""
+Pattern Day Trader: {"Yes" if account.pattern_day_trader else "No"}
+Day Trades Remaining: {account.daytrade_count if hasattr(account, "daytrade_count") else "Unknown"}"""
 
         return info
 

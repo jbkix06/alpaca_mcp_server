@@ -21,7 +21,7 @@ async def get_market_clock() -> str:
 Market Status:
 -------------
 Current Time: {clock.timestamp}
-Is Open: {'Yes' if clock.is_open else 'No'}
+Is Open: {"Yes" if clock.is_open else "No"}
 Next Open: {clock.next_open}
 Next Close: {clock.next_close}
 """
