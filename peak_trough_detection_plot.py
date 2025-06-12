@@ -807,7 +807,7 @@ def main():
     parser.add_argument(
         "--days", "-d",
         type=int,
-        default=2,
+        default=1,
         help="Number of trading days to fetch (1-30)"
     )
     
