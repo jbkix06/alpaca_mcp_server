@@ -59,7 +59,19 @@ def convert_to_nyc_timezone(timestamp_str):
     try:
         # Parse the timestamp (handles UTC timestamps from Alpaca API)
         if isinstance(timestamp_str, str):
-            dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            # Handle different timestamp formats
+            if timestamp_str.endswith('Z'):
+                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            elif '+' in timestamp_str or timestamp_str.endswith('UTC'):
+                from dateutil import parser as date_parser
+                dt = date_parser.parse(timestamp_str)
+            else:
+                # Try direct parsing first
+                try:
+                    dt = datetime.fromisoformat(timestamp_str)
+                except:
+                    from dateutil import parser as date_parser
+                    dt = date_parser.parse(timestamp_str)
         else:
             dt = timestamp_str
         
@@ -73,7 +85,19 @@ def convert_to_nyc_timezone(timestamp_str):
         
         return dt_nyc
     except Exception as e:
-        logger.warning(f"Failed to convert timestamp {timestamp_str}: {e}")
+        logger.warning(f"Failed to convert timestamp {timestamp_str} to NYC timezone: {e}")
+        # Return a fallback datetime object in NYC timezone
+        try:
+            # If all else fails, assume it's a UTC timestamp and manually convert
+            if isinstance(timestamp_str, str):
+                # Try to extract basic time info
+                from dateutil import parser as date_parser
+                dt = date_parser.parse(timestamp_str)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=pytz.UTC)
+                return dt.astimezone(pytz.timezone('America/New_York'))
+        except:
+            pass
         return timestamp_str
 
 
@@ -452,13 +476,31 @@ async def analyze_peaks_and_troughs(
             f"Parameters: {timeframe} bars, {days} days, Window: {window_len}, Lookahead: {lookahead}\n"
         )
         results.append(f"Delta: {delta}, Min Peak Distance: {min_peak_distance}\n")
-        # Show analysis time in NYC timezone
-        utc_now = datetime.utcnow().replace(tzinfo=pytz.UTC)
-        nyc_tz = pytz.timezone('America/New_York')
-        nyc_now = utc_now.astimezone(nyc_tz)
-        results.append(
-            f"Analysis Time: {nyc_now.strftime('%Y-%m-%d %H:%M:%S %Z')}\n"
-        )
+        # Show analysis time in NYC timezone - FORCE timezone conversion
+        try:
+            from datetime import datetime
+            import pytz
+            
+            utc_now = datetime.utcnow().replace(tzinfo=pytz.UTC)
+            nyc_tz = pytz.timezone('America/New_York')
+            nyc_now = utc_now.astimezone(nyc_tz)
+            
+            # Force EDT/EST display
+            tz_name = nyc_now.strftime('%Z')  # This will be EDT or EST
+            results.append(
+                f"Analysis Time: {nyc_now.strftime('%Y-%m-%d %H:%M:%S')} {tz_name}\n"
+            )
+        except Exception as e:
+            logger.warning(f"Failed to format analysis time with timezone: {e}")
+            # Fallback with manual EDT calculation
+            from datetime import datetime
+            utc_now = datetime.utcnow()
+            # EDT is UTC-4, EST is UTC-5. In June, it's EDT
+            edt_hour = (utc_now.hour - 4) % 24
+            edt_time = utc_now.replace(hour=edt_hour)
+            results.append(
+                f"Analysis Time: {edt_time.strftime('%Y-%m-%d %H:%M:%S')} EDT\n"
+            )
         results.append("=" * 80 + "\n")
 
         for symbol in symbol_list:
@@ -531,14 +573,28 @@ async def analyze_peaks_and_troughs(
                 for idx, filtered_value in recent_peaks:
                     idx = int(idx)
                     if 0 <= idx < len(timestamps):
-                        # Parse timestamp for display in NYC/EDT timezone
+                        # Parse timestamp for display in NYC/EDT timezone - FORCE timezone conversion
+                        raw_ts = timestamps[idx]
                         try:
-                            timestamp_nyc = convert_to_nyc_timezone(timestamps[idx])
-                            if hasattr(timestamp_nyc, 'strftime'):
-                                peak_time = timestamp_nyc.strftime('%H:%M:%S EDT')
+                            # Force timezone conversion regardless of environment
+                            if isinstance(raw_ts, str):
+                                from dateutil import parser as date_parser
+                                dt = date_parser.parse(raw_ts)
+                                if dt.tzinfo is None:
+                                    dt = dt.replace(tzinfo=pytz.UTC)
+                                nyc_dt = dt.astimezone(pytz.timezone('America/New_York'))
+                                peak_time = nyc_dt.strftime('%H:%M:%S')
                             else:
-                                peak_time = f"Bar_{idx}"
-                        except:
+                                # Handle datetime objects
+                                if hasattr(raw_ts, 'tzinfo'):
+                                    if raw_ts.tzinfo is None:
+                                        raw_ts = raw_ts.replace(tzinfo=pytz.UTC)
+                                    nyc_dt = raw_ts.astimezone(pytz.timezone('America/New_York'))
+                                    peak_time = nyc_dt.strftime('%H:%M:%S')
+                                else:
+                                    peak_time = f"Bar_{idx}"
+                        except Exception as e:
+                            logger.warning(f"Timezone conversion failed for peak timestamp {raw_ts}: {e}")
                             peak_time = f"Bar_{idx}"
                         
                         original_price = close_prices[idx]  # ORIGINAL unfiltered price
@@ -565,14 +621,28 @@ async def analyze_peaks_and_troughs(
                 for idx, filtered_value in recent_troughs:
                     idx = int(idx)
                     if 0 <= idx < len(timestamps):
-                        # Parse timestamp for display in NYC/EDT timezone
+                        # Parse timestamp for display in NYC/EDT timezone - FORCE timezone conversion
+                        raw_ts = timestamps[idx]
                         try:
-                            timestamp_nyc = convert_to_nyc_timezone(timestamps[idx])
-                            if hasattr(timestamp_nyc, 'strftime'):
-                                trough_time = timestamp_nyc.strftime('%H:%M:%S EDT')
+                            # Force timezone conversion regardless of environment
+                            if isinstance(raw_ts, str):
+                                from dateutil import parser as date_parser
+                                dt = date_parser.parse(raw_ts)
+                                if dt.tzinfo is None:
+                                    dt = dt.replace(tzinfo=pytz.UTC)
+                                nyc_dt = dt.astimezone(pytz.timezone('America/New_York'))
+                                trough_time = nyc_dt.strftime('%H:%M:%S')
                             else:
-                                trough_time = f"Bar_{idx}"
-                        except:
+                                # Handle datetime objects
+                                if hasattr(raw_ts, 'tzinfo'):
+                                    if raw_ts.tzinfo is None:
+                                        raw_ts = raw_ts.replace(tzinfo=pytz.UTC)
+                                    nyc_dt = raw_ts.astimezone(pytz.timezone('America/New_York'))
+                                    trough_time = nyc_dt.strftime('%H:%M:%S')
+                                else:
+                                    trough_time = f"Bar_{idx}"
+                        except Exception as e:
+                            logger.warning(f"Timezone conversion failed for trough timestamp {raw_ts}: {e}")
                             trough_time = f"Bar_{idx}"
                         
                         original_price = close_prices[idx]  # ORIGINAL unfiltered price
