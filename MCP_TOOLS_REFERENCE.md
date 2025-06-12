@@ -6,7 +6,7 @@ This document provides a comprehensive reference for all available tools in the 
 
 - **[Account & Portfolio](#account--portfolio-management)** - Account info, positions, balances
 - **[Market Data](#market-data--quotes)** - Real-time quotes, historical data, snapshots
-- **[Technical Analysis](#technical-analysis)** - Peak/trough analysis, trading signals
+- **[Technical Analysis](#technical-analysis)** - Peak/trough analysis, after-hours scanning, streaming analytics
 - **[Order Management](#order-management)** - Place orders, check status, cancel orders
 - **[Options Trading](#options-trading)** - Options data, contracts, options orders
 - **[Streaming Data](#streaming-data)** - Real-time market data streams
@@ -189,6 +189,53 @@ Get the latest minute bar for a stock.
 **Perfect for:** Finding precise entry/exit points, following the trading lesson "SCAN LONGER before entry"
 
 **Example:** `get_stock_peak_trough_analysis("CGTL,HCTI", timeframe="1Min", window_len=11)`
+
+---
+
+### `scan_after_hours_opportunities(symbols: str = "AAPL,MSFT,NVDA,TSLA,GOOGL,AMZN,META,NFLX,COIN,HOOD,AMC,GME,PLTR,SOFI,RIVN,LCID", min_volume: int = 100000, min_percent_change: float = 2.0, max_symbols: int = 15, sort_by: str = "percent_change")`
+**🌙 NEW TOOL** - Scan for after-hours trading opportunities with enhanced analytics.
+
+**Parameters:**
+- `symbols` (str): Comma-separated symbols for after-hours scanning
+- `min_volume` (int): Minimum after-hours volume threshold
+- `min_percent_change` (float): Minimum % change from regular session close
+- `max_symbols` (int): Maximum results to return
+- `sort_by` (str): Sort by "percent_change", "volume", or "price"
+
+**Focuses on:**
+1. Extended hours price movements
+2. Volume analysis relative to average
+3. News-driven momentum detection
+4. Liquidity assessment for safe entry/exit
+
+**Returns:** Formatted analysis of after-hours opportunities with risk levels and trading recommendations
+
+**Perfect for:** Finding after-hours movers, earnings plays, news-driven stocks
+
+**Example:** `scan_after_hours_opportunities("AAPL,TSLA,NVDA", min_volume=50000, min_percent_change=1.5)`
+
+---
+
+### `get_enhanced_streaming_analytics(symbol: str, analysis_minutes: int = 15, include_orderbook: bool = True)`
+**🔥 NEW TOOL** - Enhanced streaming analytics with real-time calculations.
+
+**Parameters:**
+- `symbol` (str): Stock symbol to analyze
+- `analysis_minutes` (int): Minutes of historical data to include
+- `include_orderbook` (bool): Include bid/ask analysis
+
+**Provides:**
+1. Real-time momentum analysis
+2. Volume-weighted average price (VWAP)
+3. Order flow analysis
+4. Support/resistance detection
+5. Volatility measurements
+
+**Returns:** Comprehensive real-time analytics with trading signals and monitoring commands
+
+**Perfect for:** Day trading setup, real-time market analysis, momentum confirmation
+
+**Example:** `get_enhanced_streaming_analytics("TSLA", analysis_minutes=10, include_orderbook=True)`
 
 ---
 

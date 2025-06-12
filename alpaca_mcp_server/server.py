@@ -19,6 +19,7 @@ from .tools import (
 from .tools.peak_trough_analysis_tool import (
     analyze_peaks_and_troughs as peak_trough_analysis,
 )
+# Import modules will be done locally in tool functions to avoid name conflicts
 
 # Import all prompt modules
 from .prompts import (
@@ -264,6 +265,212 @@ async def get_stock_peak_trough_analysis(
     """
     return await peak_trough_analysis(
         symbols, timeframe, days, limit, window_len, lookahead, delta, min_peak_distance
+    )
+
+
+# Day Trading Scanner Tools
+@mcp.tool()
+async def scan_day_trading_opportunities(
+    symbols: str = "SPY,QQQ,IWM,AAPL,MSFT,NVDA,TSLA,AMC,GME,PLTR,SOFI,RIVN,LCID,NIO,XPEV,BABA,META,GOOGL,AMZN,NFLX",
+    min_trades_per_minute: int = 50,
+    min_percent_change: float = 5.0,
+    max_symbols: int = 20,
+    sort_by: str = "trades"
+) -> str:
+    """
+    Scan for active day-trading opportunities using real-time market snapshots.
+    
+    Focused on two key metrics from professional trading analysis:
+    1. Trades per minute (activity/liquidity indicator)  
+    2. Percent change (momentum indicator)
+    
+    Perfect for finding explosive moves like NEHC and high-activity stocks for day trading.
+    Uses existing get_stock_snapshots tool for real-time data.
+    
+    Args:
+        symbols: Comma-separated symbols to scan (default: popular day-trading stocks)
+        min_trades_per_minute: Minimum trades in current minute bar (default: 50)
+        min_percent_change: Minimum absolute % change from reference (default: 5.0%)
+        max_symbols: Maximum results to return (default: 20)
+        sort_by: Sort results by "trades", "percent_change", or "volume"
+    
+    Returns:
+        Formatted analysis with top day-trading opportunities ranked by activity and momentum.
+    """
+    from .tools.day_trading_scanner import scan_day_trading_opportunities as scanner_func
+    return await scanner_func(
+        symbols, min_trades_per_minute, min_percent_change, max_symbols, sort_by
+    )
+
+
+@mcp.tool()
+async def scan_explosive_momentum(
+    symbols: str = "CVAC,CGTL,GNLN,NEHC,SOUN,RIOT,MARA,COIN,HOOD,RBLX",
+    min_percent_change: float = 15.0
+) -> str:
+    """
+    Quick scanner for explosive momentum moves like NEHC.
+    
+    Optimized for finding extreme percentage movers with high activity.
+    Lower trade threshold but higher % change requirement for explosive stocks.
+    
+    Args:
+        symbols: Comma-separated symbols (default: volatile/momentum stocks)
+        min_percent_change: Minimum absolute % change (default: 15.0% for explosive moves)
+    
+    Returns:
+        Top explosive momentum opportunities sorted by % change.
+    """
+    from .tools.day_trading_scanner import scan_explosive_momentum as explosive_func
+    return await explosive_func(symbols, min_percent_change)
+
+
+# Differential Trade Scanner Tools (Background Scanner Like C Program)
+@mcp.tool()
+async def start_differential_trade_scanner(
+    symbols: str = "SPY,QQQ,AAPL,MSFT,NVDA,TSLA,AMC,GME,PLTR,NIVF,HCTI,GNLN,IXHL,CVAC,CGTL",
+    min_trades_per_minute: int = 50,
+    min_percent_change: float = 5.0,
+    update_interval: int = 60,
+    max_symbols: int = 20
+) -> str:
+    """
+    Start the differential trade scanner in the background (like the C program).
+    
+    This mirrors the C program functionality:
+    1. Takes snapshots every 60 seconds
+    2. Calculates exact trade count differences 
+    3. Caches previous values for comparison
+    4. Runs continuously in background
+    
+    Perfect for continuous monitoring of trade activity using exact differential calculations
+    like the stock_analyzer.c program. Extracts trade counts from minute bar 'n' field.
+    
+    Args:
+        symbols: Comma-separated symbols to monitor
+        min_trades_per_minute: Minimum trade count difference to include
+        min_percent_change: Minimum % change to include
+        update_interval: Seconds between scans (default: 60)
+        max_symbols: Maximum results to track
+    
+    Returns:
+        Status message about scanner startup
+    """
+    return await start_differential_trade_scanner(
+        symbols, min_trades_per_minute, min_percent_change, update_interval, max_symbols
+    )
+
+
+@mcp.tool()
+async def stop_differential_trade_scanner() -> str:
+    """
+    Stop the background differential trade scanner.
+    
+    Gracefully stops the background scanner while preserving the cache
+    for next startup (like the C program's cache persistence).
+    
+    Returns:
+        Status message about scanner shutdown
+    """
+    return await stop_differential_trade_scanner()
+
+
+@mcp.tool()
+async def get_differential_trade_results(
+    sort_by: str = "trades_change",
+    max_results: int = 20
+) -> str:
+    """
+    Get the latest results from the differential trade scanner.
+    
+    Returns live results from the background scanner with exact trade count
+    differences calculated like the C program methodology.
+    
+    Args:
+        sort_by: Sort by "trades_change", "percent_change", or "volume_change"
+        max_results: Maximum results to return
+    
+    Returns:
+        Formatted results like the C program's HTML output with exact trade counts
+    """
+    return await get_differential_trade_results(sort_by, max_results)
+
+
+@mcp.tool()
+async def get_differential_scanner_status() -> str:
+    """
+    Get the current status of the differential trade scanner.
+    
+    Shows scanner health, cache size, last scan time, and background task status.
+    Perfect for monitoring the background scanner's operation like the C program.
+    
+    Returns:
+        Comprehensive status information about the differential scanner
+    """
+    return await get_differential_scanner_status()
+
+
+# After-Hours and Enhanced Analytics Tools
+@mcp.tool()
+async def scan_after_hours_opportunities(
+    symbols: str = "AAPL,MSFT,NVDA,TSLA,GOOGL,AMZN,META,NFLX,COIN,HOOD,AMC,GME,PLTR,SOFI,RIVN,LCID",
+    min_volume: int = 100000,
+    min_percent_change: float = 2.0,
+    max_symbols: int = 15,
+    sort_by: str = "percent_change"
+) -> str:
+    """
+    Scan for after-hours trading opportunities with enhanced analytics.
+    
+    Focuses on:
+    1. Extended hours price movements
+    2. Volume analysis relative to average
+    3. News-driven momentum detection
+    4. Liquidity assessment for safe entry/exit
+    
+    Args:
+        symbols: Comma-separated symbols for after-hours scanning
+        min_volume: Minimum after-hours volume threshold
+        min_percent_change: Minimum % change from regular session close
+        max_symbols: Maximum results to return
+        sort_by: Sort results by "percent_change", "volume", or "price"
+    
+    Returns:
+        Formatted analysis of after-hours opportunities
+    """
+    from .tools.after_hours_scanner import scan_after_hours_opportunities as scanner_func
+    return await scanner_func(
+        symbols, min_volume, min_percent_change, max_symbols, sort_by
+    )
+
+
+@mcp.tool()
+async def get_enhanced_streaming_analytics(
+    symbol: str,
+    analysis_minutes: int = 15,
+    include_orderbook: bool = True
+) -> str:
+    """
+    Enhanced streaming analytics with real-time calculations.
+    
+    Provides:
+    1. Real-time momentum analysis
+    2. Volume-weighted average price (VWAP)
+    3. Order flow analysis
+    4. Support/resistance detection
+    5. Volatility measurements
+    
+    Args:
+        symbol: Stock symbol to analyze
+        analysis_minutes: Minutes of historical data to include
+        include_orderbook: Include bid/ask analysis
+    
+    Returns:
+        Comprehensive real-time analytics
+    """
+    from .tools.after_hours_scanner import get_enhanced_streaming_analytics as analytics_func
+    return await analytics_func(
+        symbol, analysis_minutes, include_orderbook
     )
 
 
