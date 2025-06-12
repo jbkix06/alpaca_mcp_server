@@ -8,6 +8,7 @@ import os
 import requests
 from scipy.signal import filtfilt
 from scipy.signal.windows import hann as hanning
+import pytz
 
 # Add parent directory to path to import peakdetect
 project_root = os.path.dirname(
@@ -51,6 +52,29 @@ except ImportError:
     from alpaca_mcp_server.config import get_stock_historical_client
 
 logger = logging.getLogger(__name__)
+
+
+def convert_to_nyc_timezone(timestamp_str):
+    """Convert timestamp string to NYC/EDT timezone for display"""
+    try:
+        # Parse the timestamp (handles UTC timestamps from Alpaca API)
+        if isinstance(timestamp_str, str):
+            dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        else:
+            dt = timestamp_str
+        
+        # If timezone-naive, assume UTC
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=pytz.UTC)
+        
+        # Convert to NYC timezone (handles EDT/EST automatically)
+        nyc_tz = pytz.timezone('America/New_York')
+        dt_nyc = dt.astimezone(nyc_tz)
+        
+        return dt_nyc
+    except Exception as e:
+        logger.warning(f"Failed to convert timestamp {timestamp_str}: {e}")
+        return timestamp_str
 
 
 def zero_phase_filter(data, window_len=11):
@@ -401,8 +425,11 @@ async def analyze_peaks_and_troughs(
             logger.error(f"Failed to get API credentials: {e}")
             return f"Error: Failed to get API credentials - {str(e)}"
 
+        # Create data fetcher instance
+        fetcher = HistoricalDataFetcher(api_key, api_secret)
+        
         # Get trading days using calendar API
-        trading_days = get_trading_days_via_api(api_key, api_secret, days)
+        trading_days = fetcher.get_trading_days(days)
         if not trading_days:
             logger.warning("No trading days found, falling back to date calculation")
             now = datetime.now()
@@ -413,7 +440,7 @@ async def analyze_peaks_and_troughs(
             end_date = trading_days[0]     # Most recent day
 
         # Fetch bars using enhanced API method
-        bars_data = fetch_bars_via_api(api_key, api_secret, symbol_list, timeframe, start_date, end_date)
+        bars_data = fetcher.fetch_historical_bars(symbol_list, timeframe, start_date, end_date)
         
         if not bars_data:
             return "Error: No historical data received from API"
@@ -425,8 +452,12 @@ async def analyze_peaks_and_troughs(
             f"Parameters: {timeframe} bars, {days} days, Window: {window_len}, Lookahead: {lookahead}\n"
         )
         results.append(f"Delta: {delta}, Min Peak Distance: {min_peak_distance}\n")
+        # Show analysis time in NYC timezone
+        utc_now = datetime.utcnow().replace(tzinfo=pytz.UTC)
+        nyc_tz = pytz.timezone('America/New_York')
+        nyc_now = utc_now.astimezone(nyc_tz)
         results.append(
-            f"Analysis Time: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC\n"
+            f"Analysis Time: {nyc_now.strftime('%Y-%m-%d %H:%M:%S %Z')}\n"
         )
         results.append("=" * 80 + "\n")
 
@@ -500,13 +531,13 @@ async def analyze_peaks_and_troughs(
                 for idx, filtered_value in recent_peaks:
                     idx = int(idx)
                     if 0 <= idx < len(timestamps):
-                        # Parse timestamp for display
+                        # Parse timestamp for display in NYC/EDT timezone
                         try:
-                            if isinstance(timestamps[idx], str):
-                                timestamp_obj = datetime.fromisoformat(timestamps[idx].replace('Z', '+00:00'))
+                            timestamp_nyc = convert_to_nyc_timezone(timestamps[idx])
+                            if hasattr(timestamp_nyc, 'strftime'):
+                                peak_time = timestamp_nyc.strftime('%H:%M:%S EDT')
                             else:
-                                timestamp_obj = timestamps[idx]
-                            peak_time = timestamp_obj.strftime('%H:%M:%S')
+                                peak_time = f"Bar_{idx}"
                         except:
                             peak_time = f"Bar_{idx}"
                         
@@ -534,13 +565,13 @@ async def analyze_peaks_and_troughs(
                 for idx, filtered_value in recent_troughs:
                     idx = int(idx)
                     if 0 <= idx < len(timestamps):
-                        # Parse timestamp for display
+                        # Parse timestamp for display in NYC/EDT timezone
                         try:
-                            if isinstance(timestamps[idx], str):
-                                timestamp_obj = datetime.fromisoformat(timestamps[idx].replace('Z', '+00:00'))
+                            timestamp_nyc = convert_to_nyc_timezone(timestamps[idx])
+                            if hasattr(timestamp_nyc, 'strftime'):
+                                trough_time = timestamp_nyc.strftime('%H:%M:%S EDT')
                             else:
-                                timestamp_obj = timestamps[idx]
-                            trough_time = timestamp_obj.strftime('%H:%M:%S')
+                                trough_time = f"Bar_{idx}"
                         except:
                             trough_time = f"Bar_{idx}"
                         
