@@ -1,13 +1,13 @@
-"""Peak and trough analysis tool for day trading signals"""
+"""Peak and trough analysis tool for day trading signals - Enhanced Version"""
 
 import logging
 import numpy as np
 from datetime import datetime, timedelta
 import sys
 import os
-
-from alpaca.data.requests import StockBarsRequest
-from alpaca.data.timeframe import TimeFrame
+import requests
+from scipy.signal import filtfilt
+from scipy.signal.windows import hann as hanning
 
 # Add parent directory to path to import peakdetect
 project_root = os.path.dirname(
@@ -18,22 +18,31 @@ sys.path.insert(0, project_root)
 try:
     from peakdetect import peakdetect
 except ImportError:
-    # Fallback if peakdetect not found
+    # Enhanced fallback if peakdetect not found
     def peakdetect(y_axis, x_axis=None, lookahead=1, delta=0):
-        """Fallback peak detection if peakdetect module not available"""
+        """Enhanced fallback peak detection if peakdetect module not available"""
         peaks = []
         troughs = []
         if x_axis is None:
             x_axis = list(range(len(y_axis)))
 
-        for i in range(1, len(y_axis) - 1):
-            if y_axis[i] > y_axis[i - 1] and y_axis[i] > y_axis[i + 1]:
+        for i in range(lookahead, len(y_axis) - lookahead):
+            # Check if current point is a peak
+            is_peak = True
+            is_trough = True
+            
+            for j in range(1, lookahead + 1):
+                if y_axis[i] <= y_axis[i - j] or y_axis[i] <= y_axis[i + j]:
+                    is_peak = False
+                if y_axis[i] >= y_axis[i - j] or y_axis[i] >= y_axis[i + j]:
+                    is_trough = False
+            
+            if is_peak and (not peaks or y_axis[i] - peaks[-1][1] >= delta):
                 peaks.append((x_axis[i], y_axis[i]))
-            elif y_axis[i] < y_axis[i - 1] and y_axis[i] < y_axis[i + 1]:
+            elif is_trough and (not troughs or troughs[-1][1] - y_axis[i] >= delta):
                 troughs.append((x_axis[i], y_axis[i]))
 
         return peaks, troughs
-
 
 try:
     from ..config import get_stock_historical_client
@@ -44,50 +53,268 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-def zero_phase_filter(data: np.ndarray, window_len: int = 11) -> np.ndarray:
-    """
-    Apply zero-phase low-pass filter using Hanning window
-
-    This function is copied from server.py to ensure consistency
-    """
-    from scipy.signal import filtfilt
-    from scipy.signal.windows import hann as hanning
-
-    # Convert to numpy array
+def zero_phase_filter(data, window_len=11):
+    """Apply zero-phase low-pass filter using Hanning window"""
     data = np.array(data)
-
-    # If data is too short, return it as-is or use a smaller window
-    min_required_length = window_len * 3  # filtfilt needs at least 3x the filter length
+    
+    min_required_length = window_len * 3
     if len(data) < min_required_length:
-        # Use a smaller window or just return the data
         if len(data) < 5:
-            return data  # Too short to filter
+            return data
         else:
-            # Use a smaller window that's appropriate for the data length
             window_len = max(3, len(data) // 3)
             if window_len % 2 == 0:
                 window_len -= 1
-
-    # Ensure window length is odd
+    
     if window_len % 2 == 0:
         window_len += 1
-
-    # Create Hanning window
+    
     window = hanning(window_len)
-    window = window / window.sum()  # Normalize
-
-    # Apply zero-phase filtering using filtfilt
-    # Pad the signal to handle edge effects
+    window = window / window.sum()
+    
     pad_len = window_len // 2
-    padded = np.pad(data, pad_len, mode="edge")
-
-    # For zero-phase response, we use filtfilt
+    padded = np.pad(data, pad_len, mode='edge')
     filtered_padded = filtfilt(window, 1.0, padded)
-
-    # Remove padding
     filtered = filtered_padded[pad_len:-pad_len]
-
+    
     return filtered
+
+
+class HistoricalDataFetcher:
+    """Fetch historical bar data from Alpaca API"""
+    
+    def __init__(self, api_key, api_secret):
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.session = requests.Session()
+        self.session.headers.update({
+            'APCA-API-KEY-ID': self.api_key,
+            'APCA-API-SECRET-KEY': self.api_secret
+        })
+
+    def get_trading_days(self, days):
+        """Get the last N trading days"""
+        now = datetime.now()
+        start_date = now - timedelta(days=days * 3)
+
+        url = "https://paper-api.alpaca.markets/v2/calendar"
+        params = {
+            'start': start_date.strftime('%Y-%m-%d'),
+            'end': now.strftime('%Y-%m-%d')
+        }
+
+        try:
+            response = self.session.get(url, params=params, timeout=15)
+            response.raise_for_status()
+
+            calendar_data = response.json()
+            if not calendar_data:
+                logger.warning("No trading calendar data received")
+                return []
+
+            trading_days = [day['date'] for day in calendar_data if day.get('date')]
+            if len(trading_days) < days:
+                logger.warning("Only %s trading days available, requested %s", len(trading_days), days)
+
+            trading_days = trading_days[-days:] if trading_days else []
+            trading_days.sort(reverse=True)
+
+            logger.info("Retrieved %s trading days", len(trading_days))
+            return trading_days
+
+        except requests.exceptions.RequestException as e:
+            logger.error("Request error retrieving trading calendar: %s", e)
+            return []
+        except Exception as e:
+            logger.error("Error retrieving trading calendar: %s", e)
+            return []
+
+
+    def fetch_historical_bars(self, symbols, timeframe, start_date, end_date, feed='sip'):
+        """Fetch historical bar data for multiple symbols in one API call"""
+        if not symbols:
+            logger.warning("No symbols provided for historical data fetch")
+            return None
+
+        url = "https://data.alpaca.markets/v2/stocks/bars"
+        params = {
+            'symbols': ','.join(symbols),
+            'timeframe': timeframe,
+            'start': start_date,
+            'end': end_date,
+            'limit': 10000,
+            'adjustment': 'split',
+            'feed': feed,
+            'sort': 'asc'
+        }
+
+        try:
+            logger.info("Fetching historical bars: %s symbols, %s, %s to %s", 
+                       len(symbols), timeframe, start_date, end_date)
+
+            response = self.session.get(url, params=params, timeout=60)
+            response.raise_for_status()
+
+            data = response.json()
+
+            if not isinstance(data, dict):
+                logger.error("Invalid response format from bars API")
+                return None
+
+            if 'bars' not in data:
+                logger.warning("No 'bars' key in API response")
+                return None
+
+            bars_data = data['bars']
+            total_bars = 0
+
+            for symbol, bars in bars_data.items():
+                if bars:
+                    total_bars += len(bars)
+                else:
+                    logger.warning("No bars received for symbol %s", symbol)
+
+            logger.info("Successfully fetched %s bars for %s symbols", total_bars, len(bars_data))
+            return bars_data
+
+        except requests.exceptions.Timeout:
+            logger.error("Timeout fetching historical bars")
+            return None
+        except requests.exceptions.RequestException as e:
+            logger.error("Request error fetching historical bars: %s", e)
+            return None
+        except Exception as e:
+            logger.error("Error fetching historical bars: %s", e)
+            return None
+
+
+def process_bars_for_peaks(symbol, bars, window_len=11, lookahead=1):
+    """Process bars to compute filtered close prices and detect peaks/troughs"""
+    try:
+        if not bars or len(bars) < lookahead * 2:
+            logger.warning("Not enough bars for %s to detect peaks (need at least %d)", symbol, lookahead * 2)
+            return None
+        
+        close_prices = np.array([float(bar['c']) for bar in bars])
+        timestamps = [bar['t'] for bar in bars]
+        
+        logger.debug("Processing %d bars for %s", len(close_prices), symbol)
+        logger.debug("Close price range: %.4f - %.4f", close_prices.min(), close_prices.max())
+        
+        filtered_prices = zero_phase_filter(close_prices, window_len)
+        time_axis = np.arange(len(close_prices))
+        
+        max_peaks, min_peaks = peakdetect(
+            filtered_prices,
+            x_axis=time_axis,
+            lookahead=lookahead,
+            delta=0
+        )
+        
+        logger.info("Found %d peaks and %d troughs for %s", len(max_peaks), len(min_peaks), symbol)
+        
+        peaks_data = []
+        for peak_idx, peak_value in max_peaks:
+            idx = int(peak_idx)
+            if 0 <= idx < len(bars):
+                peaks_data.append({
+                    'index': idx,
+                    'timestamp': timestamps[idx],
+                    'filtered_price': float(peak_value),
+                    'original_price': float(close_prices[idx]),
+                    'volume': int(bars[idx]['v'])
+                })
+        
+        troughs_data = []
+        for trough_idx, trough_value in min_peaks:
+            idx = int(trough_idx)
+            if 0 <= idx < len(bars):
+                troughs_data.append({
+                    'index': idx,
+                    'timestamp': timestamps[idx],
+                    'filtered_price': float(trough_value),
+                    'original_price': float(close_prices[idx]),
+                    'volume': int(bars[idx]['v'])
+                })
+        
+        results = {
+            'symbol': symbol,
+            'total_bars': len(bars),
+            'timestamps': timestamps,
+            'original_prices': close_prices.tolist(),
+            'filtered_prices': filtered_prices.tolist(),
+            'peaks': peaks_data,
+            'troughs': troughs_data,
+            'filter_params': {
+                'window_len': window_len,
+                'lookahead': lookahead
+            },
+            'stats': {
+                'price_min': float(close_prices.min()),
+                'price_max': float(close_prices.max()),
+                'price_mean': float(close_prices.mean()),
+                'price_std': float(close_prices.std()),
+                'filtered_std': float(filtered_prices.std()),
+                'noise_reduction_pct': float(((close_prices.std() - filtered_prices.std()) / close_prices.std() * 100))
+            }
+        }
+        
+        return results
+        
+    except Exception as e:
+        logger.error("Error processing bars for peaks in %s: %s", symbol, e)
+        return None
+
+
+def get_latest_signal(results):
+    """Get the most recent peak or trough signal for a symbol"""
+    if not results:
+        return None
+    
+    peaks = results['peaks']
+    troughs = results['troughs']
+    
+    if not peaks and not troughs:
+        return None
+    
+    latest_signal = None
+    latest_index = -1
+    
+    for peak in peaks:
+        if peak['index'] > latest_index:
+            latest_index = peak['index']
+            latest_signal = {
+                'type': 'Peak',
+                'index': peak['index'],
+                'timestamp': peak['timestamp'],
+                'signal_price': peak['original_price'],
+                'filtered_price': peak['filtered_price'],
+                'volume': peak['volume']
+            }
+    
+    for trough in troughs:
+        if trough['index'] > latest_index:
+            latest_index = trough['index']
+            latest_signal = {
+                'type': 'Trough', 
+                'index': trough['index'],
+                'timestamp': trough['timestamp'],
+                'signal_price': trough['original_price'],
+                'filtered_price': trough['filtered_price'],
+                'volume': trough['volume']
+            }
+    
+    if latest_signal:
+        total_bars = results['total_bars']
+        samples_ago = total_bars - 1 - latest_signal['index']
+        current_price = results['original_prices'][-1]
+        
+        latest_signal['samples_ago'] = samples_ago
+        latest_signal['current_price'] = current_price
+        latest_signal['price_change'] = current_price - latest_signal['signal_price']
+        latest_signal['price_change_pct'] = (latest_signal['price_change'] / latest_signal['signal_price']) * 100
+        
+    return latest_signal
 
 
 async def analyze_peaks_and_troughs(
@@ -101,14 +328,19 @@ async def analyze_peaks_and_troughs(
     min_peak_distance: int = 5,
 ) -> str:
     """
-    Fetch intraday bar data and identify peaks and troughs for day trading signals using
-    zero-phase Hanning filtering followed by peak detection algorithm.
+    Enhanced peak and trough analysis for day trading signals using zero-phase filtering.
 
     This tool applies professional technical analysis to identify precise entry/exit points:
-    1. Fetches historical intraday bar data for specified symbols
+    1. Fetches historical intraday bar data using proper trading calendar
     2. Applies zero-phase low-pass Hanning filtering to remove noise while preserving timing
-    3. Runs peak detection algorithm on filtered data to find optimal turning points
-    4. Returns original prices at detected peaks/troughs for executable trading signals
+    3. Detects peaks/troughs on filtered data but reports ORIGINAL prices for trading
+    4. Returns actionable trading signals with sample indices and distances
+
+    Key improvements:
+    - Uses trading calendar for accurate date ranges
+    - Reports original (unfiltered) prices at peak/trough locations
+    - Shows sample indices for verification
+    - Enhanced signal interpretation based on proximity to latest signals
 
     Args:
         symbols: Comma-separated list of stock symbols (e.g., "AAPL,MSFT,NVDA")
@@ -123,13 +355,13 @@ async def analyze_peaks_and_troughs(
     Returns:
         Formatted string with comprehensive peak/trough analysis including:
         - Technical summary with price ranges and bar counts
-        - Recent peaks (resistance/sell signals) with timestamps and prices
-        - Recent troughs (support/buy signals) with timestamps and prices
-        - Trading signal recommendations (BUY/LONG, SELL/SHORT, WATCH)
-        - Distance and percentage analysis from latest signals
+        - Recent peaks (resistance/sell signals) with sample indices and original prices
+        - Recent troughs (support/buy signals) with sample indices and original prices
+        - Trading signal recommendations with distance analysis
+        - Clear BUY/SELL signals based on proximity to latest trough/peak
 
     Examples:
-        analyze_peaks_and_troughs("CGTL")  # Quick analysis of CGTL
+        analyze_peaks_and_troughs("RSLS")  # Quick analysis of RSLS
         analyze_peaks_and_troughs("AAPL,MSFT", timeframe="5Min", days=2)  # 5min bars, 2 days
         analyze_peaks_and_troughs("NVDA", window_len=21, lookahead=3)  # More smoothing, wider lookahead
     """
@@ -160,46 +392,31 @@ async def analyze_peaks_and_troughs(
         if min_peak_distance < 1:
             min_peak_distance = 5
 
-        # Get the data client
+        # Get API credentials for enhanced data fetching
         try:
-            data_client = get_stock_historical_client()
+            from ..config.settings import settings
+            api_key = settings.api_key
+            api_secret = settings.api_secret
         except Exception as e:
-            logger.error(f"Failed to get data client: {e}")
-            return f"Error: Failed to initialize data client - {str(e)}"
+            logger.error(f"Failed to get API credentials: {e}")
+            return f"Error: Failed to get API credentials - {str(e)}"
 
-        # Map timeframe string to TimeFrame enum
-        timeframe_map = {
-            "1Min": TimeFrame.Minute,
-            "5Min": TimeFrame(5, "Min"),
-            "15Min": TimeFrame(15, "Min"),
-            "30Min": TimeFrame(30, "Min"),
-            "1Hour": TimeFrame.Hour,
-            "1Day": TimeFrame.Day,
-        }
+        # Get trading days using calendar API
+        trading_days = get_trading_days_via_api(api_key, api_secret, days)
+        if not trading_days:
+            logger.warning("No trading days found, falling back to date calculation")
+            now = datetime.now()
+            start_date = (now - timedelta(days=days)).strftime('%Y-%m-%d')
+            end_date = now.strftime('%Y-%m-%d')
+        else:
+            start_date = trading_days[-1]  # Oldest day
+            end_date = trading_days[0]     # Most recent day
 
-        tf = timeframe_map.get(timeframe, TimeFrame.Minute)
-
-        # Calculate start time based on days parameter
-        now = datetime.utcnow()
-        start = now - timedelta(days=days + 2)  # Extra buffer for weekends/holidays
-
-        # Create request
-        request = StockBarsRequest(
-            symbol_or_symbols=symbol_list,
-            timeframe=tf,
-            start=start,
-            end=now,
-            limit=limit * len(symbol_list),  # Total limit across all symbols
-            feed="sip",
-        )
-
-        # Fetch bars
-        bars_response = data_client.get_stock_bars(request)
-
-        # Access the actual data from the response
-        bars_data = (
-            bars_response.data if hasattr(bars_response, "data") else bars_response
-        )
+        # Fetch bars using enhanced API method
+        bars_data = fetch_bars_via_api(api_key, api_secret, symbol_list, timeframe, start_date, end_date)
+        
+        if not bars_data:
+            return "Error: No historical data received from API"
 
         # Process each symbol
         results = []
@@ -226,12 +443,12 @@ async def analyze_peaks_and_troughs(
                 results.append(f"No bars found for {symbol}\n")
                 continue
 
-            # Extract close prices and timestamps
+            # Extract close prices and timestamps from API format
             close_prices = []
             timestamps = []
             for bar in symbol_bars:
-                close_prices.append(float(bar.close))
-                timestamps.append(bar.timestamp)
+                close_prices.append(float(bar['c']))  # Close price
+                timestamps.append(bar['t'])  # Timestamp
 
             close_prices = np.array(close_prices)
 
@@ -241,13 +458,19 @@ async def analyze_peaks_and_troughs(
                 )
                 continue
 
+            results.append(f"Total bars analyzed: {len(close_prices)}\n")
+            results.append(
+                f"Price range: ${min(close_prices):.4f} - ${max(close_prices):.4f}\n"
+            )
+            results.append(f"Current price: ${close_prices[-1]:.4f}\n\n")
+
             # Apply zero-phase Hanning filter
             filtered_prices = zero_phase_filter(close_prices, window_len)
 
             # Create time axis (indices)
             time_axis = np.arange(len(close_prices))
 
-            # Detect peaks and troughs
+            # Detect peaks and troughs on filtered data
             max_peaks, min_peaks = peakdetect(
                 filtered_prices, x_axis=time_axis, lookahead=lookahead, delta=delta
             )
@@ -269,117 +492,133 @@ async def analyze_peaks_and_troughs(
                 max_peaks = filtered_max_peaks
                 min_peaks = filtered_min_peaks
 
-            # Format results
-            results.append(f"Total bars analyzed: {len(close_prices)}\n")
-            results.append(
-                f"Price range: ${min(close_prices):.4f} - ${max(close_prices):.4f}\n"
-            )
-            results.append(f"Current price: ${close_prices[-1]:.4f}\n\n")
-
-            # Peaks (potential sell signals)
+            # Peaks (potential sell signals) - Report ORIGINAL prices
             results.append(f"### Peaks (Resistance/Sell Signals): {len(max_peaks)}\n")
             if max_peaks:
                 # Get last 5 peaks
                 recent_peaks = max_peaks[-5:] if len(max_peaks) > 5 else max_peaks
-                for idx, peak_value in recent_peaks:
+                for idx, filtered_value in recent_peaks:
                     idx = int(idx)
                     if 0 <= idx < len(timestamps):
-                        peak_time = timestamps[idx]
-                        original_price = close_prices[idx]
-                        filtered_price = peak_value
+                        # Parse timestamp for display
+                        try:
+                            if isinstance(timestamps[idx], str):
+                                timestamp_obj = datetime.fromisoformat(timestamps[idx].replace('Z', '+00:00'))
+                            else:
+                                timestamp_obj = timestamps[idx]
+                            peak_time = timestamp_obj.strftime('%H:%M:%S')
+                        except:
+                            peak_time = f"Bar_{idx}"
+                        
+                        original_price = close_prices[idx]  # ORIGINAL unfiltered price
                         results.append(
-                            f"  - {peak_time.strftime('%H:%M:%S')}: ${original_price:.4f} (filtered: ${filtered_price:.4f})\n"
+                            f"  - Sample {idx}, {peak_time}: ${original_price:.4f} (filtered: ${filtered_value:.4f})\n"
                         )
 
                 # Latest peak analysis
                 if max_peaks:
                     latest_peak_idx = int(max_peaks[-1][0])
-                    latest_peak_price = close_prices[latest_peak_idx]
+                    latest_peak_price = close_prices[latest_peak_idx]  # ORIGINAL price
                     current_price = close_prices[-1]
                     peak_distance = len(close_prices) - 1 - latest_peak_idx
 
                     results.append(
-                        f"\nLatest peak: ${latest_peak_price:.4f} ({peak_distance} bars ago)\n"
+                        f"\nLatest peak: Sample {latest_peak_idx}, ${latest_peak_price:.4f} ({peak_distance} bars ago)\n"
                     )
-                    if (
-                        current_price < latest_peak_price * 0.995
-                    ):  # More than 0.5% below peak
-                        results.append(
-                            "⬇️ Price below recent peak - potential SHORT opportunity\n"
-                        )
 
-            # Troughs (potential buy signals)
+            # Troughs (potential buy signals) - Report ORIGINAL prices
             results.append(f"\n### Troughs (Support/Buy Signals): {len(min_peaks)}\n")
             if min_peaks:
                 # Get last 5 troughs
                 recent_troughs = min_peaks[-5:] if len(min_peaks) > 5 else min_peaks
-                for idx, trough_value in recent_troughs:
+                for idx, filtered_value in recent_troughs:
                     idx = int(idx)
                     if 0 <= idx < len(timestamps):
-                        trough_time = timestamps[idx]
-                        original_price = close_prices[idx]
-                        filtered_price = trough_value
+                        # Parse timestamp for display
+                        try:
+                            if isinstance(timestamps[idx], str):
+                                timestamp_obj = datetime.fromisoformat(timestamps[idx].replace('Z', '+00:00'))
+                            else:
+                                timestamp_obj = timestamps[idx]
+                            trough_time = timestamp_obj.strftime('%H:%M:%S')
+                        except:
+                            trough_time = f"Bar_{idx}"
+                        
+                        original_price = close_prices[idx]  # ORIGINAL unfiltered price
                         results.append(
-                            f"  - {trough_time.strftime('%H:%M:%S')}: ${original_price:.4f} (filtered: ${filtered_price:.4f})\n"
+                            f"  - Sample {idx}, {trough_time}: ${original_price:.4f} (filtered: ${filtered_value:.4f})\n"
                         )
 
                 # Latest trough analysis
                 if min_peaks:
                     latest_trough_idx = int(min_peaks[-1][0])
-                    latest_trough_price = close_prices[latest_trough_idx]
+                    latest_trough_price = close_prices[latest_trough_idx]  # ORIGINAL price
                     current_price = close_prices[-1]
                     trough_distance = len(close_prices) - 1 - latest_trough_idx
 
                     results.append(
-                        f"\nLatest trough: ${latest_trough_price:.4f} ({trough_distance} bars ago)\n"
+                        f"\nLatest trough: Sample {latest_trough_idx}, ${latest_trough_price:.4f} ({trough_distance} bars ago)\n"
                     )
-                    if (
-                        current_price > latest_trough_price * 1.005
-                    ):  # More than 0.5% above trough
-                        results.append(
-                            "⬆️ Price above recent trough - potential LONG opportunity\n"
-                        )
 
-            # Trading signals summary
+            # Enhanced Trading signals summary
             results.append("\n### Trading Signal Summary:\n")
 
             # Determine current position relative to peaks/troughs
             if max_peaks and min_peaks:
                 latest_peak_idx = int(max_peaks[-1][0])
                 latest_trough_idx = int(min_peaks[-1][0])
+                current_price = close_prices[-1]
 
                 if latest_peak_idx > latest_trough_idx:
-                    # Last signal was a peak
+                    # Last signal was a peak - use ORIGINAL price
                     peak_price = close_prices[latest_peak_idx]
                     price_from_peak = ((current_price - peak_price) / peak_price) * 100
-                    results.append(f"📊 Last signal: PEAK at ${peak_price:.4f}\n")
+                    bars_since_peak = len(close_prices) - 1 - latest_peak_idx
+                    
+                    results.append(f"📊 Last signal: PEAK at sample {latest_peak_idx} (${peak_price:.4f})\n")
                     results.append(
-                        f"📍 Current position: {price_from_peak:+.2f}% from peak\n"
+                        f"📍 Current position: {price_from_peak:+.2f}% from peak ({bars_since_peak} bars ago)\n"
                     )
 
-                    if price_from_peak < -1.0:
-                        results.append(
-                            "🔴 SELL/SHORT Signal - Price declining from peak\n"
-                        )
-                    elif price_from_peak < -0.5:
-                        results.append("⚠️ Watch for further decline or reversal\n")
+                    if bars_since_peak <= 3 and abs(price_from_peak) <= 2.0:
+                        results.append("🔴 SELL/SHORT Signal - Near recent peak, good exit point\n")
+                    elif price_from_peak < -2.0:
+                        results.append("⚠️ Watch - Price declining from peak, potential reversal\n")
+                    else:
+                        results.append("➡️ Neutral - Monitor for direction\n")
                 else:
-                    # Last signal was a trough
+                    # Last signal was a trough - use ORIGINAL price
                     trough_price = close_prices[latest_trough_idx]
-                    price_from_trough = (
-                        (current_price - trough_price) / trough_price
-                    ) * 100
-                    results.append(f"📊 Last signal: TROUGH at ${trough_price:.4f}\n")
+                    price_from_trough = ((current_price - trough_price) / trough_price) * 100
+                    bars_since_trough = len(close_prices) - 1 - latest_trough_idx
+                    
+                    results.append(f"📊 Last signal: TROUGH at sample {latest_trough_idx} (${trough_price:.4f})\n")
                     results.append(
-                        f"📍 Current position: {price_from_trough:+.2f}% from trough\n"
+                        f"📍 Current position: {price_from_trough:+.2f}% from trough ({bars_since_trough} bars ago)\n"
                     )
 
-                    if price_from_trough > 1.0:
-                        results.append(
-                            "🟢 BUY/LONG Signal - Price rising from trough\n"
-                        )
-                    elif price_from_trough > 0.5:
-                        results.append("⚠️ Watch for continued rise or reversal\n")
+                    if bars_since_trough <= 3 and abs(price_from_trough) <= 2.0:
+                        results.append("🟢 BUY/LONG Signal - Near recent trough, good entry point\n")
+                    elif price_from_trough > 2.0:
+                        results.append("⚠️ Watch - Price rising from trough, potential reversal\n")
+                    else:
+                        results.append("➡️ Neutral - Monitor for direction\n")
+            
+            elif min_peaks:
+                # Only troughs found
+                latest_trough_idx = int(min_peaks[-1][0])
+                trough_price = close_prices[latest_trough_idx]
+                bars_since = len(close_prices) - 1 - latest_trough_idx
+                if bars_since <= 3:
+                    results.append("🟢 BUY Signal - Recent trough detected\n")
+
+            elif max_peaks:
+                # Only peaks found
+                latest_peak_idx = int(max_peaks[-1][0])
+                peak_price = close_prices[latest_peak_idx]
+                bars_since = len(close_prices) - 1 - latest_peak_idx
+                if bars_since <= 3:
+                    results.append("🔴 SELL Signal - Recent peak detected\n")
 
             results.append("-" * 40 + "\n")
 
