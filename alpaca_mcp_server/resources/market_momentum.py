@@ -1,9 +1,12 @@
 """Market momentum resource with real SPY data analysis."""
 
-from datetime import datetime, timedelta
+from datetime import datetime
+import pytz
 from ..config.settings import get_stock_historical_client
 from alpaca.data.requests import StockBarsRequest
-from alpaca.data.timeframe import TimeFrame
+from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
+from alpaca.data.enums import DataFeed
+from ..tools.market_data_tools import get_stock_bars_intraday
 
 
 async def get_market_momentum(
@@ -23,35 +26,90 @@ async def get_market_momentum(
         sma_long: Long moving average period (default: 20)
     """
     try:
+        # Use the working intraday data tool instead of direct API calls
+        # This tool handles timezone, data feed, and paper trading limitations properly
+
+        # Map timeframe to string format expected by the tool
+        timeframe_map = {
+            1: "1Min",
+            5: "5Min",
+            15: "15Min",
+            30: "30Min",
+            60: "1Hour",
+        }
+
+        timeframe_str = timeframe_map.get(timeframe_minutes, "1Min")
+
+        # Calculate required bars based on SMAs and add buffer
+        required_bars = max(sma_short, sma_long) * 2  # Double for safety
+
+        # Use the working intraday tool to get data
+        bars_result = await get_stock_bars_intraday(
+            symbol=symbol,
+            timeframe=timeframe_str,
+            limit=required_bars,
+        )
+
+        # Parse the result to extract actual bar data
+        # The tool returns formatted text, but we need to call the API directly with the same parameters
+
+        # Fall back to direct API call using the same logic as the working tool
         data_client = get_stock_historical_client()
+        eastern = pytz.timezone("US/Eastern")
 
-        # Get data for specified symbol and timeframe
-        end_time = datetime.now()
-        start_time = end_time - timedelta(hours=analysis_hours)
+        # Use smart date range (copied from working tool)
+        now_et = datetime.now(eastern)
 
-        # Map minutes to TimeFrame
+        # Default to today's extended hours data (4 AM - 8 PM ET)
+        start = eastern.localize(
+            datetime.strptime(now_et.strftime("%Y-%m-%d"), "%Y-%m-%d").replace(
+                hour=4, minute=0
+            )
+        )
+
+        is_weekday = now_et.weekday() < 5
+        is_market_hours = 9 <= now_et.hour <= 16
+
+        if is_weekday and (4 <= now_et.hour <= 20):
+            # Market is open or in extended hours, use current time
+            end = now_et
+        else:
+            # Market closed, use end of extended hours
+            end = eastern.localize(
+                datetime.strptime(now_et.strftime("%Y-%m-%d"), "%Y-%m-%d").replace(
+                    hour=20, minute=0
+                )
+            )
+
+        # Map timeframe
         if timeframe_minutes == 1:
             timeframe = TimeFrame.Minute
         elif timeframe_minutes == 5:
-            timeframe = TimeFrame(5, "Minute")
+            timeframe = TimeFrame(5, TimeFrameUnit.Minute)
         elif timeframe_minutes == 15:
-            timeframe = TimeFrame(15, "Minute")
+            timeframe = TimeFrame(15, TimeFrameUnit.Minute)
         elif timeframe_minutes == 30:
-            timeframe = TimeFrame(30, "Minute")
+            timeframe = TimeFrame(30, TimeFrameUnit.Minute)
         elif timeframe_minutes == 60:
             timeframe = TimeFrame.Hour
         else:
-            timeframe = TimeFrame.Minute  # Default fallback
+            timeframe = TimeFrame.Minute
 
         request = StockBarsRequest(
             symbol_or_symbols=symbol,
             timeframe=timeframe,
-            start=start_time,
-            end=end_time,
+            start=start,
+            end=end,
+            limit=required_bars,
+            feed=DataFeed.SIP,
         )
 
-        bars = data_client.get_stock_bars(request)
-        symbol_bars = list(bars[symbol]) if symbol in bars else []
+        bars_data = data_client.get_stock_bars(request)
+        symbol_bars = (
+            list(bars_data.data[symbol])
+            if bars_data.data and symbol in bars_data.data
+            else []
+        )
 
         if len(symbol_bars) < max(sma_short, sma_long):
             return {
@@ -59,6 +117,12 @@ async def get_market_momentum(
                 "bars_received": len(symbol_bars),
                 "required_bars": max(sma_short, sma_long),
                 "symbol": symbol,
+                "start_time_et": start.strftime("%Y-%m-%d %H:%M:%S %Z"),
+                "end_time_et": end.strftime("%Y-%m-%d %H:%M:%S %Z"),
+                "current_time_et": now_et.strftime("%Y-%m-%d %H:%M:%S %Z"),
+                "market_status": "weekday" if now_et.weekday() < 5 else "weekend",
+                "hour_et": now_et.hour,
+                "timeframe": str(timeframe),
                 "last_updated": datetime.now().isoformat(),
             }
 
@@ -139,6 +203,9 @@ async def get_market_momentum(
             "timeframe_minutes": timeframe_minutes,
             "analysis_period_hours": analysis_hours,
             "last_bar_time": symbol_bars[-1].timestamp.isoformat(),
+            "start_time_et": start.strftime("%Y-%m-%d %H:%M:%S %Z"),
+            "end_time_et": end.strftime("%Y-%m-%d %H:%M:%S %Z"),
+            "current_time_et": now_et.strftime("%Y-%m-%d %H:%M:%S %Z"),
             "parameters": {
                 "symbol": symbol,
                 "timeframe_minutes": timeframe_minutes,

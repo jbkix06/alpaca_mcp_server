@@ -49,11 +49,11 @@ async def get_stream_status() -> dict:
                 stats = buffer.get_stats()
                 symbol_stats[data_type] = {
                     "buffer_size": buffer_size,
-                    "last_update": datetime.fromtimestamp(
-                        stats["last_update"]
-                    ).isoformat()
-                    if stats["last_update"]
-                    else None,
+                    "last_update": (
+                        datetime.fromtimestamp(stats["last_update"]).isoformat()
+                        if stats["last_update"]
+                        else None
+                    ),
                 }
                 symbol_total += buffer_size
 

@@ -244,9 +244,9 @@ class PositionAnalysis:
             "unrealized_pl": str(self.unrealized_pl),
             "unrealized_pl_percent": f"{self.unrealized_pl_percent:.2%}",
             "side": self.side.value,
-            "portfolio_weight": f"{self.portfolio_weight:.2%}"
-            if self.portfolio_weight
-            else None,
+            "portfolio_weight": (
+                f"{self.portfolio_weight:.2%}" if self.portfolio_weight else None
+            ),
             "risk_level": self.risk_level.value,
             "is_profitable": self.is_profitable,
         }
@@ -322,9 +322,9 @@ class MarketConditions:
             "timestamp": self.timestamp.isoformat(),
             "market_status": self.market_status.value,
             "market_sentiment": self.market_sentiment,
-            "spy_change_percent": f"{self.spy_change_percent:.2%}"
-            if self.spy_change_percent
-            else None,
+            "spy_change_percent": (
+                f"{self.spy_change_percent:.2%}" if self.spy_change_percent else None
+            ),
             "vix_level": str(self.vix_level) if self.vix_level else None,
             "volatility_level": self.overall_volatility.value,
             "is_high_volatility": self.is_high_volatility_environment,
@@ -404,9 +404,9 @@ class TradingOpportunity:
             "entry_price": str(self.entry_price) if self.entry_price else None,
             "target_price": str(self.target_price) if self.target_price else None,
             "stop_loss": str(self.stop_loss) if self.stop_loss else None,
-            "risk_reward_ratio": str(self.risk_reward_ratio)
-            if self.risk_reward_ratio
-            else None,
+            "risk_reward_ratio": (
+                str(self.risk_reward_ratio) if self.risk_reward_ratio else None
+            ),
             "time_horizon": self.time_horizon,
             "priority_score": f"{self.priority_score:.2f}",
             "is_valid": self.is_valid,
@@ -517,9 +517,11 @@ class RiskMetrics:
             "top_5_concentration": f"{self.top_5_concentration:.2%}",
             "number_of_positions": self.number_of_positions,
             "cash_percentage": f"{self.cash_percentage:.2%}",
-            "portfolio_volatility": f"{self.portfolio_volatility:.2%}"
-            if self.portfolio_volatility
-            else None,
+            "portfolio_volatility": (
+                f"{self.portfolio_volatility:.2%}"
+                if self.portfolio_volatility
+                else None
+            ),
             "max_drawdown": f"{self.max_drawdown:.2%}" if self.max_drawdown else None,
             "leverage_ratio": str(self.leverage_ratio),
             "is_well_diversified": self.is_well_diversified,
@@ -562,9 +564,9 @@ class MarketConditionsManager(StateManager):
             if self._conditions:
                 return {
                     "conditions": self._conditions.to_dict(),
-                    "last_update": self._last_update.isoformat()
-                    if self._last_update
-                    else None,
+                    "last_update": (
+                        self._last_update.isoformat() if self._last_update else None
+                    ),
                     "is_stale": self.is_stale(),
                 }
             return {}
@@ -663,12 +665,16 @@ class AnalysisResultsManager(StateManager):
             return {
                 "total_results": len(self._results),
                 "recent_analyses": list(self._results.keys())[-10:],
-                "oldest_result": min(self._timestamps.values()).isoformat()
-                if self._timestamps
-                else None,
-                "newest_result": max(self._timestamps.values()).isoformat()
-                if self._timestamps
-                else None,
+                "oldest_result": (
+                    min(self._timestamps.values()).isoformat()
+                    if self._timestamps
+                    else None
+                ),
+                "newest_result": (
+                    max(self._timestamps.values()).isoformat()
+                    if self._timestamps
+                    else None
+                ),
             }
 
     def update_state(self, key: str, result: Any) -> None:

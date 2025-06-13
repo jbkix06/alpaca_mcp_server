@@ -65,7 +65,7 @@ async def get_stock_quote(symbol: str) -> str:
         symbol (str): Stock ticker symbol (e.g., AAPL, MSFT)
 
     Returns:
-        str: Formatted string containing ask/bid prices, sizes, and timestamp
+        str: Formatted string containing ask/bid prices, sizes, and timestamp in NYC/EDT
     """
     try:
         client = get_stock_historical_client()
@@ -74,13 +74,17 @@ async def get_stock_quote(symbol: str) -> str:
 
         if symbol in quotes:
             quote = quotes[symbol]
+            # Convert timestamp to NYC/EDT
+            eastern = pytz.timezone("US/Eastern")
+            timestamp_nyc = quote.timestamp.astimezone(eastern)
+
             return f"""Latest Quote for {symbol}:
 ------------------------
 Ask Price: ${quote.ask_price:.2f}
 Bid Price: ${quote.bid_price:.2f}
 Ask Size: {quote.ask_size}
 Bid Size: {quote.bid_size}
-Timestamp: {quote.timestamp}"""
+Timestamp: {timestamp_nyc.strftime("%Y-%m-%d %H:%M:%S %Z")}"""
         else:
             return f"No quote data found for {symbol}."
 
@@ -567,7 +571,10 @@ async def get_stock_snapshots(symbols: Union[str, List[str]]) -> str:
 
         result = "# Market Snapshots\n"
         result += f"Symbols: {', '.join(symbol_list)}\n"
-        result += f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        # Display current timestamp in NYC/EDT
+        eastern = pytz.timezone("US/Eastern")
+        current_time_nyc = datetime.now(eastern)
+        result += f"Timestamp: {current_time_nyc.strftime('%Y-%m-%d %H:%M:%S %Z')}\n\n"
 
         for symbol in symbol_list:
             if symbol in snapshots:
@@ -587,9 +594,13 @@ async def get_stock_snapshots(symbols: Union[str, List[str]]) -> str:
 ### Latest Trade
 """
                 if latest_trade:
+                    # Convert timestamp to NYC/EDT
+                    eastern = pytz.timezone("US/Eastern")
+                    trade_time_nyc = latest_trade.timestamp.astimezone(eastern)
+
                     result += f"""• Price: ${float(latest_trade.price):.2f}
 • Size: {latest_trade.size:,} shares
-• Time: {latest_trade.timestamp.strftime("%H:%M:%S")}
+• Time: {trade_time_nyc.strftime("%H:%M:%S %Z")}
 • Exchange: {getattr(latest_trade, "exchange", "N/A")}
 """
                 else:
@@ -602,25 +613,44 @@ async def get_stock_snapshots(symbols: Union[str, List[str]]) -> str:
                     )
                     spread_pct = (spread / float(latest_quote.ask_price)) * 100
 
+                    # Convert timestamp to NYC/EDT
+                    eastern = pytz.timezone("US/Eastern")
+                    quote_time_nyc = latest_quote.timestamp.astimezone(eastern)
+
                     result += f"""• Bid: ${float(latest_quote.bid_price):.2f} (Size: {latest_quote.bid_size:,})
 • Ask: ${float(latest_quote.ask_price):.2f} (Size: {latest_quote.ask_size:,})
 • Spread: ${spread:.2f} ({spread_pct:.2f}%)
-• Time: {latest_quote.timestamp.strftime("%H:%M:%S")}
+• Time: {quote_time_nyc.strftime("%H:%M:%S %Z")}
 """
                 else:
                     result += "• No current quote data available\n"
 
                 result += "\n### Current Minute Bar\n"
                 if minute_bar:
-                    minute_change = (
-                        (float(minute_bar.close) - float(minute_bar.open))
-                        / float(minute_bar.open)
-                    ) * 100
-                    result += f"""• OHLC: ${float(minute_bar.open):.2f} / ${float(minute_bar.high):.2f} / ${float(minute_bar.low):.2f} / ${float(minute_bar.close):.2f}
-• Volume: {minute_bar.volume:,}
-• Change: {minute_change:+.2f}%
-• Time: {minute_bar.timestamp.strftime("%H:%M")}
-"""
+                    try:
+                        minute_change = (
+                            (float(minute_bar.close) - float(minute_bar.open))
+                            / float(minute_bar.open)
+                        ) * 100
+
+                        # Convert timestamp to NYC/EDT
+                        eastern = pytz.timezone("US/Eastern")
+                        minute_time_nyc = minute_bar.timestamp.astimezone(eastern)
+
+                        # Get trade count
+                        trades = (
+                            int(float(minute_bar.trade_count))
+                            if hasattr(minute_bar, "trade_count")
+                            else 0
+                        )
+
+                        result += f"• OHLC: ${float(minute_bar.open):.2f} / ${float(minute_bar.high):.2f} / ${float(minute_bar.low):.2f} / ${float(minute_bar.close):.2f}\n"
+                        result += f"• Volume: {minute_bar.volume:,}\n"
+                        result += f"• Trades: {trades:,} trades/min\n"
+                        result += f"• Change: {minute_change:+.2f}%\n"
+                        result += f"• Time: {minute_time_nyc.strftime('%H:%M %Z')}\n"
+                    except Exception as e:
+                        result += f"• Error processing minute bar: {str(e)}\n"
                 else:
                     result += "• No current minute bar data\n"
 
@@ -753,7 +783,7 @@ async def get_stock_latest_trade(symbol: str) -> str:
         symbol (str): Stock ticker symbol
 
     Returns:
-        str: Formatted string containing the latest trade information
+        str: Formatted string containing the latest trade information with NYC/EDT timestamp
     """
     try:
         client = get_stock_historical_client()
@@ -762,11 +792,15 @@ async def get_stock_latest_trade(symbol: str) -> str:
 
         if symbol in trades:
             trade = trades[symbol]
+            # Convert timestamp to NYC/EDT
+            eastern = pytz.timezone("US/Eastern")
+            timestamp_nyc = trade.timestamp.astimezone(eastern)
+
             return f"""Latest Trade for {symbol}:
 -----------------------
 Price: ${float(trade.price):.2f}
 Size: {trade.size:,} shares
-Time: {trade.timestamp.strftime("%Y-%m-%d %H:%M:%S")}
+Time: {timestamp_nyc.strftime("%Y-%m-%d %H:%M:%S %Z")}
 Exchange: {getattr(trade, "exchange", "N/A")}"""
         else:
             return f"No recent trade data found for {symbol}."
@@ -783,7 +817,7 @@ async def get_stock_latest_bar(symbol: str) -> str:
         symbol (str): Stock ticker symbol
 
     Returns:
-        str: Formatted string containing the latest bar information
+        str: Formatted string containing the latest bar information with NYC/EDT timestamp
     """
     try:
         client = get_stock_historical_client()
@@ -794,9 +828,13 @@ async def get_stock_latest_bar(symbol: str) -> str:
             bar = bars[symbol]
             bar_change = ((float(bar.close) - float(bar.open)) / float(bar.open)) * 100
 
+            # Convert timestamp to NYC/EDT
+            eastern = pytz.timezone("US/Eastern")
+            timestamp_nyc = bar.timestamp.astimezone(eastern)
+
             return f"""Latest Minute Bar for {symbol}:
 -----------------------------
-Time: {bar.timestamp.strftime("%Y-%m-%d %H:%M")}
+Time: {timestamp_nyc.strftime("%Y-%m-%d %H:%M %Z")}
 Open: ${float(bar.open):.2f}
 High: ${float(bar.high):.2f}
 Low: ${float(bar.low):.2f}

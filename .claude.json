@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "alpaca": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["/home/jjoravet/alpaca-mcp-server/run_alpaca_mcp.py"],
+      "env": {
+        "APCA_API_KEY_ID": "${APCA_API_KEY_ID}",
+        "APCA_API_SECRET_KEY": "${APCA_API_SECRET_KEY}",
+        "PAPER": "true"
+      }
+    }
+  },
+  "commands": {
+    "startup": {
+      "name": "startup",
+      "description": "Execute comprehensive day trading startup checks with parallel execution and high-liquidity scanner",
+      "contents": "/home/jjoravet/alpaca-mcp-server/DAY_TRADING_GUIDE.md"
+    }
+  }
+}

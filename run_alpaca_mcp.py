@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 """Entry script for the new modular Alpaca MCP Server."""
+
 import sys
 import os
+
 # Add the project root to Python path
 sys.path.insert(0, os.path.dirname(__file__))
 try:
     from alpaca_mcp_server.server import mcp
-    
+
     if __name__ == "__main__":
         print("🚀 Starting Alpaca Trading MCP Server (Modular Architecture)")
         print("📊 Prompt-driven workflows enabled")
         print("⚡ Use list_trading_capabilities() to explore features")
         print("=" * 60)
-        mcp.run(transport='stdio')
-        
+        mcp.run(transport="stdio")
+
 except ImportError as e:
     print(f"❌ Import Error: {e}")
     print("\nTroubleshooting:")

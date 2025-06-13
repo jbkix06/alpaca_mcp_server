@@ -31,13 +31,13 @@ except ImportError:
             # Check if current point is a peak
             is_peak = True
             is_trough = True
-            
+
             for j in range(1, lookahead + 1):
                 if y_axis[i] <= y_axis[i - j] or y_axis[i] <= y_axis[i + j]:
                     is_peak = False
                 if y_axis[i] >= y_axis[i - j] or y_axis[i] >= y_axis[i + j]:
                     is_trough = False
-            
+
             if is_peak and (not peaks or y_axis[i] - peaks[-1][1] >= delta):
                 peaks.append((x_axis[i], y_axis[i]))
             elif is_trough and (not troughs or troughs[-1][1] - y_axis[i] >= delta):
@@ -45,11 +45,12 @@ except ImportError:
 
         return peaks, troughs
 
+
 try:
     from ..config import get_stock_historical_client
 except ImportError:
     # Try absolute import
-    from alpaca_mcp_server.config import get_stock_historical_client
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +61,11 @@ def convert_to_nyc_timezone(timestamp_str):
         # Parse the timestamp (handles UTC timestamps from Alpaca API)
         if isinstance(timestamp_str, str):
             # Handle different timestamp formats
-            if timestamp_str.endswith('Z'):
-                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-            elif '+' in timestamp_str or timestamp_str.endswith('UTC'):
+            if timestamp_str.endswith("Z"):
+                dt = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+            elif "+" in timestamp_str or timestamp_str.endswith("UTC"):
                 from dateutil import parser as date_parser
+
                 dt = date_parser.parse(timestamp_str)
             else:
                 # Try direct parsing first
@@ -71,31 +73,35 @@ def convert_to_nyc_timezone(timestamp_str):
                     dt = datetime.fromisoformat(timestamp_str)
                 except:
                     from dateutil import parser as date_parser
+
                     dt = date_parser.parse(timestamp_str)
         else:
             dt = timestamp_str
-        
+
         # If timezone-naive, assume UTC
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=pytz.UTC)
-        
+
         # Convert to NYC timezone (handles EDT/EST automatically)
-        nyc_tz = pytz.timezone('America/New_York')
+        nyc_tz = pytz.timezone("America/New_York")
         dt_nyc = dt.astimezone(nyc_tz)
-        
+
         return dt_nyc
     except Exception as e:
-        logger.warning(f"Failed to convert timestamp {timestamp_str} to NYC timezone: {e}")
+        logger.warning(
+            f"Failed to convert timestamp {timestamp_str} to NYC timezone: {e}"
+        )
         # Return a fallback datetime object in NYC timezone
         try:
             # If all else fails, assume it's a UTC timestamp and manually convert
             if isinstance(timestamp_str, str):
                 # Try to extract basic time info
                 from dateutil import parser as date_parser
+
                 dt = date_parser.parse(timestamp_str)
                 if dt.tzinfo is None:
                     dt = dt.replace(tzinfo=pytz.UTC)
-                return dt.astimezone(pytz.timezone('America/New_York'))
+                return dt.astimezone(pytz.timezone("America/New_York"))
         except:
             pass
         return timestamp_str
@@ -104,7 +110,7 @@ def convert_to_nyc_timezone(timestamp_str):
 def zero_phase_filter(data, window_len=11):
     """Apply zero-phase low-pass filter using Hanning window"""
     data = np.array(data)
-    
+
     min_required_length = window_len * 3
     if len(data) < min_required_length:
         if len(data) < 5:
@@ -113,32 +119,31 @@ def zero_phase_filter(data, window_len=11):
             window_len = max(3, len(data) // 3)
             if window_len % 2 == 0:
                 window_len -= 1
-    
+
     if window_len % 2 == 0:
         window_len += 1
-    
+
     window = hanning(window_len)
     window = window / window.sum()
-    
+
     pad_len = window_len // 2
-    padded = np.pad(data, pad_len, mode='edge')
+    padded = np.pad(data, pad_len, mode="edge")
     filtered_padded = filtfilt(window, 1.0, padded)
     filtered = filtered_padded[pad_len:-pad_len]
-    
+
     return filtered
 
 
 class HistoricalDataFetcher:
     """Fetch historical bar data from Alpaca API"""
-    
+
     def __init__(self, api_key, api_secret):
         self.api_key = api_key
         self.api_secret = api_secret
         self.session = requests.Session()
-        self.session.headers.update({
-            'APCA-API-KEY-ID': self.api_key,
-            'APCA-API-SECRET-KEY': self.api_secret
-        })
+        self.session.headers.update(
+            {"APCA-API-KEY-ID": self.api_key, "APCA-API-SECRET-KEY": self.api_secret}
+        )
 
     def get_trading_days(self, days):
         """Get the last N trading days"""
@@ -147,8 +152,8 @@ class HistoricalDataFetcher:
 
         url = "https://paper-api.alpaca.markets/v2/calendar"
         params = {
-            'start': start_date.strftime('%Y-%m-%d'),
-            'end': now.strftime('%Y-%m-%d')
+            "start": start_date.strftime("%Y-%m-%d"),
+            "end": now.strftime("%Y-%m-%d"),
         }
 
         try:
@@ -160,9 +165,13 @@ class HistoricalDataFetcher:
                 logger.warning("No trading calendar data received")
                 return []
 
-            trading_days = [day['date'] for day in calendar_data if day.get('date')]
+            trading_days = [day["date"] for day in calendar_data if day.get("date")]
             if len(trading_days) < days:
-                logger.warning("Only %s trading days available, requested %s", len(trading_days), days)
+                logger.warning(
+                    "Only %s trading days available, requested %s",
+                    len(trading_days),
+                    days,
+                )
 
             trading_days = trading_days[-days:] if trading_days else []
             trading_days.sort(reverse=True)
@@ -177,8 +186,9 @@ class HistoricalDataFetcher:
             logger.error("Error retrieving trading calendar: %s", e)
             return []
 
-
-    def fetch_historical_bars(self, symbols, timeframe, start_date, end_date, feed='sip'):
+    def fetch_historical_bars(
+        self, symbols, timeframe, start_date, end_date, feed="sip"
+    ):
         """Fetch historical bar data for multiple symbols in one API call"""
         if not symbols:
             logger.warning("No symbols provided for historical data fetch")
@@ -186,19 +196,24 @@ class HistoricalDataFetcher:
 
         url = "https://data.alpaca.markets/v2/stocks/bars"
         params = {
-            'symbols': ','.join(symbols),
-            'timeframe': timeframe,
-            'start': start_date,
-            'end': end_date,
-            'limit': 10000,
-            'adjustment': 'split',
-            'feed': feed,
-            'sort': 'asc'
+            "symbols": ",".join(symbols),
+            "timeframe": timeframe,
+            "start": start_date,
+            "end": end_date,
+            "limit": 10000,
+            "adjustment": "split",
+            "feed": feed,
+            "sort": "asc",
         }
 
         try:
-            logger.info("Fetching historical bars: %s symbols, %s, %s to %s", 
-                       len(symbols), timeframe, start_date, end_date)
+            logger.info(
+                "Fetching historical bars: %s symbols, %s, %s to %s",
+                len(symbols),
+                timeframe,
+                start_date,
+                end_date,
+            )
 
             response = self.session.get(url, params=params, timeout=60)
             response.raise_for_status()
@@ -209,11 +224,11 @@ class HistoricalDataFetcher:
                 logger.error("Invalid response format from bars API")
                 return None
 
-            if 'bars' not in data:
+            if "bars" not in data:
                 logger.warning("No 'bars' key in API response")
                 return None
 
-            bars_data = data['bars']
+            bars_data = data["bars"]
             total_bars = 0
 
             for symbol, bars in bars_data.items():
@@ -222,7 +237,11 @@ class HistoricalDataFetcher:
                 else:
                     logger.warning("No bars received for symbol %s", symbol)
 
-            logger.info("Successfully fetched %s bars for %s symbols", total_bars, len(bars_data))
+            logger.info(
+                "Successfully fetched %s bars for %s symbols",
+                total_bars,
+                len(bars_data),
+            )
             return bars_data
 
         except requests.exceptions.Timeout:
@@ -240,75 +259,90 @@ def process_bars_for_peaks(symbol, bars, window_len=11, lookahead=1):
     """Process bars to compute filtered close prices and detect peaks/troughs"""
     try:
         if not bars or len(bars) < lookahead * 2:
-            logger.warning("Not enough bars for %s to detect peaks (need at least %d)", symbol, lookahead * 2)
+            logger.warning(
+                "Not enough bars for %s to detect peaks (need at least %d)",
+                symbol,
+                lookahead * 2,
+            )
             return None
-        
-        close_prices = np.array([float(bar['c']) for bar in bars])
-        timestamps = [bar['t'] for bar in bars]
-        
+
+        close_prices = np.array([float(bar["c"]) for bar in bars])
+        timestamps = [bar["t"] for bar in bars]
+
         logger.debug("Processing %d bars for %s", len(close_prices), symbol)
-        logger.debug("Close price range: %.4f - %.4f", close_prices.min(), close_prices.max())
-        
+        logger.debug(
+            "Close price range: %.4f - %.4f", close_prices.min(), close_prices.max()
+        )
+
         filtered_prices = zero_phase_filter(close_prices, window_len)
         time_axis = np.arange(len(close_prices))
-        
+
         max_peaks, min_peaks = peakdetect(
-            filtered_prices,
-            x_axis=time_axis,
-            lookahead=lookahead,
-            delta=0
+            filtered_prices, x_axis=time_axis, lookahead=lookahead, delta=0
         )
-        
-        logger.info("Found %d peaks and %d troughs for %s", len(max_peaks), len(min_peaks), symbol)
-        
+
+        logger.info(
+            "Found %d peaks and %d troughs for %s",
+            len(max_peaks),
+            len(min_peaks),
+            symbol,
+        )
+
         peaks_data = []
         for peak_idx, peak_value in max_peaks:
             idx = int(peak_idx)
             if 0 <= idx < len(bars):
-                peaks_data.append({
-                    'index': idx,
-                    'timestamp': timestamps[idx],
-                    'filtered_price': float(peak_value),
-                    'original_price': float(close_prices[idx]),
-                    'volume': int(bars[idx]['v'])
-                })
-        
+                peaks_data.append(
+                    {
+                        "index": idx,
+                        "timestamp": timestamps[idx],
+                        "filtered_price": float(peak_value),
+                        "original_price": float(close_prices[idx]),
+                        "volume": int(bars[idx]["v"]),
+                    }
+                )
+
         troughs_data = []
         for trough_idx, trough_value in min_peaks:
             idx = int(trough_idx)
             if 0 <= idx < len(bars):
-                troughs_data.append({
-                    'index': idx,
-                    'timestamp': timestamps[idx],
-                    'filtered_price': float(trough_value),
-                    'original_price': float(close_prices[idx]),
-                    'volume': int(bars[idx]['v'])
-                })
-        
+                troughs_data.append(
+                    {
+                        "index": idx,
+                        "timestamp": timestamps[idx],
+                        "filtered_price": float(trough_value),
+                        "original_price": float(close_prices[idx]),
+                        "volume": int(bars[idx]["v"]),
+                    }
+                )
+
         results = {
-            'symbol': symbol,
-            'total_bars': len(bars),
-            'timestamps': timestamps,
-            'original_prices': close_prices.tolist(),
-            'filtered_prices': filtered_prices.tolist(),
-            'peaks': peaks_data,
-            'troughs': troughs_data,
-            'filter_params': {
-                'window_len': window_len,
-                'lookahead': lookahead
+            "symbol": symbol,
+            "total_bars": len(bars),
+            "timestamps": timestamps,
+            "original_prices": close_prices.tolist(),
+            "filtered_prices": filtered_prices.tolist(),
+            "peaks": peaks_data,
+            "troughs": troughs_data,
+            "filter_params": {"window_len": window_len, "lookahead": lookahead},
+            "stats": {
+                "price_min": float(close_prices.min()),
+                "price_max": float(close_prices.max()),
+                "price_mean": float(close_prices.mean()),
+                "price_std": float(close_prices.std()),
+                "filtered_std": float(filtered_prices.std()),
+                "noise_reduction_pct": float(
+                    (
+                        (close_prices.std() - filtered_prices.std())
+                        / close_prices.std()
+                        * 100
+                    )
+                ),
             },
-            'stats': {
-                'price_min': float(close_prices.min()),
-                'price_max': float(close_prices.max()),
-                'price_mean': float(close_prices.mean()),
-                'price_std': float(close_prices.std()),
-                'filtered_std': float(filtered_prices.std()),
-                'noise_reduction_pct': float(((close_prices.std() - filtered_prices.std()) / close_prices.std() * 100))
-            }
         }
-        
+
         return results
-        
+
     except Exception as e:
         logger.error("Error processing bars for peaks in %s: %s", symbol, e)
         return None
@@ -318,50 +352,52 @@ def get_latest_signal(results):
     """Get the most recent peak or trough signal for a symbol"""
     if not results:
         return None
-    
-    peaks = results['peaks']
-    troughs = results['troughs']
-    
+
+    peaks = results["peaks"]
+    troughs = results["troughs"]
+
     if not peaks and not troughs:
         return None
-    
+
     latest_signal = None
     latest_index = -1
-    
+
     for peak in peaks:
-        if peak['index'] > latest_index:
-            latest_index = peak['index']
+        if peak["index"] > latest_index:
+            latest_index = peak["index"]
             latest_signal = {
-                'type': 'Peak',
-                'index': peak['index'],
-                'timestamp': peak['timestamp'],
-                'signal_price': peak['original_price'],
-                'filtered_price': peak['filtered_price'],
-                'volume': peak['volume']
+                "type": "Peak",
+                "index": peak["index"],
+                "timestamp": peak["timestamp"],
+                "signal_price": peak["original_price"],
+                "filtered_price": peak["filtered_price"],
+                "volume": peak["volume"],
             }
-    
+
     for trough in troughs:
-        if trough['index'] > latest_index:
-            latest_index = trough['index']
+        if trough["index"] > latest_index:
+            latest_index = trough["index"]
             latest_signal = {
-                'type': 'Trough', 
-                'index': trough['index'],
-                'timestamp': trough['timestamp'],
-                'signal_price': trough['original_price'],
-                'filtered_price': trough['filtered_price'],
-                'volume': trough['volume']
+                "type": "Trough",
+                "index": trough["index"],
+                "timestamp": trough["timestamp"],
+                "signal_price": trough["original_price"],
+                "filtered_price": trough["filtered_price"],
+                "volume": trough["volume"],
             }
-    
+
     if latest_signal:
-        total_bars = results['total_bars']
-        samples_ago = total_bars - 1 - latest_signal['index']
-        current_price = results['original_prices'][-1]
-        
-        latest_signal['samples_ago'] = samples_ago
-        latest_signal['current_price'] = current_price
-        latest_signal['price_change'] = current_price - latest_signal['signal_price']
-        latest_signal['price_change_pct'] = (latest_signal['price_change'] / latest_signal['signal_price']) * 100
-        
+        total_bars = results["total_bars"]
+        samples_ago = total_bars - 1 - latest_signal["index"]
+        current_price = results["original_prices"][-1]
+
+        latest_signal["samples_ago"] = samples_ago
+        latest_signal["current_price"] = current_price
+        latest_signal["price_change"] = current_price - latest_signal["signal_price"]
+        latest_signal["price_change_pct"] = (
+            latest_signal["price_change"] / latest_signal["signal_price"]
+        ) * 100
+
     return latest_signal
 
 
@@ -443,6 +479,7 @@ async def analyze_peaks_and_troughs(
         # Get API credentials for enhanced data fetching
         try:
             from ..config.settings import settings
+
             api_key = settings.api_key
             api_secret = settings.api_secret
         except Exception as e:
@@ -451,21 +488,23 @@ async def analyze_peaks_and_troughs(
 
         # Create data fetcher instance
         fetcher = HistoricalDataFetcher(api_key, api_secret)
-        
+
         # Get trading days using calendar API
         trading_days = fetcher.get_trading_days(days)
         if not trading_days:
             logger.warning("No trading days found, falling back to date calculation")
             now = datetime.now()
-            start_date = (now - timedelta(days=days)).strftime('%Y-%m-%d')
-            end_date = now.strftime('%Y-%m-%d')
+            start_date = (now - timedelta(days=days)).strftime("%Y-%m-%d")
+            end_date = now.strftime("%Y-%m-%d")
         else:
             start_date = trading_days[-1]  # Oldest day
-            end_date = trading_days[0]     # Most recent day
+            end_date = trading_days[0]  # Most recent day
 
         # Fetch bars using enhanced API method
-        bars_data = fetcher.fetch_historical_bars(symbol_list, timeframe, start_date, end_date)
-        
+        bars_data = fetcher.fetch_historical_bars(
+            symbol_list, timeframe, start_date, end_date
+        )
+
         if not bars_data:
             return "Error: No historical data received from API"
 
@@ -480,13 +519,13 @@ async def analyze_peaks_and_troughs(
         try:
             from datetime import datetime
             import pytz
-            
+
             utc_now = datetime.utcnow().replace(tzinfo=pytz.UTC)
-            nyc_tz = pytz.timezone('America/New_York')
+            nyc_tz = pytz.timezone("America/New_York")
             nyc_now = utc_now.astimezone(nyc_tz)
-            
+
             # Force EDT/EST display
-            tz_name = nyc_now.strftime('%Z')  # This will be EDT or EST
+            tz_name = nyc_now.strftime("%Z")  # This will be EDT or EST
             results.append(
                 f"Analysis Time: {nyc_now.strftime('%Y-%m-%d %H:%M:%S')} {tz_name}\n"
             )
@@ -494,6 +533,7 @@ async def analyze_peaks_and_troughs(
             logger.warning(f"Failed to format analysis time with timezone: {e}")
             # Fallback with manual EDT calculation
             from datetime import datetime
+
             utc_now = datetime.utcnow()
             # EDT is UTC-4, EST is UTC-5. In June, it's EDT
             edt_hour = (utc_now.hour - 4) % 24
@@ -520,8 +560,8 @@ async def analyze_peaks_and_troughs(
             close_prices = []
             timestamps = []
             for bar in symbol_bars:
-                close_prices.append(float(bar['c']))  # Close price
-                timestamps.append(bar['t'])  # Timestamp
+                close_prices.append(float(bar["c"]))  # Close price
+                timestamps.append(bar["t"])  # Timestamp
 
             close_prices = np.array(close_prices)
 
@@ -579,24 +619,31 @@ async def analyze_peaks_and_troughs(
                             # Force timezone conversion regardless of environment
                             if isinstance(raw_ts, str):
                                 from dateutil import parser as date_parser
+
                                 dt = date_parser.parse(raw_ts)
                                 if dt.tzinfo is None:
                                     dt = dt.replace(tzinfo=pytz.UTC)
-                                nyc_dt = dt.astimezone(pytz.timezone('America/New_York'))
-                                peak_time = nyc_dt.strftime('%H:%M:%S')
+                                nyc_dt = dt.astimezone(
+                                    pytz.timezone("America/New_York")
+                                )
+                                peak_time = nyc_dt.strftime("%H:%M:%S")
                             else:
                                 # Handle datetime objects
-                                if hasattr(raw_ts, 'tzinfo'):
+                                if hasattr(raw_ts, "tzinfo"):
                                     if raw_ts.tzinfo is None:
                                         raw_ts = raw_ts.replace(tzinfo=pytz.UTC)
-                                    nyc_dt = raw_ts.astimezone(pytz.timezone('America/New_York'))
-                                    peak_time = nyc_dt.strftime('%H:%M:%S')
+                                    nyc_dt = raw_ts.astimezone(
+                                        pytz.timezone("America/New_York")
+                                    )
+                                    peak_time = nyc_dt.strftime("%H:%M:%S")
                                 else:
                                     peak_time = f"Bar_{idx}"
                         except Exception as e:
-                            logger.warning(f"Timezone conversion failed for peak timestamp {raw_ts}: {e}")
+                            logger.warning(
+                                f"Timezone conversion failed for peak timestamp {raw_ts}: {e}"
+                            )
                             peak_time = f"Bar_{idx}"
-                        
+
                         original_price = close_prices[idx]  # ORIGINAL unfiltered price
                         results.append(
                             f"  - Sample {idx}, {peak_time}: ${original_price:.4f} (filtered: ${filtered_value:.4f})\n"
@@ -627,24 +674,31 @@ async def analyze_peaks_and_troughs(
                             # Force timezone conversion regardless of environment
                             if isinstance(raw_ts, str):
                                 from dateutil import parser as date_parser
+
                                 dt = date_parser.parse(raw_ts)
                                 if dt.tzinfo is None:
                                     dt = dt.replace(tzinfo=pytz.UTC)
-                                nyc_dt = dt.astimezone(pytz.timezone('America/New_York'))
-                                trough_time = nyc_dt.strftime('%H:%M:%S')
+                                nyc_dt = dt.astimezone(
+                                    pytz.timezone("America/New_York")
+                                )
+                                trough_time = nyc_dt.strftime("%H:%M:%S")
                             else:
                                 # Handle datetime objects
-                                if hasattr(raw_ts, 'tzinfo'):
+                                if hasattr(raw_ts, "tzinfo"):
                                     if raw_ts.tzinfo is None:
                                         raw_ts = raw_ts.replace(tzinfo=pytz.UTC)
-                                    nyc_dt = raw_ts.astimezone(pytz.timezone('America/New_York'))
-                                    trough_time = nyc_dt.strftime('%H:%M:%S')
+                                    nyc_dt = raw_ts.astimezone(
+                                        pytz.timezone("America/New_York")
+                                    )
+                                    trough_time = nyc_dt.strftime("%H:%M:%S")
                                 else:
                                     trough_time = f"Bar_{idx}"
                         except Exception as e:
-                            logger.warning(f"Timezone conversion failed for trough timestamp {raw_ts}: {e}")
+                            logger.warning(
+                                f"Timezone conversion failed for trough timestamp {raw_ts}: {e}"
+                            )
                             trough_time = f"Bar_{idx}"
-                        
+
                         original_price = close_prices[idx]  # ORIGINAL unfiltered price
                         results.append(
                             f"  - Sample {idx}, {trough_time}: ${original_price:.4f} (filtered: ${filtered_value:.4f})\n"
@@ -653,7 +707,9 @@ async def analyze_peaks_and_troughs(
                 # Latest trough analysis
                 if min_peaks:
                     latest_trough_idx = int(min_peaks[-1][0])
-                    latest_trough_price = close_prices[latest_trough_idx]  # ORIGINAL price
+                    latest_trough_price = close_prices[
+                        latest_trough_idx
+                    ]  # ORIGINAL price
                     current_price = close_prices[-1]
                     trough_distance = len(close_prices) - 1 - latest_trough_idx
 
@@ -675,36 +731,50 @@ async def analyze_peaks_and_troughs(
                     peak_price = close_prices[latest_peak_idx]
                     price_from_peak = ((current_price - peak_price) / peak_price) * 100
                     bars_since_peak = len(close_prices) - 1 - latest_peak_idx
-                    
-                    results.append(f"📊 Last signal: PEAK at sample {latest_peak_idx} (${peak_price:.4f})\n")
+
+                    results.append(
+                        f"📊 Last signal: PEAK at sample {latest_peak_idx} (${peak_price:.4f})\n"
+                    )
                     results.append(
                         f"📍 Current position: {price_from_peak:+.2f}% from peak ({bars_since_peak} bars ago)\n"
                     )
 
                     if bars_since_peak <= 3 and abs(price_from_peak) <= 2.0:
-                        results.append("🔴 SELL/SHORT Signal - Near recent peak, good exit point\n")
+                        results.append(
+                            "🔴 SELL/SHORT Signal - Near recent peak, good exit point\n"
+                        )
                     elif price_from_peak < -2.0:
-                        results.append("⚠️ Watch - Price declining from peak, potential reversal\n")
+                        results.append(
+                            "⚠️ Watch - Price declining from peak, potential reversal\n"
+                        )
                     else:
                         results.append("➡️ Neutral - Monitor for direction\n")
                 else:
                     # Last signal was a trough - use ORIGINAL price
                     trough_price = close_prices[latest_trough_idx]
-                    price_from_trough = ((current_price - trough_price) / trough_price) * 100
+                    price_from_trough = (
+                        (current_price - trough_price) / trough_price
+                    ) * 100
                     bars_since_trough = len(close_prices) - 1 - latest_trough_idx
-                    
-                    results.append(f"📊 Last signal: TROUGH at sample {latest_trough_idx} (${trough_price:.4f})\n")
+
+                    results.append(
+                        f"📊 Last signal: TROUGH at sample {latest_trough_idx} (${trough_price:.4f})\n"
+                    )
                     results.append(
                         f"📍 Current position: {price_from_trough:+.2f}% from trough ({bars_since_trough} bars ago)\n"
                     )
 
                     if bars_since_trough <= 3 and abs(price_from_trough) <= 2.0:
-                        results.append("🟢 BUY/LONG Signal - Near recent trough, good entry point\n")
+                        results.append(
+                            "🟢 BUY/LONG Signal - Near recent trough, good entry point\n"
+                        )
                     elif price_from_trough > 2.0:
-                        results.append("⚠️ Watch - Price rising from trough, potential reversal\n")
+                        results.append(
+                            "⚠️ Watch - Price rising from trough, potential reversal\n"
+                        )
                     else:
                         results.append("➡️ Neutral - Monitor for direction\n")
-            
+
             elif min_peaks:
                 # Only troughs found
                 latest_trough_idx = int(min_peaks[-1][0])

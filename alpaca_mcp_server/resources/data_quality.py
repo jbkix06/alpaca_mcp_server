@@ -62,9 +62,7 @@ async def get_data_quality(
                         else (
                             "good"
                             if latency_ms < latency_threshold_ms * 0.5
-                            else "fair"
-                            if latency_ms < latency_threshold_ms
-                            else "poor"
+                            else "fair" if latency_ms < latency_threshold_ms else "poor"
                         )
                     )
 
@@ -88,9 +86,7 @@ async def get_data_quality(
                         else (
                             "good"
                             if spread_pct < spread_threshold_pct * 0.5
-                            else "fair"
-                            if spread_pct < spread_threshold_pct
-                            else "poor"
+                            else "fair" if spread_pct < spread_threshold_pct else "poor"
                         )
                     )
 
@@ -114,9 +110,7 @@ async def get_data_quality(
                         else (
                             "good"
                             if overall_score >= 70
-                            else "fair"
-                            if overall_score >= 50
-                            else "poor"
+                            else "fair" if overall_score >= 50 else "poor"
                         )
                     )
 
