@@ -82,7 +82,7 @@ async def scan_day_trading_opportunities(
             response = requests.get(url, headers=headers, timeout=120)
             if response.status_code != 200:
                 logger.warning(
-                    f"Error fetching batch {i//batch_size + 1}: {response.status_code}"
+                    f"Error fetching batch {i // batch_size + 1}: {response.status_code}"
                 )
                 continue
 
@@ -91,7 +91,7 @@ async def scan_day_trading_opportunities(
             all_snapshots.update(batch_snapshots)
 
             logger.info(
-                f"Processed batch {i//batch_size + 1}/{(len(symbol_list) + batch_size - 1)//batch_size}"
+                f"Processed batch {i // batch_size + 1}/{(len(symbol_list) + batch_size - 1) // batch_size}"
             )
 
         snapshots = all_snapshots
@@ -192,7 +192,7 @@ async def scan_day_trading_opportunities(
         if not results:
             return f"""
 🎯 **DAY TRADING OPPORTUNITY SCAN**
-Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} EDT
+Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} EDT
 Threshold: {min_trades_per_minute} trades/minute
 Total Qualified: 0 stocks
 
@@ -210,7 +210,7 @@ Total Qualified: 0 stocks
         # Professional tabular format like shell script output
         result = f"""
 🎯 **DAY TRADING OPPORTUNITY SCAN**
-Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} EDT
+Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} EDT
 Threshold: {min_trades_per_minute} trades/minute
 Total Qualified: {len(results)} stocks
 
@@ -233,7 +233,7 @@ Rank Symbol  Trades/Min    Change%     Price    Volume      Momentum
             change_sign = "+" if stock["percent"] > 0 else ""
 
             result += f"""
-{i:4} {stock['symbol']:<6} {stock['trades_per_minute']:>9,} {change_sign}{stock['percent']:>8.1f}% ${stock['price']:>7.3f} {stock['volume']:>9,} {momentum}"""
+{i:4} {stock["symbol"]:<6} {stock["trades_per_minute"]:>9,} {change_sign}{stock["percent"]:>8.1f}% ${stock["price"]:>7.3f} {stock["volume"]:>9,} {momentum}"""
 
         result += """
 ```
@@ -248,9 +248,9 @@ Rank Symbol  Trades/Min    Change%     Price    Volume      Momentum
             explosive = len([s for s in results if s["percent_change"] > 10])
 
             result += f"""
-- 🎯 **Top Mover:** {top_mover['symbol']} ({top_mover['percent']:+.1f}%) with {top_mover['trades_per_minute']:,} trades/min
+- 🎯 **Top Mover:** {top_mover["symbol"]} ({top_mover["percent"]:+.1f}%) with {top_mover["trades_per_minute"]:,} trades/min
 - 📊 **Avg Liquidity:** {avg_trades:,.0f} trades/minute
-- 📈 **Winners:** {winners}/{len(results)} stocks positive ({winners/len(results)*100:.0f}%)
+- 📈 **Winners:** {winners}/{len(results)} stocks positive ({winners / len(results) * 100:.0f}%)
 - 🔥 **Explosive Moves:** {explosive} stocks >10% gain
 
 **🚀 READY FOR DAY TRADING! 🚀**"""

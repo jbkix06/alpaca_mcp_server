@@ -145,7 +145,6 @@ async def scan_day_trading_opportunities(
                 and current_price > 0
                 and minute_volume > 0
             ):
-
                 opportunities.append(
                     {
                         "symbol": symbol,
@@ -176,12 +175,12 @@ async def scan_day_trading_opportunities(
         if not opportunities:
             return f"""# 🔍 Day Trading Scanner - No Opportunities Found
 
-**Scan Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Scan Time:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Filters Applied:**
 • Minimum Trades/Min: {min_trades_per_minute}
 • Minimum % Change: {min_percent_change}%
 
-**Symbols Scanned:** {len(symbols.split(','))}
+**Symbols Scanned:** {len(symbols.split(","))}
 **Opportunities Found:** 0
 
 **Suggestions:**
@@ -194,9 +193,9 @@ async def scan_day_trading_opportunities(
         # Format results
         result = f"""# 🔥 Day Trading Scanner Results
 
-**Scan Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-**Sorted By:** {sort_by.replace('_', ' ').title()}
-**Opportunities Found:** {len(opportunities)} (from {len(symbols.split(','))} symbols)
+**Scan Time:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**Sorted By:** {sort_by.replace("_", " ").title()}
+**Opportunities Found:** {len(opportunities)} (from {len(symbols.split(","))} symbols)
 
 ## 📊 Top Opportunities
 
@@ -220,13 +219,13 @@ async def scan_day_trading_opportunities(
             elif opp["breakout_ratio"] > 90:
                 breakout_status = " | 📊 BREAKOUT"
 
-            result += f"""### {i}. {opp['symbol']} - {momentum}{breakout_status}
-• **Price:** ${opp['price']:.2f}
-• **Trades/Min:** {opp['trades_per_minute']:,} 
-• **% Change:** {opp['percent_change']:+.1f}%
-• **Volume:** {opp['volume']:,}
-• **Range:** ${opp['daily_low']:.2f} - ${opp['daily_high']:.2f}
-• **Prev Close:** ${opp['prev_close']:.2f}
+            result += f"""### {i}. {opp["symbol"]} - {momentum}{breakout_status}
+• **Price:** ${opp["price"]:.2f}
+• **Trades/Min:** {opp["trades_per_minute"]:,} 
+• **% Change:** {opp["percent_change"]:+.1f}%
+• **Volume:** {opp["volume"]:,}
+• **Range:** ${opp["daily_low"]:.2f} - ${opp["daily_high"]:.2f}
+• **Prev Close:** ${opp["prev_close"]:.2f}
 
 """
 
@@ -243,13 +242,13 @@ async def scan_day_trading_opportunities(
 • **Average Trades/Min:** {avg_trades:.0f}
 • **Average % Change:** {avg_change:.1f}%
 • **Total Volume:** {total_volume:,}
-• **Most Active:** {opportunities[0]['symbol'] if sort_by == 'trades' else opportunities[0]['symbol']}
-• **Biggest Mover:** {max(opportunities, key=lambda x: x['percent_change'])['symbol']}
+• **Most Active:** {opportunities[0]["symbol"] if sort_by == "trades" else opportunities[0]["symbol"]}
+• **Biggest Mover:** {max(opportunities, key=lambda x: x["percent_change"])["symbol"]}
 
 ## ⚡ Quick Actions
-• **Peak Analysis:** `get_stock_peak_trough_analysis("{','.join(o['symbol'] for o in opportunities[:5])}")`
-• **Real-time Stream:** `start_global_stock_stream(["{'\", \"'.join(o['symbol'] for o in opportunities[:10])}"], ["trades", "quotes"])`
-• **Detailed Snapshots:** `get_stock_snapshots("{','.join(o['symbol'] for o in opportunities[:5])}")`
+• **Peak Analysis:** `get_stock_peak_trough_analysis("{",".join(o["symbol"] for o in opportunities[:5])}")`
+• **Real-time Stream:** `start_global_stock_stream(["{'", "'.join(o["symbol"] for o in opportunities[:10])}"], ["trades", "quotes"])`
+• **Detailed Snapshots:** `get_stock_snapshots("{",".join(o["symbol"] for o in opportunities[:5])}")`
 """
 
         return result

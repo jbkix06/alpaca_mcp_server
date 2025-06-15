@@ -65,7 +65,7 @@ async def start_differential_trade_scanner(
 
 **Scanner Status:** Running in background
 **Update Interval:** {update_interval} seconds (like C program)
-**Symbols Monitored:** {len(symbols.split(','))} symbols
+**Symbols Monitored:** {len(symbols.split(","))} symbols
 **Filters:** {min_trades_per_minute}+ trades/min, {min_percent_change}%+ change
 
 ## 📊 Monitoring
@@ -169,7 +169,7 @@ async def get_differential_trade_results(
 
 **Scan Time:** {scan_time}
 **Method:** Exact trade count differences (like C program)
-**Sorted By:** {sort_by.replace('_', ' ').title()}
+**Sorted By:** {sort_by.replace("_", " ").title()}
 **Opportunities Found:** {len(results)} (from {total_scanned} symbols)
 
 ## 📊 Active Trading Opportunities
@@ -188,14 +188,14 @@ async def get_differential_trade_results(
             else:
                 momentum = "⚡ MODERATE"
 
-            output += f"""### {i}. {stock.get('symbol', 'N/A')} - {momentum}
-• **Price:** ${stock.get('price', 0):.3f}
-• **Trades/Min:** {stock.get('trades_change', 0):,} (EXACT difference)
-• **% Change:** {stock.get('percent_change', 0):+.1f}%
-• **Gradient/2:** {stock.get('gradient2', 0):.1f}
-• **Volume Change:** {stock.get('volume_change', 0):,}
-• **Current Trades:** {stock.get('current_trades', 0):,}
-• **Previous Close:** ${stock.get('prev_close', 0):.3f}
+            output += f"""### {i}. {stock.get("symbol", "N/A")} - {momentum}
+• **Price:** ${stock.get("price", 0):.3f}
+• **Trades/Min:** {stock.get("trades_change", 0):,} (EXACT difference)
+• **% Change:** {stock.get("percent_change", 0):+.1f}%
+• **Gradient/2:** {stock.get("gradient2", 0):.1f}
+• **Volume Change:** {stock.get("volume_change", 0):,}
+• **Current Trades:** {stock.get("current_trades", 0):,}
+• **Previous Close:** ${stock.get("prev_close", 0):.3f}
 
 """
 
@@ -216,13 +216,13 @@ async def get_differential_trade_results(
 • **Average Trades/Min:** {avg_trades:.0f} (exact differences)
 • **Average % Change:** {avg_change:.1f}%
 • **Total Volume Change:** {total_volume_change:,}
-• **Scanner Status:** {'🟢 Running' if _scanner_running else '🔴 Stopped'}
-• **Most Active:** {max(results, key=lambda x: x.get('trades_change', 0))['symbol'] if results else 'N/A'} ({max(results, key=lambda x: x.get('trades_change', 0)).get('trades_change', 0):,} trades/min)
-• **Biggest Mover:** {max(results, key=lambda x: x.get('percent_change', 0))['symbol'] if results else 'N/A'} ({max(results, key=lambda x: x.get('percent_change', 0)).get('percent_change', 0):+.1f}%)
+• **Scanner Status:** {"🟢 Running" if _scanner_running else "🔴 Stopped"}
+• **Most Active:** {max(results, key=lambda x: x.get("trades_change", 0))["symbol"] if results else "N/A"} ({max(results, key=lambda x: x.get("trades_change", 0)).get("trades_change", 0):,} trades/min)
+• **Biggest Mover:** {max(results, key=lambda x: x.get("percent_change", 0))["symbol"] if results else "N/A"} ({max(results, key=lambda x: x.get("percent_change", 0)).get("percent_change", 0):+.1f}%)
 
 ## ⚡ Trading Actions
-• **Peak Analysis:** `get_stock_peak_trough_analysis("{','.join(s['symbol'] for s in results[:5])}")`
-• **Start Streaming:** `start_global_stock_stream(["{'\", \"'.join(s['symbol'] for s in results[:5])}"], ["trades", "quotes"])`
+• **Peak Analysis:** `get_stock_peak_trough_analysis("{",".join(s["symbol"] for s in results[:5])}")`
+• **Start Streaming:** `start_global_stock_stream(["{'", "'.join(s["symbol"] for s in results[:5])}"], ["trades", "quotes"])`
 • **Account Status:** `get_account_info()` | **Positions:** `get_positions()`
 
 **Note:** This shows exact trade count differences calculated every 60 seconds, matching the C program methodology.
@@ -252,7 +252,7 @@ async def get_differential_scanner_status() -> str:
 
         return f"""# 📊 Differential Trade Scanner Status
 
-**Status:** {status_emoji} {'Running' if _scanner_running else 'Stopped'}
+**Status:** {status_emoji} {"Running" if _scanner_running else "Stopped"}
 **Method:** Exact trade count differences (like C program)
 **Last Scan:** {last_scan}
 **Cache Size:** {cache_size} symbols
@@ -262,7 +262,7 @@ async def get_differential_scanner_status() -> str:
 • **Update Frequency:** Every 60 seconds
 • **Calculation Method:** Current trades - Previous trades (cached)
 • **Data Source:** Alpaca minute bar trade counts
-• **Background Mode:** {'✅ Active' if _scanner_running else '❌ Inactive'}
+• **Background Mode:** {"✅ Active" if _scanner_running else "❌ Inactive"}
 
 ## 🔧 Available Commands
 • **Start Scanner:** `start_differential_trade_scanner()`
@@ -340,7 +340,6 @@ async def _background_scanner_loop(
                         and percent_change >= min_percent_change
                         and current_price > 0
                     ):
-
                         opportunities.append(
                             {
                                 "symbol": symbol,

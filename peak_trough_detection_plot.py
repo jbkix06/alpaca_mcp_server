@@ -437,7 +437,7 @@ def print_latest_signals_table(all_results):
     print("=" * 115)
 
 
-def plot_single_symbol(results, save_plot=False, output_dir="."):
+def plot_single_symbol(results, save_plot=False, output_dir=".", dpi=400):
     """Create a professional plot for a single symbol with auto-positioned legend and stats"""
     if not results:
         logger.error("No results to plot")
@@ -740,14 +740,14 @@ def plot_single_symbol(results, save_plot=False, output_dir="."):
         filename = os.path.join(
             output_dir, "{}_peak_detection_{}.png".format(symbol, timestamp)
         )
-        plt.savefig(filename, dpi=300, bbox_inches="tight", facecolor="white")
+        plt.savefig(filename, dpi=dpi, bbox_inches="tight", facecolor="white")
         logger.info("Plot saved as %s", filename)
 
     plt.show()
     return fig
 
 
-def plot_combined_subplots(all_results, save_plot=False, output_dir="."):
+def plot_combined_subplots(all_results, save_plot=False, output_dir=".", dpi=400):
     """Create combined subplots for multiple symbols"""
     if not all_results:
         logger.error("No results to plot")
@@ -918,14 +918,14 @@ def plot_combined_subplots(all_results, save_plot=False, output_dir="."):
         filename = os.path.join(
             output_dir, "multi_symbol_{}_{}.png".format(symbols_str, timestamp)
         )
-        plt.savefig(filename, dpi=300, bbox_inches="tight", facecolor="white")
+        plt.savefig(filename, dpi=dpi, bbox_inches="tight", facecolor="white")
         logger.info("Combined plot saved as %s", filename)
 
     plt.show()
     return fig
 
 
-def plot_overlay(all_results, save_plot=False, output_dir="."):
+def plot_overlay(all_results, save_plot=False, output_dir=".", dpi=400):
     """Create overlay plot with normalized prices"""
     if not all_results:
         logger.error("No results to plot")
@@ -1096,7 +1096,7 @@ def plot_overlay(all_results, save_plot=False, output_dir="."):
         filename = os.path.join(
             output_dir, "overlay_{}_{}.png".format(symbols_str, timestamp)
         )
-        plt.savefig(filename, dpi=300, bbox_inches="tight", facecolor="white")
+        plt.savefig(filename, dpi=dpi, bbox_inches="tight", facecolor="white")
         logger.info("Overlay plot saved as %s", filename)
 
     plt.show()

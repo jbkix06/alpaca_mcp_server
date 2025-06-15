@@ -133,7 +133,6 @@ async def scan_after_hours_opportunities(
                             abs(percent_change) >= min_percent_change
                             and symbol_data["volume"] >= min_volume
                         ):
-
                             symbol_data.update(
                                 {
                                     "percent_change": percent_change,
@@ -168,14 +167,14 @@ async def scan_after_hours_opportunities(
         if not opportunities:
             return f"""# 🌙 After-Hours Scanner - No Opportunities Found
 
-**Scan Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Scan Time:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Market Session:** {_parse_market_session(market_clock)}
 
 **Filters Applied:**
 • Minimum Volume: {min_volume:,}
 • Minimum % Change: {min_percent_change}%
 
-**Symbols Scanned:** {len(symbols.split(','))}
+**Symbols Scanned:** {len(symbols.split(","))}
 **Opportunities Found:** 0
 
 **Suggestions:**
@@ -188,9 +187,9 @@ async def scan_after_hours_opportunities(
         # Format results
         result = f"""# 🌙 After-Hours Trading Opportunities
 
-**Scan Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Scan Time:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Market Session:** {_parse_market_session(market_clock)}
-**Sorted By:** {sort_by.replace('_', ' ').title()}
+**Sorted By:** {sort_by.replace("_", " ").title()}
 **Opportunities Found:** {len(opportunities)}
 
 ## 🎯 Top After-Hours Movers
@@ -217,13 +216,13 @@ async def scan_after_hours_opportunities(
             else:
                 risk = "🟢 GOOD LIQUIDITY"
 
-            result += f"""### {i}. {stock['symbol']} - {signal} {color}
-• **Price:** ${stock['current_price']:.4f} ({stock['percent_change']:+.2f}%)
-• **Volume:** {stock['volume']:,}
-• **Range:** ${stock['low']:.4f} - ${stock['high']:.4f} ({stock['ah_range_pct']:.1f}%)
-• **Spread:** ${stock['spread']:.4f} ({stock['spread_pct']:.2f}%)
+            result += f"""### {i}. {stock["symbol"]} - {signal} {color}
+• **Price:** ${stock["current_price"]:.4f} ({stock["percent_change"]:+.2f}%)
+• **Volume:** {stock["volume"]:,}
+• **Range:** ${stock["low"]:.4f} - ${stock["high"]:.4f} ({stock["ah_range_pct"]:.1f}%)
+• **Spread:** ${stock["spread"]:.4f} ({stock["spread_pct"]:.2f}%)
 • **Risk Level:** {risk}
-• **Momentum Score:** {stock['momentum_score']:.1f}
+• **Momentum Score:** {stock["momentum_score"]:.1f}
 
 """
 
@@ -240,23 +239,23 @@ async def scan_after_hours_opportunities(
 **Market Activity:**
 • Total AH Volume: {total_volume:,}
 • Average % Change: {avg_change:.2f}%
-• Biggest Mover: {top_mover['symbol']} ({top_mover['percent_change']:+.2f}%)
-• Most Active: {most_active['symbol']} ({most_active['volume']:,} volume)
+• Biggest Mover: {top_mover["symbol"]} ({top_mover["percent_change"]:+.2f}%)
+• Most Active: {most_active["symbol"]} ({most_active["volume"]:,} volume)
 
 **Liquidity Assessment:**
-• High Liquidity: {sum(1 for s in opportunities if s['spread_pct'] < 0.2)} stocks
-• Moderate Liquidity: {sum(1 for s in opportunities if 0.2 <= s['spread_pct'] < 0.5)} stocks  
-• Low Liquidity: {sum(1 for s in opportunities if s['spread_pct'] >= 0.5)} stocks
+• High Liquidity: {sum(1 for s in opportunities if s["spread_pct"] < 0.2)} stocks
+• Moderate Liquidity: {sum(1 for s in opportunities if 0.2 <= s["spread_pct"] < 0.5)} stocks  
+• Low Liquidity: {sum(1 for s in opportunities if s["spread_pct"] >= 0.5)} stocks
 
 ## ⚡ Enhanced Actions
 
 **Deep Analysis:**
-• `get_stock_peak_trough_analysis("{','.join(s['symbol'] for s in opportunities[:5])}")`
-• `get_stock_bars_intraday("{opportunities[0]['symbol']}", timeframe="5Min", limit=100)`
+• `get_stock_peak_trough_analysis("{",".join(s["symbol"] for s in opportunities[:5])}")`
+• `get_stock_bars_intraday("{opportunities[0]["symbol"]}", timeframe="5Min", limit=100)`
 
 **Real-Time Monitoring:**
-• `start_global_stock_stream(["{'\", \"'.join(s['symbol'] for s in opportunities[:3])}"], ["trades", "quotes"])`
-• `start_differential_trade_scanner("{','.join(s['symbol'] for s in opportunities[:5])}")`
+• `start_global_stock_stream(["{'", "'.join(s["symbol"] for s in opportunities[:3])}"], ["trades", "quotes"])`
+• `start_differential_trade_scanner("{",".join(s["symbol"] for s in opportunities[:5])}")`
 
 **Risk Management:**
 • Use limit orders only in after-hours
@@ -338,7 +337,7 @@ async def get_enhanced_streaming_analytics(
 
         result = f"""# 🔥 Enhanced Streaming Analytics - {symbol}
 
-**Analysis Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Analysis Time:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Timeframe:** Last {analysis_minutes} minutes
 **Data Sources:** Snapshots + Streaming + Historical Bars
 

@@ -44,7 +44,7 @@ async def get_market_momentum(
         required_bars = max(sma_short, sma_long) * 2  # Double for safety
 
         # Use the working intraday tool to get data
-        bars_result = await get_stock_bars_intraday(
+        _ = await get_stock_bars_intraday(
             symbol=symbol,
             timeframe=timeframe_str,
             limit=required_bars,
@@ -68,7 +68,6 @@ async def get_market_momentum(
         )
 
         is_weekday = now_et.weekday() < 5
-        is_market_hours = 9 <= now_et.hour <= 16
 
         if is_weekday and (4 <= now_et.hour <= 20):
             # Market is open or in extended hours, use current time

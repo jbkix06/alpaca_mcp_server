@@ -848,7 +848,9 @@ async def health_check() -> str:
         status_emoji = (
             "🟢"
             if health.get("server_status") == "healthy"
-            else "🟡" if health.get("server_status") == "degraded" else "🔴"
+            else "🟡"
+            if health.get("server_status") == "degraded"
+            else "🔴"
         )
         market_emoji = "🔔" if session.get("alpaca_market_open") else "🔕"
 
@@ -918,6 +920,57 @@ async def get_extended_hours_info() -> str:
     return await get_extended_hours_info()
 
 
+@mcp.tool()
+async def generate_advanced_technical_plots(
+    symbols: str,
+    timeframe: str = "1Min",
+    days: int = 1,
+    window_len: int = 11,
+    lookahead: int = 1,
+    plot_mode: str = "single",
+    display_plots: bool = False,
+    dpi: int = 400,
+) -> str:
+    """
+    Generate professional peak/trough analysis plots with zero-phase filtering.
+
+    Creates publication-quality technical analysis plots showing:
+    - Original and filtered price data using Hanning window
+    - Peak/trough detection with actual price annotations
+    - Multiple plotting modes: single, combined, overlay
+    - Professional styling with auto-positioned legends
+    - Signal summary tables with latest trading levels
+    - Precise support/resistance levels for trading
+
+    Perfect for visual technical analysis and identifying entry/exit levels.
+    Integrates seamlessly with other workflow tools for complete analysis.
+
+    Args:
+        symbols: Comma-separated symbols (e.g., "AAPL,MSFT,TSLA")
+        timeframe: Bar timeframe ("1Min", "5Min", "15Min", "30Min", "1Hour", "1Day")
+        days: Number of trading days to analyze (1-30)
+        window_len: Hanning filter window length (3-101, must be odd)
+        lookahead: Peak detection sensitivity (1-50, higher=more sensitive)
+        plot_mode: "single", "combined", "overlay", or "all"
+
+    Returns:
+        Comprehensive analysis with plot locations and trading signals
+    """
+    from .tools.advanced_plotting_tool import generate_peak_trough_plots
+
+    return await generate_peak_trough_plots(
+        symbols,
+        timeframe,
+        days,
+        window_len,
+        lookahead,
+        plot_mode,
+        True,
+        display_plots,
+        dpi,
+    )
+
+
 # ============================================================================
 # PROMPT REGISTRATIONS
 # ============================================================================
@@ -951,3 +1004,35 @@ def get_server():
 
 if __name__ == "__main__":
     mcp.run()
+
+
+@mcp.prompt()
+async def day_trading_workflow(symbol: str = None) -> str:
+    """Complete day trading analysis and setup workflow for any symbol."""
+    from .prompts.day_trading_workflow import day_trading_workflow as dtw_func
+
+    return await dtw_func(symbol)
+
+
+@mcp.prompt()
+async def master_scanning_workflow(scan_type: str = "comprehensive") -> str:
+    """Master scanner workflow using all available scanner tools simultaneously."""
+    from .prompts.master_scanning_workflow import master_scanning_workflow as msw_func
+
+    return await msw_func(scan_type)
+
+
+@mcp.prompt()
+async def pro_technical_workflow(symbol: str, timeframe: str = "comprehensive") -> str:
+    """Professional technical analysis workflow using advanced algorithms and peak/trough detection."""
+    from .prompts.pro_technical_workflow import pro_technical_workflow as ptw_func
+
+    return await ptw_func(symbol, timeframe)
+
+
+@mcp.prompt()
+async def market_session_workflow(session_type: str = "full_day") -> str:
+    """Complete market session strategy using timing tools and session-specific analysis."""
+    from .prompts.market_session_workflow import market_session_workflow as msw_func
+
+    return await msw_func(session_type)

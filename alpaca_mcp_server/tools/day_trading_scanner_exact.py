@@ -95,7 +95,6 @@ async def scan_day_trading_opportunities_exact(
                 and percent_change >= min_percent_change
                 and current_price > 0
             ):
-
                 results.append(
                     {
                         "symbol": symbol,
@@ -125,13 +124,13 @@ async def scan_day_trading_opportunities_exact(
         if not results:
             return f"""# 🔍 Day Trading Scanner - No Opportunities (Exact Measurement)
 
-**Scan Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Scan Time:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Measurement Method:** Differential snapshots ({wait_seconds}s interval)
 **Filters Applied:**
 • Minimum Trades/Min: {min_trades_per_minute} (exact count)
 • Minimum % Change: {min_percent_change}%
 
-**Symbols Scanned:** {len(symbols.split(','))}
+**Symbols Scanned:** {len(symbols.split(","))}
 **Opportunities Found:** 0
 
 **Note:** This uses EXACT trade counts, not estimates. Results may be lower during quiet periods.
@@ -140,10 +139,10 @@ async def scan_day_trading_opportunities_exact(
         # Format results like your screenshot
         result = f"""# 🔥 Day Trading Scanner - EXACT Trade Counts
 
-**Scan Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Scan Time:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Measurement Method:** Differential snapshots ({wait_seconds}s interval)
-**Sorted By:** {sort_by.replace('_', ' ').title()}
-**Opportunities Found:** {len(results)} (from {len(symbols.split(','))} symbols)
+**Sorted By:** {sort_by.replace("_", " ").title()}
+**Opportunities Found:** {len(results)} (from {len(symbols.split(","))} symbols)
 
 ## 📊 Exact Trading Metrics (Like Your Screenshot)
 
@@ -160,14 +159,14 @@ async def scan_day_trading_opportunities_exact(
             else:
                 momentum = "⚡ MODERATE"
 
-            result += f"""### {i}. {stock['symbol']} - {momentum}
-• **Price:** ${stock['price']:.3f}
-• **Trades/Min:** {stock['trades_per_minute']:,} (EXACT)
-• **% Change:** +{stock['percent_change']:.1f}%
-• **Gradient/2:** {stock['gradient2']:.1f}
-• **Volume Change:** {stock['volume_change']:,} 
-• **Current Volume:** {stock['current_volume']:,}
-• **Previous Close:** ${stock['prev_close']:.3f}
+            result += f"""### {i}. {stock["symbol"]} - {momentum}
+• **Price:** ${stock["price"]:.3f}
+• **Trades/Min:** {stock["trades_per_minute"]:,} (EXACT)
+• **% Change:** +{stock["percent_change"]:.1f}%
+• **Gradient/2:** {stock["gradient2"]:.1f}
+• **Volume Change:** {stock["volume_change"]:,} 
+• **Current Volume:** {stock["current_volume"]:,}
+• **Previous Close:** ${stock["prev_close"]:.3f}
 
 """
 
@@ -181,12 +180,12 @@ async def scan_day_trading_opportunities_exact(
 • **Average % Change:** {avg_change:.1f}%
 • **Total Volume Change:** {total_volume_change:,}
 • **Measurement Interval:** {wait_seconds} seconds
-• **Most Active:** {max(results, key=lambda x: x['trades_per_minute'])['symbol']} ({max(results, key=lambda x: x['trades_per_minute'])['trades_per_minute']:,} trades/min)
-• **Biggest Mover:** {max(results, key=lambda x: x['percent_change'])['symbol']} (+{max(results, key=lambda x: x['percent_change'])['percent_change']:.1f}%)
+• **Most Active:** {max(results, key=lambda x: x["trades_per_minute"])["symbol"]} ({max(results, key=lambda x: x["trades_per_minute"])["trades_per_minute"]:,} trades/min)
+• **Biggest Mover:** {max(results, key=lambda x: x["percent_change"])["symbol"]} (+{max(results, key=lambda x: x["percent_change"])["percent_change"]:.1f}%)
 
 ## ⚡ Trading Actions
-• **Peak Analysis:** `get_stock_peak_trough_analysis("{','.join(s['symbol'] for s in results[:5])}")`
-• **Real-time Stream:** `start_global_stock_stream(["{'\", \"'.join(s['symbol'] for s in results[:5])}"], ["trades", "quotes"])`
+• **Peak Analysis:** `get_stock_peak_trough_analysis("{",".join(s["symbol"] for s in results[:5])}")`
+• **Real-time Stream:** `start_global_stock_stream(["{'", "'.join(s["symbol"] for s in results[:5])}"], ["trades", "quotes"])`
 • **Position Analysis:** `get_positions()` | **Account Status:** `get_account_info()`
 
 **Note:** These are EXACT trade counts measured over {wait_seconds} seconds, not estimates.

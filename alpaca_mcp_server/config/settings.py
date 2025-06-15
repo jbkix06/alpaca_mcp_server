@@ -29,6 +29,7 @@ class Settings:
 
         # Paper trading flag
         self.paper = os.getenv("PAPER", "true").lower() in ["true", "1", "yes"]
+        self.paper_trading = self.paper  # Alias for compatibility
 
         # Optional URL overrides
         self.trade_api_url = os.getenv("trade_api_url")

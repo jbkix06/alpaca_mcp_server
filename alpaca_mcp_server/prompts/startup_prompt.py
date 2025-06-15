@@ -49,9 +49,8 @@ async def startup() -> str:
             top_20 = stocks[:20]
         else:
             top_20 = []
-    except Exception as e:
+    except Exception:
         top_20 = []
-        error_msg = str(e)
 
     # Build report
     report = []
@@ -106,7 +105,7 @@ async def startup() -> str:
         )
         report.append(f"- 📊 **Avg Liquidity:** {avg_liquidity:,.0f} trades/minute")
         report.append(
-            f"- 📈 **Winners:** {winners}/{len(top_20)} stocks positive ({winners/len(top_20)*100:.0f}%)"
+            f"- 📈 **Winners:** {winners}/{len(top_20)} stocks positive ({winners / len(top_20) * 100:.0f}%)"
         )
         report.append(f"- 🔥 **Explosive Moves:** {explosive} stocks >10% gain")
 

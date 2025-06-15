@@ -272,7 +272,12 @@ async def start_global_stock_stream(
     Returns:
         str: Confirmation with stock stream details and data access instructions
     """
-    global _global_stock_stream, _stock_stream_thread, _stock_stream_active, _stock_stream_start_time, _stock_stream_end_time
+    global \
+        _global_stock_stream, \
+        _stock_stream_thread, \
+        _stock_stream_active, \
+        _stock_stream_start_time, \
+        _stock_stream_end_time
 
     try:
         # Check if stock stream already exists
@@ -376,7 +381,10 @@ Options:
 
         # Function to run the stock stream with duration monitoring
         def run_stock_stream():
-            global _stock_stream_active, _stock_stream_start_time, _stock_stream_end_time
+            global \
+                _stock_stream_active, \
+                _stock_stream_start_time, \
+                _stock_stream_end_time
 
             try:
                 _stock_stream_active = True
@@ -454,7 +462,11 @@ async def stop_global_stock_stream() -> str:
     Returns:
         str: Final statistics and confirmation message
     """
-    global _global_stock_stream, _stock_stream_thread, _stock_stream_active, _stock_stream_subscriptions
+    global \
+        _global_stock_stream, \
+        _stock_stream_thread, \
+        _stock_stream_active, \
+        _stock_stream_subscriptions
 
     try:
         if not _stock_stream_active:
