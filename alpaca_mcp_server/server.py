@@ -1,52 +1,105 @@
 """Main MCP server implementation with prompt-driven architecture."""
 
+import sys
+import os
+
+# Handle both direct execution and module import
+if __name__ == "__main__" or not __package__:
+    # Add parent directory to path for direct execution
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from alpaca_mcp_server.config.settings import settings
+else:
+    from .config.settings import settings
+
 from mcp.server.fastmcp import FastMCP
-from .config.settings import settings
 
 # Import all tool modules
-from .tools import (
-    account_tools,
-    position_tools,
-    order_tools,
-    market_data_tools,
-    market_info_tools,
-    options_tools,
-    watchlist_tools,
-    asset_tools,
-    corporate_action_tools,
-    streaming_tools,
-)
-from .tools.peak_trough_analysis_tool import (
-    analyze_peaks_and_troughs as peak_trough_analysis,
-)
-
-# Import modules will be done locally in tool functions to avoid name conflicts
-
-# Import all prompt modules
-from .prompts import (
-    list_trading_capabilities as ltc_module,
-    account_analysis_prompt,
-    position_management_prompt,
-    market_analysis_prompt,
-    tools_reference_prompt,
-    startup_prompt,
-    scan_prompt,
-)
+if __name__ == "__main__" or not __package__:
+    from alpaca_mcp_server.tools import (
+        account_tools,
+        position_tools,
+        order_tools,
+        market_data_tools,
+        market_info_tools,
+        options_tools,
+        watchlist_tools,
+        asset_tools,
+        corporate_action_tools,
+        streaming_tools,
+    )
+    from alpaca_mcp_server.tools.peak_trough_analysis_tool import (
+        analyze_peaks_and_troughs as peak_trough_analysis,
+    )
+    from alpaca_mcp_server.tools.plot_py_tool import (
+        generate_stock_plot,
+    )
+    from alpaca_mcp_server.prompts import (
+        account_analysis_prompt,
+        position_management_prompt,
+        market_analysis_prompt,
+        tools_reference_prompt,
+        startup_prompt,
+        scan_prompt,
+    )
+else:
+    from .tools import (
+        account_tools,
+        position_tools,
+        order_tools,
+        market_data_tools,
+        market_info_tools,
+        options_tools,
+        watchlist_tools,
+        asset_tools,
+        corporate_action_tools,
+        streaming_tools,
+    )
+    from .tools.peak_trough_analysis_tool import (
+        analyze_peaks_and_troughs as peak_trough_analysis,
+    )
+    from .tools.plot_py_tool import (
+        generate_stock_plot,
+    )
+    from .prompts import (
+        account_analysis_prompt,
+        position_management_prompt,
+        market_analysis_prompt,
+        tools_reference_prompt,
+        startup_prompt,
+        scan_prompt,
+    )
 
 # Import resource modules
-from .resources import (
-    account_resources,
-    market_resources,
-    position_resources,
-    portfolio_resources,
-    streaming_resources,
-    market_momentum,
-    intraday_pnl,
-    data_quality,
-    server_health,
-    session_status,
-    api_monitor,
-)
+if __name__ == "__main__" or not __package__:
+    from alpaca_mcp_server.resources import (
+        account_resources,
+        market_resources,
+        position_resources,
+        portfolio_resources,
+        streaming_resources,
+        market_momentum,
+        intraday_pnl,
+        data_quality,
+        server_health,
+        session_status,
+        api_monitor,
+        help_system,
+    )
+else:
+    from .resources import (
+        account_resources,
+        market_resources,
+        position_resources,
+        portfolio_resources,
+        streaming_resources,
+        market_momentum,
+        intraday_pnl,
+        data_quality,
+        server_health,
+        session_status,
+        api_monitor,
+        help_system,
+    )
 
 # Create the FastMCP server instance
 mcp = FastMCP(
@@ -54,6 +107,28 @@ mcp = FastMCP(
     version=settings.version,
     dependencies=["alpaca-py>=0.40.1", "python-dotenv>=1.1.0"],
 )
+
+# Apply Claude Code compatibility patches
+if __name__ == "__main__" or not __package__:
+    from alpaca_mcp_server.compatibility import apply_claude_code_compatibility
+    from alpaca_mcp_server.claude_code_tool_fix import (
+        apply_claude_code_tool_registration_fix,
+        force_claude_code_protocol_compliance,
+        add_claude_code_debug_tools,
+    )
+else:
+    from .compatibility import apply_claude_code_compatibility
+    from .claude_code_tool_fix import (
+        apply_claude_code_tool_registration_fix,
+        force_claude_code_protocol_compliance,
+        add_claude_code_debug_tools,
+    )
+
+print("🔧 Applying Claude Code MCP compatibility patches...")
+_compatibility_patch = apply_claude_code_compatibility(mcp)
+mcp = apply_claude_code_tool_registration_fix(mcp)
+mcp = force_claude_code_protocol_compliance(mcp)
+mcp = add_claude_code_debug_tools(mcp)
 
 # ============================================================================
 # PROMPTS - Guided Trading Workflows (Highest Leverage)
@@ -63,7 +138,17 @@ mcp = FastMCP(
 @mcp.prompt()
 async def list_trading_capabilities() -> str:
     """List all Alpaca trading capabilities with guided workflows."""
-    return await ltc_module.list_trading_capabilities()
+    # Import locally to avoid any naming conflicts
+    if __name__ == "__main__" or not __package__:
+        from alpaca_mcp_server.prompts.list_trading_capabilities import (
+            list_trading_capabilities as ltc_func,
+        )
+    else:
+        from .prompts.list_trading_capabilities import (
+            list_trading_capabilities as ltc_func,
+        )
+
+    return await ltc_func()
 
 
 @mcp.prompt()
@@ -135,8 +220,12 @@ async def close_all_positions(cancel_orders: bool = False) -> str:
 
 # Market Data Tools
 @mcp.tool()
-async def get_stock_quote(symbol: str) -> str:
+async def get_stock_quote(symbol: str, help: str = None) -> str:
     """Get latest quote for a stock."""
+    # Check for help parameter
+    if help == "--help" or help == "help":
+        return help_system.get_help_system().get_tool_help("get_stock_quote")
+
     return await market_data_tools.get_stock_quote(symbol)
 
 
@@ -748,6 +837,41 @@ async def get_api_status_resource() -> dict:
 
 
 # ============================================================================
+# HELP SYSTEM RESOURCES - Tool Documentation and Introspection
+# ============================================================================
+
+
+@mcp.resource("help://tools")
+async def get_all_tools_help_resource() -> str:
+    """Comprehensive help for all available tools organized by category."""
+    return await help_system.get_all_tools_help_resource()
+
+
+@mcp.resource("help://tools/{tool_name}")
+async def get_tool_help_resource(tool_name: str) -> str:
+    """Detailed help for a specific tool including parameters and examples."""
+    return await help_system.get_tool_help_resource(tool_name)
+
+
+@mcp.resource("help://prompts")
+async def get_all_prompts_help_resource() -> str:
+    """Comprehensive help for all available workflows/prompts."""
+    return await help_system.get_all_prompts_help_resource()
+
+
+@mcp.resource("help://prompts/{prompt_name}")
+async def get_prompt_help_resource(prompt_name: str) -> str:
+    """Detailed help for a specific workflow/prompt including parameters and examples."""
+    return await help_system.get_prompt_help_resource(prompt_name)
+
+
+@mcp.resource("help://search/{query}")
+async def search_tools_resource(query: str) -> str:
+    """Search tools by name, description, or category."""
+    return await help_system.search_tools_resource(query)
+
+
+# ============================================================================
 # RESOURCE MIRROR TOOLS - For Claude Code Compatibility
 # ============================================================================
 
@@ -929,7 +1053,7 @@ async def generate_advanced_technical_plots(
     lookahead: int = 1,
     plot_mode: str = "single",
     display_plots: bool = False,
-    dpi: int = 400,
+    dpi: int = 100,
 ) -> str:
     """
     Generate professional peak/trough analysis plots with zero-phase filtering.
@@ -965,10 +1089,242 @@ async def generate_advanced_technical_plots(
         window_len,
         lookahead,
         plot_mode,
-        True,
-        display_plots,
+        True,  # save_plots
+        display_plots,  # display_plots
         dpi,
     )
+
+
+@mcp.tool()
+async def generate_stock_plot(
+    symbols: str,
+    timeframe: str = "1Min",
+    days: int = 1,
+    window: int = 11,
+    lookahead: int = 1,
+    feed: str = "sip",
+    no_plot: bool = False,
+    verbose: bool = False,
+) -> str:
+    """
+    Generate stock analysis plots using the plot.py script with ImageMagick display.
+
+    This tool integrates the standalone plot.py script as an MCP tool, providing
+    professional technical analysis plots with automatic ImageMagick display.
+
+    Features:
+    - Zero-phase Hanning filtering for noise reduction
+    - Peak/trough detection with precise price annotations
+    - Real-time market data from Alpaca API
+    - Professional styling with NYC/EDT timezone
+    - Automatic plot display via ImageMagick
+    - Multi-symbol support in single API call
+
+    Args:
+        symbols: Comma-separated stock symbols (e.g., "AAPL,MSFT,TSLA")
+        timeframe: Bar timeframe - "1Min", "5Min", "15Min", "30Min", "1Hour", "1Day"
+        days: Number of trading days to analyze (1-30)
+        window: Hanning filter window length (3-101, must be odd)
+        lookahead: Peak detection sensitivity (1-50, higher = more sensitive)
+        feed: Data feed - "sip", "iex", or "otc"
+        no_plot: Skip plotting and only show analysis (useful for batch processing)
+        verbose: Enable detailed logging output
+
+    Returns:
+        Comprehensive analysis results with plot locations and trading signals
+    """
+    from .tools.plot_py_tool import generate_stock_plot as plot_py_func
+    
+    return await plot_py_func(
+        symbols, timeframe, days, window, lookahead, feed, no_plot, verbose
+    )
+
+
+# ============================================================================
+# HELP SYSTEM TOOLS - CLI-style Help Interface
+# ============================================================================
+
+
+@mcp.tool()
+async def get_tool_help(tool_name: str) -> str:
+    """
+    Get comprehensive help for a specific tool (like --help in CLI tools).
+
+    Args:
+        tool_name: Name of the tool to get help for
+
+    Returns:
+        Detailed help including parameters, examples, and related tools
+
+    Examples:
+        get_tool_help("get_stock_quote")
+        get_tool_help("scan_day_trading_opportunities")
+    """
+    return help_system.get_help_system().get_tool_help(tool_name)
+
+
+@mcp.tool()
+async def get_all_tools_help() -> str:
+    """
+    Get help for all available tools organized by category.
+
+    Returns:
+        Comprehensive listing of all tools with descriptions
+    """
+    return help_system.get_help_system().get_all_tools_help()
+
+
+@mcp.tool()
+async def get_prompt_help(prompt_name: str) -> str:
+    """
+    Get comprehensive help for a specific workflow/prompt.
+
+    Args:
+        prompt_name: Name of the prompt/workflow to get help for
+
+    Returns:
+        Detailed help including parameters and usage examples
+
+    Examples:
+        get_prompt_help("master_scanning_workflow")
+        get_prompt_help("account_analysis")
+    """
+    return help_system.get_help_system().get_prompt_help(prompt_name)
+
+
+@mcp.tool()
+async def get_all_prompts_help() -> str:
+    """
+    Get help for all available workflows/prompts.
+
+    Returns:
+        Comprehensive listing of all workflows with descriptions
+    """
+    return help_system.get_help_system().get_all_prompts_help()
+
+
+@mcp.tool()
+async def search_tools(query: str) -> str:
+    """
+    Search tools by name, description, or category.
+
+    Args:
+        query: Search term to find matching tools
+
+    Returns:
+        List of tools matching the search query
+
+    Examples:
+        search_tools("order")
+        search_tools("streaming")
+        search_tools("scanner")
+    """
+    return help_system.get_help_system().search_tools(query)
+
+
+@mcp.tool()
+async def get_mcp_tool_schema(tool_name: str) -> dict:
+    """
+    Get MCP-compliant tool schema for a specific tool.
+
+    Args:
+        tool_name: Name of the tool to get schema for
+
+    Returns:
+        MCP-compliant tool schema with inputSchema and annotations
+
+    Examples:
+        get_mcp_tool_schema("get_stock_quote")
+        get_mcp_tool_schema("place_stock_order")
+    """
+    return help_system.get_help_system().get_mcp_tool_schema(tool_name) or {}
+
+
+@mcp.tool()
+async def export_mcp_tools_list() -> dict:
+    """
+    Export all tools in MCP tools/list response format.
+
+    Returns:
+        Complete MCP tools/list response with all tool schemas
+
+    This provides the exact format that MCP clients expect for tool discovery.
+    """
+    return help_system.get_help_system().export_mcp_tools_list()
+
+
+@mcp.tool()
+async def debug_mcp_tools() -> str:
+    """Debug function to verify MCP tool registration for Claude Code compatibility."""
+    import json
+
+    # Get all registered tools from tool manager
+    tool_manager = getattr(mcp, "_tool_manager", None)
+    tools_dict = getattr(tool_manager, "_tools", {}) if tool_manager else {}
+
+    tools_info = {
+        "total_tools": len(tools_dict),
+        "tool_names": list(tools_dict.keys())[:10]
+        if tools_dict
+        else [],  # First 10 for brevity
+        "sample_tool_schema": None,
+        "claude_code_mode": getattr(mcp, "_claude_code_mode", False),
+        "server_name": getattr(mcp, "name", "unknown"),
+        "server_version": getattr(mcp, "version", "unknown"),
+        "has_tool_manager": tool_manager is not None,
+        "tool_manager_type": str(type(tool_manager)) if tool_manager else None,
+    }
+
+    # Get a sample tool schema for verification
+    if tools_dict:
+        sample_name = list(tools_dict.keys())[0]
+        sample_tool = tools_dict[sample_name]
+        if hasattr(sample_tool, "get_schema"):
+            try:
+                tools_info["sample_tool_schema"] = sample_tool.get_schema()
+            except Exception as e:
+                tools_info["sample_tool_schema_error"] = str(e)
+        else:
+            tools_info["sample_tool_info"] = {
+                "name": sample_name,
+                "type": str(type(sample_tool)),
+                "has_schema": hasattr(sample_tool, "get_schema"),
+                "callable": callable(sample_tool),
+            }
+
+    return json.dumps(tools_info, indent=2)
+
+
+@mcp.tool()
+async def cc_debug_tools() -> str:
+    """Claude Code debug: List all registered tools"""
+    import json
+
+    tool_manager = getattr(mcp, "_tool_manager", None)
+    tools_dict = getattr(tool_manager, "_tools", {}) if tool_manager else {}
+
+    tools_info = {
+        "server_name": getattr(mcp, "name", "alpaca-trading"),
+        "total_tools": len(tools_dict),
+        "tool_names": list(tools_dict.keys()),
+        "server_connected": True,
+        "claude_code_compatible": True,
+        "fastmcp_version": getattr(mcp, "version", "unknown"),
+    }
+
+    return json.dumps(tools_info, indent=2)
+
+
+@mcp.tool()
+async def cc_force_refresh() -> str:
+    """Claude Code: Force tool list refresh"""
+    return "Tool list refresh requested - restart Claude Code to see updated tools"
+
+
+@mcp.tool()
+async def cc_test_simple() -> str:
+    """Simple test tool for Claude Code"""
+    return "✅ Claude Code can execute MCP tools successfully!"
 
 
 # ============================================================================
@@ -1002,10 +1358,6 @@ def get_server():
     return mcp
 
 
-if __name__ == "__main__":
-    mcp.run()
-
-
 @mcp.prompt()
 async def day_trading_workflow(symbol: str = None) -> str:
     """Complete day trading analysis and setup workflow for any symbol."""
@@ -1033,6 +1385,21 @@ async def pro_technical_workflow(symbol: str, timeframe: str = "comprehensive") 
 @mcp.prompt()
 async def market_session_workflow(session_type: str = "full_day") -> str:
     """Complete market session strategy using timing tools and session-specific analysis."""
-    from .prompts.market_session_workflow import market_session_workflow as msw_func
+    if __name__ == "__main__" or not __package__:
+        from alpaca_mcp_server.prompts.market_session_workflow import (
+            market_session_workflow as msw_func,
+        )
+    else:
+        from .prompts.market_session_workflow import market_session_workflow as msw_func
 
     return await msw_func(session_type)
+
+
+# Initialize help system after all tools and prompts are registered
+help_system.initialize_help_system(mcp)
+
+# Server is designed to be run through main.py or as a module
+# Use: python -m alpaca_mcp_server or python alpaca_mcp_server/main.py
+
+if __name__ == "__main__":
+    mcp.run()

@@ -1,7 +1,7 @@
 """Day Trading Startup Prompt - Parallel execution of all startup checks."""
 
-import subprocess
 from datetime import datetime
+from ..tools.day_trading_scanner import scan_day_trading_opportunities
 
 
 async def startup() -> str:
@@ -16,39 +16,35 @@ async def startup() -> str:
         Comprehensive startup status report with top trading opportunities
     """
 
-    # Run the high-liquidity scanner to get active stocks
+    # Use MCP day trading scanner for active stocks
     try:
-        scanner_result = subprocess.run(
-            ["./trades_per_minute.sh", "-f", "combined.lis", "-t", "500"],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            cwd="/home/jjoravet/alpaca-mcp-server",
+        scanner_result = await scan_day_trading_opportunities(
+            min_trades_per_minute=500,
+            min_percent_change=0.0,  # Get all stocks, we'll filter later
+            max_symbols=20,
+            sort_by="trades",
         )
 
-        if scanner_result.returncode == 0:
-            # Process output to get all active stocks
-            lines = scanner_result.stdout.strip().split("\n")[2:]  # Skip header
-            stocks = []
+        # Parse the formatted result to extract stock data
+        top_20 = []
+        if "No active stocks found" not in scanner_result:
+            lines = scanner_result.split("\n")
             for line in lines:
-                parts = line.split()
-                if len(parts) >= 3:
-                    symbol = parts[0]
-                    trades = int(parts[1])
-                    pct_str = parts[2].rstrip("%")
+                if " | " in line and not line.startswith("Symbol"):
                     try:
-                        pct = float(pct_str)
-                        # Only include stocks with meaningful activity
-                        if trades >= 500:
-                            stocks.append((symbol, trades, pct))
-                    except ValueError:
-                        continue
+                        parts = line.split(" | ")
+                        if len(parts) >= 4:
+                            symbol = parts[0].strip()
+                            trades_str = parts[1].strip().replace(",", "")
+                            pct_str = parts[2].strip().rstrip("%")
 
-            # Sort by percent change and get top 20 ACTIVE stocks
-            stocks.sort(key=lambda x: x[2], reverse=True)
-            top_20 = stocks[:20]
-        else:
-            top_20 = []
+                            trades = int(trades_str)
+                            pct = float(pct_str)
+
+                            if trades >= 500:
+                                top_20.append((symbol, trades, pct))
+                    except (ValueError, IndexError):
+                        continue
     except Exception:
         top_20 = []
 

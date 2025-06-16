@@ -3,9 +3,42 @@
 import logging
 import requests
 import os
-from datetime import datetime
+from datetime import datetime, timezone
+import pytz
 
 logger = logging.getLogger(__name__)
+
+
+def _is_market_hours() -> tuple[bool, str]:
+    """Check if market is currently open and return status message."""
+    eastern = pytz.timezone("US/Eastern")
+    now = datetime.now(eastern)
+
+    # Weekend check
+    if now.weekday() >= 5:  # Saturday=5, Sunday=6
+        return (
+            False,
+            f"WEEKEND - No trading on {now.strftime('%A')}. Next market open: Monday 9:30 AM ET",
+        )
+
+    # Check regular market hours (9:30 AM - 4:00 PM ET)
+    market_open = now.replace(hour=9, minute=30, second=0, microsecond=0)
+    market_close = now.replace(hour=16, minute=0, second=0, microsecond=0)
+
+    if market_open <= now <= market_close:
+        return True, "MARKET OPEN - Regular trading hours"
+
+    # Check after-hours (4:00 PM - 8:00 PM ET)
+    after_hours_close = now.replace(hour=20, minute=0, second=0, microsecond=0)
+    if market_close < now <= after_hours_close:
+        return False, "AFTER-HOURS - Limited trading until 8:00 PM ET"
+
+    # Check pre-market (4:00 AM - 9:30 AM ET)
+    pre_market_open = now.replace(hour=4, minute=0, second=0, microsecond=0)
+    if pre_market_open <= now < market_open:
+        return False, "PRE-MARKET - Limited trading until 9:30 AM ET"
+
+    return False, "CLOSED - Market closed overnight"
 
 
 async def scan_day_trading_opportunities(
@@ -35,6 +68,11 @@ async def scan_day_trading_opportunities(
         Formatted string with trading opportunities using exact C program methodology
     """
     try:
+        # Check market status first
+        is_open, market_status = _is_market_hours()
+        eastern = pytz.timezone("US/Eastern")
+        current_time = datetime.now(eastern)
+
         # Parse symbols exactly like C program - load from combined.lis if ALL
         if symbols.upper() == "ALL":
             try:
@@ -118,6 +156,22 @@ async def scan_day_trading_opportunities(
                     continue
                 minute_trades = int(minute_trades)
 
+                # Check data freshness - minute bar timestamp
+                minute_bar_time = minute_bar.get("t")
+                data_age_warning = ""
+                if minute_bar_time:
+                    try:
+                        bar_time = datetime.fromisoformat(
+                            minute_bar_time.replace("Z", "+00:00")
+                        )
+                        age_minutes = (
+                            current_time.replace(tzinfo=timezone.utc) - bar_time
+                        ).total_seconds() / 60
+                        if age_minutes > 60:  # Data older than 1 hour
+                            data_age_warning = f" (Data: {age_minutes:.0f}m old)"
+                    except:
+                        pass
+
                 # Apply 50 trade filter exactly like C program (line 687)
                 if minute_trades < min_trades_per_minute:
                     continue
@@ -171,6 +225,7 @@ async def scan_day_trading_opportunities(
                         "prev_close": reference_price,
                         "day_close": day_close,
                         "percent": percent,  # Raw percent for display
+                        "data_age_warning": data_age_warning,
                     }
                 )
 
@@ -190,12 +245,17 @@ async def scan_day_trading_opportunities(
         results = results[:max_symbols]
 
         if not results:
+            weekend_warning = ""
+            if not is_open and current_time.weekday() >= 5:
+                weekend_warning = f"\n⚠️  **{market_status}**\n⚠️  **Data shown may be stale from Friday's close - no live weekend trading**\n"
+
             return f"""
 🎯 **DAY TRADING OPPORTUNITY SCAN**
-Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} EDT
+Time: {current_time.strftime("%Y-%m-%d %H:%M:%S")} EDT
+Market Status: {market_status}
 Threshold: {min_trades_per_minute} trades/minute
 Total Qualified: 0 stocks
-
+{weekend_warning}
 **No opportunities found with current filters**
 
 **Suggestions:**
@@ -207,12 +267,19 @@ Total Qualified: 0 stocks
 **Symbols Scanned:** {len(symbol_list):,}
 """
 
+        # Add market status warning for stale data
+        weekend_warning = ""
+        if not is_open and current_time.weekday() >= 5:
+            weekend_warning = f"\n⚠️  **{market_status}**\n⚠️  **TRADING DATA BELOW IS STALE - Friday's close data, not live trading**\n"
+
         # Professional tabular format like shell script output
         result = f"""
 🎯 **DAY TRADING OPPORTUNITY SCAN**
-Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} EDT
+Time: {current_time.strftime("%Y-%m-%d %H:%M:%S")} EDT
+Market Status: {market_status}
 Threshold: {min_trades_per_minute} trades/minute
 Total Qualified: {len(results)} stocks
+{weekend_warning}
 
 ```
 Rank Symbol  Trades/Min    Change%     Price    Volume      Momentum
@@ -233,7 +300,7 @@ Rank Symbol  Trades/Min    Change%     Price    Volume      Momentum
             change_sign = "+" if stock["percent"] > 0 else ""
 
             result += f"""
-{i:4} {stock["symbol"]:<6} {stock["trades_per_minute"]:>9,} {change_sign}{stock["percent"]:>8.1f}% ${stock["price"]:>7.3f} {stock["volume"]:>9,} {momentum}"""
+{i:4} {stock["symbol"]:<6} {stock["trades_per_minute"]:>9,} {change_sign}{stock["percent"]:>8.1f}% ${stock["price"]:>7.3f} {stock["volume"]:>9,} {momentum}{stock["data_age_warning"]}"""
 
         result += """
 ```

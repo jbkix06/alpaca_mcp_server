@@ -4,7 +4,6 @@ Complete market session strategy using timing tools and session-specific analysi
 """
 
 
-
 async def market_session_workflow(session_type: str = "full_day") -> str:
     """
     Complete market session strategy workflow using timing and session analysis.

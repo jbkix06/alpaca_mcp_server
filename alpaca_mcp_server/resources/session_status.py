@@ -1,15 +1,15 @@
 """Market session status resource with extended hours awareness."""
 
-from datetime import datetime, time, timezone, timedelta
+from datetime import datetime, time
+import pandas as pd
+import pandas_market_calendars as mcal
 from ..config.settings import get_trading_client
 
 
 def get_eastern_time():
     """Get current time in Eastern timezone."""
-    # EST is UTC-5, EDT is UTC-4
-    # For simplicity using EST, production should handle DST automatically
-    eastern = timezone(timedelta(hours=-5))
-    return datetime.now(eastern)
+    # Use pandas for proper timezone handling with DST
+    return pd.Timestamp.now(tz="America/New_York")
 
 
 async def get_session_status() -> dict:
@@ -22,14 +22,45 @@ async def get_session_status() -> dict:
         now_et = get_eastern_time()
         current_time = now_et.time()
 
+        # Get NYSE calendar
+        nyse = mcal.get_calendar("NYSE")
+
+        # Check if today is a trading day
+        today = now_et.date()
+        schedule = nyse.schedule(start_date=today, end_date=today)
+        is_trading_day = len(schedule) > 0
+
         # Define all trading sessions
         premarket_start = time(4, 0)  # 4:00 AM ET
         market_open = time(9, 30)  # 9:30 AM ET
         market_close = time(16, 0)  # 4:00 PM ET
         postmarket_end = time(20, 0)  # 8:00 PM ET
 
-        # Determine current session
-        if premarket_start <= current_time < market_open:
+        # If it's not a trading day (weekend or holiday), market is closed
+        if not is_trading_day:
+            current_session = "closed"
+            session_description = "Markets closed (weekend/holiday)"
+            is_extended_hours = False
+            progress_percent = None
+
+            # Find next trading day
+            next_trading_days = nyse.valid_days(
+                start_date=today + pd.Timedelta(days=1),
+                end_date=today + pd.Timedelta(days=7),
+            )
+            if len(next_trading_days) > 0:
+                next_trading_day = next_trading_days[0].date()
+                next_event = "market_open"
+                next_event_time = pd.Timestamp(
+                    next_trading_day, tz="America/New_York"
+                ).replace(hour=9, minute=30, second=0, microsecond=0)
+            else:
+                # Fallback if no trading days found in next week
+                next_event = "market_open"
+                next_event_time = now_et + pd.Timedelta(days=1)
+
+        # Determine current session for trading days
+        elif premarket_start <= current_time < market_open:
             current_session = "pre_market"
             session_description = "Pre-market trading"
             is_extended_hours = True
@@ -66,11 +97,30 @@ async def get_session_status() -> dict:
 
             # Determine next opening
             if current_time >= postmarket_end:
-                # After 8 PM - next is pre-market tomorrow
-                next_event = "premarket_open"
-                next_event_time = (now_et + timedelta(days=1)).replace(
-                    hour=4, minute=0, second=0, microsecond=0
+                # After 8 PM - next is pre-market tomorrow (if it's a trading day)
+                tomorrow = today + pd.Timedelta(days=1)
+                tomorrow_schedule = nyse.schedule(
+                    start_date=tomorrow, end_date=tomorrow
                 )
+                if len(tomorrow_schedule) > 0:
+                    next_event = "premarket_open"
+                    next_event_time = pd.Timestamp(
+                        tomorrow, tz="America/New_York"
+                    ).replace(hour=4, minute=0, second=0, microsecond=0)
+                else:
+                    # Tomorrow is not a trading day, find next trading day
+                    next_trading_days = nyse.valid_days(
+                        start_date=tomorrow, end_date=tomorrow + pd.Timedelta(days=7)
+                    )
+                    if len(next_trading_days) > 0:
+                        next_trading_day = next_trading_days[0].date()
+                        next_event = "premarket_open"
+                        next_event_time = pd.Timestamp(
+                            next_trading_day, tz="America/New_York"
+                        ).replace(hour=4, minute=0, second=0, microsecond=0)
+                    else:
+                        next_event = "premarket_open"
+                        next_event_time = now_et + pd.Timedelta(days=1)
             else:
                 # Before 4 AM - next is pre-market today
                 next_event = "premarket_open"

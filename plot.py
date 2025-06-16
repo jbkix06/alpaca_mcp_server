@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Multi-Symbol Peak Detection Test Script with Plotting
-Clean version with all functionality preserved
+Multi-Symbol Peak Detection Test Script with MCP Server Display
+Modified to work with MCP server that uses ImageMagick display
 """
 
 import os
@@ -9,9 +9,16 @@ import sys
 import logging
 import numpy as np
 import requests
+import subprocess
+import tempfile
+import threading
 from datetime import datetime, timedelta
 from scipy.signal import filtfilt
 from scipy.signal.windows import hann as hanning
+
+# Set matplotlib backend BEFORE any other matplotlib imports
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend for server environments
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from dateutil import parser as date_parser
@@ -27,6 +34,83 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+# Global plot manager for MCP server
+class MCPPlotManager:
+    def __init__(self):
+        self.temp_dir = tempfile.mkdtemp(prefix='alpaca_plots_')
+        self.generated_plots = []
+        self.display_processes = []
+        logger.info(f"Plot temp directory: {self.temp_dir}")
+    
+    def generate_filename(self, symbol, plot_type="peak_detection"):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{symbol}_{plot_type}_{timestamp}.png"
+        return os.path.join(self.temp_dir, filename)
+    
+    def save_and_display(self, fig, filepath):
+        try:
+            fig.savefig(filepath, dpi=100, bbox_inches='tight', facecolor='white')
+            plt.close(fig)
+            self.generated_plots.append(filepath)
+            logger.info(f"Plot saved: {filepath}")
+            
+            # Display with ImageMagick (non-blocking) and track process
+            process = subprocess.Popen(['display', filepath], 
+                                     stdout=subprocess.DEVNULL, 
+                                     stderr=subprocess.DEVNULL)
+            self.display_processes.append(process)
+            logger.info(f"Plot displayed with ImageMagick (PID: {process.pid})")
+            
+            # Start cleanup monitoring in background
+            self._schedule_cleanup_on_close(process)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save/display plot: {e}")
+            return False
+    
+    def _schedule_cleanup_on_close(self, process):
+        """Monitor display process and cleanup when it closes"""
+        def monitor_and_cleanup():
+            try:
+                # Wait for the display process to terminate
+                process.wait()
+                logger.info(f"Display process {process.pid} closed, cleaning up temp directory")
+                self.cleanup()
+            except Exception as e:
+                logger.error(f"Error monitoring display process: {e}")
+        
+        # Start monitoring in background thread
+        cleanup_thread = threading.Thread(target=monitor_and_cleanup, daemon=True)
+        cleanup_thread.start()
+    
+    def cleanup(self):
+        """Clean up temporary directory and all plot files"""
+        try:
+            import shutil
+            if os.path.exists(self.temp_dir):
+                shutil.rmtree(self.temp_dir)
+                logger.info(f"Cleaned up temporary directory: {self.temp_dir}")
+            self.generated_plots.clear()
+        except Exception as e:
+            logger.error(f"Failed to cleanup temp directory: {e}")
+    
+    def force_cleanup(self):
+        """Force cleanup of all display processes and temp files"""
+        # Terminate any remaining display processes
+        for process in self.display_processes:
+            try:
+                if process.poll() is None:  # Process still running
+                    process.terminate()
+                    logger.info(f"Terminated display process {process.pid}")
+            except Exception as e:
+                logger.error(f"Error terminating process: {e}")
+        
+        self.display_processes.clear()
+        self.cleanup()
+
+# Global instance
+mcp_plot_manager = MCPPlotManager()
 
 
 def convert_to_nyc_timezone(timestamp_str):
@@ -437,19 +521,17 @@ def print_latest_signals_table(all_results):
     print("=" * 115)
 
 
-def plot_single_symbol(results, save_plot=False, output_dir=".", dpi=400):
-    """Create a professional plot for a single symbol with auto-positioned legend and stats"""
+def plot_single_symbol(results):
+    """Create plot for single symbol - modified for MCP server"""
     if not results:
         logger.error("No results to plot")
-        return
+        return None
 
     # Set matplotlib timezone to NYC
-    import matplotlib
-
     matplotlib.rcParams["timezone"] = "America/New_York"
 
     plt.style.use("seaborn-v0_8-darkgrid")
-    fig, ax = plt.subplots(figsize=(14, 8))
+    fig, ax = plt.subplots(figsize=(12, 8))  # Smaller size for server
 
     # Set timezone for x-axis BEFORE plotting
     nyc_tz = tz.gettz("America/New_York")
@@ -458,7 +540,6 @@ def plot_single_symbol(results, save_plot=False, output_dir=".", dpi=400):
     # Parse timestamps and convert to NYC/EDT timezone
     try:
         timestamps = [convert_to_nyc_timezone(ts) for ts in results["timestamps"]]
-        # Verify we have the right number of timestamps
         if len(timestamps) != len(results["original_prices"]):
             logger.warning("Timestamp count mismatch, using indices for x-axis")
             timestamps = range(len(results["original_prices"]))
@@ -512,8 +593,8 @@ def plot_single_symbol(results, save_plot=False, output_dir=".", dpi=400):
             marker="^",
             label="Peaks ({})".format(len(peaks)),
             zorder=4,
-            edgecolors="none",
-            linewidths=0,
+            edgecolors="black",
+            linewidth=1,
         )
 
         # Add peak annotations with actual prices
@@ -549,8 +630,8 @@ def plot_single_symbol(results, save_plot=False, output_dir=".", dpi=400):
             marker="v",
             label="Troughs ({})".format(len(troughs)),
             zorder=4,
-            edgecolors="none",
-            linewidths=0,
+            edgecolors="black",
+            linewidth=1,
         )
 
         # Add trough annotations with actual prices
@@ -585,12 +666,9 @@ def plot_single_symbol(results, save_plot=False, output_dir=".", dpi=400):
 
     # Format x-axis for datetime with NYC/EDT timezone
     if isinstance(timestamps[0], datetime):
-        # Create timezone-aware formatter (timezone already set above)
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M", tz=nyc_tz))
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
         plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha="right")
-
-        # Add timezone label to x-axis
         ax.set_xlabel("Time (NYC/EDT)", fontsize=12, fontweight="bold")
     else:
         ax.set_xlabel("Time", fontsize=12, fontweight="bold")
@@ -598,10 +676,8 @@ def plot_single_symbol(results, save_plot=False, output_dir=".", dpi=400):
     # Grid
     ax.grid(True, linestyle="--", alpha=0.7, color="gray")
 
-    # Set axis limits with padding
-    y_min, y_max = ax.get_ylim()
-    y_range = y_max - y_min
-    ax.set_ylim(y_min - 0.02 * y_range, y_max + 0.02 * y_range)
+    # Legend - simple positioning
+    ax.legend(loc='best', frameon=True, fancybox=True, shadow=True, fontsize=11, framealpha=0.9)
 
     # Calculate stats for text box
     price_min = original_prices.min()
@@ -616,80 +692,10 @@ def plot_single_symbol(results, save_plot=False, output_dir=".", dpi=400):
         "Peak/Trough Ratio: {}/{}"
     ).format(price_min, price_max, noise_reduction, len(peaks), len(troughs))
 
-    # Auto-position legend and stats box to avoid overlap
-    # Try different legend positions and find best fit
-    legend_positions = [
-        ("upper left", (0.02, 0.98)),  # Legend upper left, stats lower left
-        ("upper right", (0.02, 0.98)),  # Legend upper right, stats upper left
-        ("lower left", (0.02, 0.35)),  # Legend lower left, stats upper left
-        ("lower right", (0.02, 0.98)),  # Legend lower right, stats upper left
-        ("center left", (0.02, 0.98)),  # Legend center left, stats upper left
-        ("center right", (0.02, 0.98)),  # Legend center right, stats upper left
-    ]
-
-    # Determine which corner has least data density for better positioning
-    data_density = {
-        "upper_left": 0,
-        "upper_right": 0,
-        "lower_left": 0,
-        "lower_right": 0,
-    }
-
-    # Check peak/trough density in each corner (simplified heuristic)
-    x_mid = len(timestamps) // 2
-    y_mid = (y_min + y_max) / 2
-
-    for peak in peaks:
-        if peak["index"] < x_mid and peak["original_price"] > y_mid:
-            data_density["upper_left"] += 1
-        elif peak["index"] >= x_mid and peak["original_price"] > y_mid:
-            data_density["upper_right"] += 1
-        elif peak["index"] < x_mid and peak["original_price"] <= y_mid:
-            data_density["lower_left"] += 1
-        else:
-            data_density["lower_right"] += 1
-
-    for trough in troughs:
-        if trough["index"] < x_mid and trough["original_price"] > y_mid:
-            data_density["upper_left"] += 1
-        elif trough["index"] >= x_mid and trough["original_price"] > y_mid:
-            data_density["upper_right"] += 1
-        elif trough["index"] < x_mid and trough["original_price"] <= y_mid:
-            data_density["lower_left"] += 1
-        else:
-            data_density["lower_right"] += 1
-
-    # Find corner with least density
-    min_density_corner = min(data_density, key=data_density.get)
-
-    # Set legend and stats positions based on least dense corner
-    if min_density_corner == "upper_left":
-        legend_loc = "upper left"
-        stats_pos = (0.02, 0.35)  # Lower left for stats
-    elif min_density_corner == "upper_right":
-        legend_loc = "upper right"
-        stats_pos = (0.02, 0.98)  # Upper left for stats
-    elif min_density_corner == "lower_left":
-        legend_loc = "lower left"
-        stats_pos = (0.02, 0.98)  # Upper left for stats
-    else:  # lower_right
-        legend_loc = "lower right"
-        stats_pos = (0.02, 0.98)  # Upper left for stats
-
-    # Create legend with auto-positioning
-    legend = ax.legend(
-        loc=legend_loc,
-        frameon=True,
-        fancybox=True,
-        shadow=True,
-        fontsize=11,
-        framealpha=0.9,
-    )
-
-    # Add stats text box with auto-positioning
-    stats_box = ax.text(
-        stats_pos[0],
-        stats_pos[1],
+    # Simple stats box positioning
+    ax.text(
+        0.02,
+        0.98,
         stats_text,
         transform=ax.transAxes,
         fontsize=10,
@@ -697,414 +703,16 @@ def plot_single_symbol(results, save_plot=False, output_dir=".", dpi=400):
         bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.8),
     )
 
-    # Additional check: if legend and stats would still overlap, move stats to opposite corner
-    legend_bbox = legend.get_window_extent(fig.canvas.get_renderer())
-    stats_bbox = stats_box.get_window_extent(fig.canvas.get_renderer())
-
-    # Convert to axes coordinates for comparison
-    legend_bbox_ax = legend_bbox.transformed(ax.transAxes.inverted())
-    stats_bbox_ax = stats_bbox.transformed(ax.transAxes.inverted())
-
-    # Check for overlap (simplified intersection test)
-    overlap = not (
-        legend_bbox_ax.x1 < stats_bbox_ax.x0
-        or legend_bbox_ax.x0 > stats_bbox_ax.x1
-        or legend_bbox_ax.y1 < stats_bbox_ax.y0
-        or legend_bbox_ax.y0 > stats_bbox_ax.y1
-    )
-
-    if overlap:
-        # Move stats to opposite corner
-        if stats_pos[1] > 0.5:  # Stats was in upper area
-            new_stats_pos = (0.02, 0.25)  # Move to lower
-        else:  # Stats was in lower area
-            new_stats_pos = (0.02, 0.98)  # Move to upper
-
-        # Remove old stats box and create new one
-        stats_box.remove()
-        ax.text(
-            new_stats_pos[0],
-            new_stats_pos[1],
-            stats_text,
-            transform=ax.transAxes,
-            fontsize=10,
-            verticalalignment="top",
-            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.8),
-        )
-
     plt.tight_layout()
 
-    # Save plot if requested
-    if save_plot:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = os.path.join(
-            output_dir, "{}_peak_detection_{}.png".format(symbol, timestamp)
-        )
-        plt.savefig(filename, dpi=dpi, bbox_inches="tight", facecolor="white")
-        logger.info("Plot saved as %s", filename)
-
-    plt.show()
-    return fig
-
-
-def plot_combined_subplots(all_results, save_plot=False, output_dir=".", dpi=400):
-    """Create combined subplots for multiple symbols"""
-    if not all_results:
-        logger.error("No results to plot")
-        return
-
-    # Set matplotlib timezone to NYC
-    import matplotlib
-
-    matplotlib.rcParams["timezone"] = "America/New_York"
-
-    num_symbols = len(all_results)
-    rows = (num_symbols + 1) // 2
-    cols = 2 if num_symbols > 1 else 1
-
-    plt.style.use("seaborn-v0_8-darkgrid")
-    fig, axes = plt.subplots(rows, cols, figsize=(16, 6 * rows))
-
-    if num_symbols == 1:
-        axes = [axes]
-    elif rows == 1:
-        axes = [axes]
+    # Save and display using MCP plot manager
+    filepath = mcp_plot_manager.generate_filename(symbol)
+    success = mcp_plot_manager.save_and_display(fig, filepath)
+    
+    if success:
+        return filepath
     else:
-        axes = axes.flatten()
-
-    # Set timezone for all subplots
-    nyc_tz = tz.gettz("America/New_York")
-
-    for idx, results in enumerate(all_results):
-        ax = axes[idx]
-
-        # Set timezone for this subplot BEFORE plotting
-        ax.xaxis_date(tz=nyc_tz)
-
-        # Parse timestamps and convert to NYC/EDT timezone
-        try:
-            timestamps = [convert_to_nyc_timezone(ts) for ts in results["timestamps"]]
-            # Verify we have the right number of timestamps
-            if len(timestamps) != len(results["original_prices"]):
-                timestamps = range(len(results["original_prices"]))
-        except:
-            timestamps = range(len(results["original_prices"]))
-
-        # Extract data
-        original_prices = np.array(results["original_prices"])
-        filtered_prices = np.array(results["filtered_prices"])
-        peaks = results["peaks"]
-        troughs = results["troughs"]
-
-        # Plot lines
-        ax.plot(
-            timestamps,
-            original_prices,
-            color="#2E86AB",
-            linewidth=1.5,
-            alpha=0.7,
-            label="Original",
-        )
-        ax.plot(
-            timestamps, filtered_prices, color="#A23B72", linewidth=2, label="Filtered"
-        )
-
-        # Plot peaks and troughs at original prices with price annotations
-        if peaks:
-            peak_times = [
-                (
-                    convert_to_nyc_timezone(peak["timestamp"])
-                    if isinstance(timestamps[0], datetime)
-                    else peak["index"]
-                )
-                for peak in peaks
-            ]
-            peak_original_prices = [peak["original_price"] for peak in peaks]
-            ax.scatter(
-                peak_times,
-                peak_original_prices,
-                color="#F18F01",
-                s=60,
-                marker="^",
-                label="Peaks ({})".format(len(peaks)),
-                zorder=4,
-                edgecolors="none",
-                linewidths=0,
-            )
-
-            # Add price annotations for peaks
-            for i, (time, price) in enumerate(zip(peak_times, peak_original_prices)):
-                ax.annotate(
-                    "${:.4f}".format(price),
-                    (time, price),
-                    xytext=(0, 10),
-                    textcoords="offset points",
-                    fontsize=8,
-                    ha="center",
-                    color="#F18F01",
-                )
-
-        if troughs:
-            trough_times = [
-                (
-                    convert_to_nyc_timezone(trough["timestamp"])
-                    if isinstance(timestamps[0], datetime)
-                    else trough["index"]
-                )
-                for trough in troughs
-            ]
-            trough_original_prices = [trough["original_price"] for trough in troughs]
-            ax.scatter(
-                trough_times,
-                trough_original_prices,
-                color="#C73E1D",
-                s=60,
-                marker="v",
-                label="Troughs ({})".format(len(troughs)),
-                zorder=4,
-                edgecolors="none",
-                linewidths=0,
-            )
-
-            # Add price annotations for troughs
-            for i, (time, price) in enumerate(
-                zip(trough_times, trough_original_prices)
-            ):
-                ax.annotate(
-                    "${:.4f}".format(price),
-                    (time, price),
-                    xytext=(0, -15),
-                    textcoords="offset points",
-                    fontsize=8,
-                    ha="center",
-                    color="#C73E1D",
-                )
-
-        # Styling
-        symbol = results["symbol"]
-        ax.set_title(
-            "{} (P:{} T:{})".format(symbol, len(peaks), len(troughs)), fontweight="bold"
-        )
-        ax.set_ylabel("Price ($)")
-        ax.grid(True, linestyle="--", alpha=0.5)
-        ax.legend(fontsize=9)
-
-        # Format x-axis with NYC/EDT timezone
-        if isinstance(timestamps[0], datetime):
-            # Timezone already set above, just format
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M", tz=nyc_tz))
-            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
-            ax.set_xlabel("Time (NYC/EDT)", fontsize=10)
-
-    # Hide empty subplots
-    for idx in range(num_symbols, len(axes)):
-        axes[idx].set_visible(False)
-
-    # Overall title
-    window_len = all_results[0]["filter_params"]["window_len"]
-    lookahead = all_results[0]["filter_params"]["lookahead"]
-    fig.suptitle(
-        "Multi-Symbol Peak Detection (Hanning w={}, Lookahead={})".format(
-            window_len, lookahead
-        ),
-        fontsize=16,
-        fontweight="bold",
-    )
-
-    plt.tight_layout()
-
-    # Save plot if requested
-    if save_plot:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        symbols_str = "_".join([r["symbol"] for r in all_results])
-        filename = os.path.join(
-            output_dir, "multi_symbol_{}_{}.png".format(symbols_str, timestamp)
-        )
-        plt.savefig(filename, dpi=dpi, bbox_inches="tight", facecolor="white")
-        logger.info("Combined plot saved as %s", filename)
-
-    plt.show()
-    return fig
-
-
-def plot_overlay(all_results, save_plot=False, output_dir=".", dpi=400):
-    """Create overlay plot with normalized prices"""
-    if not all_results:
-        logger.error("No results to plot")
-        return
-
-    # Set matplotlib timezone to NYC
-    import matplotlib
-
-    matplotlib.rcParams["timezone"] = "America/New_York"
-
-    plt.style.use("seaborn-v0_8-darkgrid")
-    fig, ax = plt.subplots(figsize=(16, 10))
-
-    # Set timezone for x-axis BEFORE plotting
-    nyc_tz = tz.gettz("America/New_York")
-    ax.xaxis_date(tz=nyc_tz)
-
-    colors = ["#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#3A5F8A", "#8B5A5C"]
-
-    for idx, results in enumerate(all_results):
-        color = colors[idx % len(colors)]
-        symbol = results["symbol"]
-
-        # Parse timestamps and convert to NYC/EDT timezone
-        try:
-            timestamps = [convert_to_nyc_timezone(ts) for ts in results["timestamps"]]
-            # Verify we have the right number of timestamps
-            if len(timestamps) != len(results["original_prices"]):
-                timestamps = range(len(results["original_prices"]))
-        except:
-            timestamps = range(len(results["original_prices"]))
-
-        # Normalize prices to percentage change from first price
-        original_prices = np.array(results["original_prices"])
-        normalized_prices = (original_prices / original_prices[0] - 1) * 100
-
-        filtered_prices = np.array(results["filtered_prices"])
-        normalized_filtered = (filtered_prices / original_prices[0] - 1) * 100
-
-        # Plot lines
-        ax.plot(
-            timestamps,
-            normalized_prices,
-            color=color,
-            linewidth=1.5,
-            alpha=0.7,
-            label="{} Original".format(symbol),
-        )
-        ax.plot(
-            timestamps,
-            normalized_filtered,
-            color=color,
-            linewidth=2.5,
-            label="{} Filtered".format(symbol),
-            linestyle="--",
-        )
-
-        # Plot peaks and troughs with actual price annotations
-        peaks = results["peaks"]
-        troughs = results["troughs"]
-
-        if peaks:
-            peak_times = [
-                (
-                    convert_to_nyc_timezone(peak["timestamp"])
-                    if isinstance(timestamps[0], datetime)
-                    else peak["index"]
-                )
-                for peak in peaks
-            ]
-            peak_normalized = [
-                (peak["original_price"] / original_prices[0] - 1) * 100
-                for peak in peaks
-            ]
-            ax.scatter(
-                peak_times,
-                peak_normalized,
-                color=color,
-                s=80,
-                marker="^",
-                edgecolors="none",
-                linewidths=0,
-                zorder=4,
-            )
-
-            # Add actual price annotations
-            for i, (time, norm_price, actual_price) in enumerate(
-                zip(peak_times, peak_normalized, [p["original_price"] for p in peaks])
-            ):
-                ax.annotate(
-                    "${:.4f}".format(actual_price),
-                    (time, norm_price),
-                    xytext=(5, 10),
-                    textcoords="offset points",
-                    fontsize=8,
-                    color=color,
-                )
-
-        if troughs:
-            trough_times = [
-                (
-                    convert_to_nyc_timezone(trough["timestamp"])
-                    if isinstance(timestamps[0], datetime)
-                    else trough["index"]
-                )
-                for trough in troughs
-            ]
-            trough_normalized = [
-                (trough["original_price"] / original_prices[0] - 1) * 100
-                for trough in troughs
-            ]
-            ax.scatter(
-                trough_times,
-                trough_normalized,
-                color=color,
-                s=80,
-                marker="v",
-                edgecolors="none",
-                linewidths=0,
-                zorder=4,
-            )
-
-            # Add actual price annotations
-            for i, (time, norm_price, actual_price) in enumerate(
-                zip(
-                    trough_times,
-                    trough_normalized,
-                    [t["original_price"] for t in troughs],
-                )
-            ):
-                ax.annotate(
-                    "${:.4f}".format(actual_price),
-                    (time, norm_price),
-                    xytext=(5, -15),
-                    textcoords="offset points",
-                    fontsize=8,
-                    color=color,
-                )
-
-    # Styling
-    ax.set_ylabel("Normalized Return (%)", fontsize=12, fontweight="bold")
-    ax.set_title(
-        "Multi-Symbol Overlay (Normalized Returns with Actual Prices)",
-        fontsize=14,
-        fontweight="bold",
-    )
-    ax.grid(True, linestyle="--", alpha=0.7)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
-    ax.axhline(y=0, color="black", linestyle="-", alpha=0.3)
-
-    # Format x-axis with NYC/EDT timezone
-    if len(all_results) > 0:
-        try:
-            timestamps = [
-                convert_to_nyc_timezone(ts) for ts in all_results[0]["timestamps"]
-            ]
-            # Timezone already set above, just format
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M", tz=nyc_tz))
-            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
-            ax.set_xlabel("Time (NYC/EDT)", fontsize=12, fontweight="bold")
-        except:
-            ax.set_xlabel("Time", fontsize=12, fontweight="bold")
-
-    plt.tight_layout()
-
-    # Save plot if requested
-    if save_plot:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        symbols_str = "_".join([r["symbol"] for r in all_results])
-        filename = os.path.join(
-            output_dir, "overlay_{}_{}.png".format(symbols_str, timestamp)
-        )
-        plt.savefig(filename, dpi=dpi, bbox_inches="tight", facecolor="white")
-        logger.info("Overlay plot saved as %s", filename)
-
-    plt.show()
-    return fig
+        return None
 
 
 def print_summary(results):
@@ -1164,7 +772,7 @@ def print_summary(results):
 
 
 def main():
-    """Main test function"""
+    """Main test function - modified for MCP server"""
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -1230,29 +838,6 @@ def main():
         default="sip",
         choices=["iex", "sip", "otc"],
         help="Data feed to use",
-    )
-
-    parser.add_argument(
-        "--plot-mode",
-        type=str,
-        default="single",
-        choices=["single", "combined", "overlay", "all"],
-        help="Plotting mode: single plots, combined subplots, overlay, or all modes",
-    )
-
-    parser.add_argument(
-        "--save-plots",
-        "-p",
-        action="store_true",
-        help="Save plots as PNG files with timestamp",
-    )
-
-    parser.add_argument(
-        "--output-dir",
-        "-o",
-        type=str,
-        default=".",
-        help="Output directory for saved plots",
     )
 
     parser.add_argument(
@@ -1323,16 +908,10 @@ def main():
     window_len = args.window
     lookahead = args.lookahead
 
-    # Create output directory if it doesn't exist
-    if args.save_plots and not os.path.exists(args.output_dir):
-        os.makedirs(args.output_dir)
-        logger.info("Created output directory: %s", args.output_dir)
-
     logger.info("Starting multi-symbol peak detection test...")
     logger.info("Symbols: %s", test_symbols)
     logger.info("Days: %d, Timeframe: %s, Feed: %s", days, timeframe, feed)
     logger.info("Filter params: window_len=%d, lookahead=%d", window_len, lookahead)
-    logger.info("Plot mode: %s", args.plot_mode)
 
     try:
         # Initialize data fetcher
@@ -1375,8 +954,6 @@ def main():
 
             if results:
                 all_results.append(results)
-
-                # Print summary for each symbol
                 print_summary(results)
             else:
                 logger.error("Failed to process %s", symbol)
@@ -1385,33 +962,22 @@ def main():
             logger.error("No symbols processed successfully")
             return
 
-        # Print latest signals table (same as no-plot version)
+        # Print latest signals table
         print_latest_signals_table(all_results)
 
         # Generate plots if not disabled
         if not args.no_plot:
-            if args.plot_mode == "single" or args.plot_mode == "all":
-                logger.info("Creating individual plots...")
-                for results in all_results:
-                    plot_single_symbol(
-                        results, save_plot=args.save_plots, output_dir=args.output_dir
-                    )
-
-            if (args.plot_mode == "combined" or args.plot_mode == "all") and len(
-                all_results
-            ) > 1:
-                logger.info("Creating combined subplot...")
-                plot_combined_subplots(
-                    all_results, save_plot=args.save_plots, output_dir=args.output_dir
-                )
-
-            if (args.plot_mode == "overlay" or args.plot_mode == "all") and len(
-                all_results
-            ) > 1:
-                logger.info("Creating overlay plot...")
-                plot_overlay(
-                    all_results, save_plot=args.save_plots, output_dir=args.output_dir
-                )
+            logger.info("Creating plots with MCP display...")
+            plot_files = []
+            for results in all_results:
+                filepath = plot_single_symbol(results)
+                if filepath:
+                    plot_files.append(filepath)
+                    print(f"✅ Plot generated and displayed: {filepath}")
+                else:
+                    print(f"❌ Failed to generate plot for {results['symbol']}")
+            
+            print(f"\n📈 Generated {len(plot_files)} plots in: {mcp_plot_manager.temp_dir}")
         else:
             logger.info("Plotting skipped")
 
@@ -1439,8 +1005,10 @@ def main():
 
     except KeyboardInterrupt:
         logger.info("Test interrupted by user")
+        mcp_plot_manager.force_cleanup()
     except Exception as e:
         logger.error("Test failed: %s", e)
+        mcp_plot_manager.force_cleanup()
         raise
 
 

@@ -8,6 +8,7 @@ import sys
 import asyncio
 import logging
 import tempfile
+import subprocess
 from typing import List, Dict, Any
 from pathlib import Path
 
@@ -32,6 +33,220 @@ except ImportError as e:
     PLOTTING_AVAILABLE = False
 
 
+def create_headless_plot(results, plot_dir, dpi=100):
+    """Create a single symbol plot in headless mode using matplotlib with proper display"""
+    import matplotlib
+
+    matplotlib.use("Agg")  # Use non-interactive backend
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+    from dateutil import tz
+    import numpy as np
+    import subprocess
+    from datetime import datetime
+
+    if not results:
+        return None
+
+    try:
+        # Set up the plot with high resolution size
+        plt.style.use("seaborn-v0_8-darkgrid")
+        fig, ax = plt.subplots(figsize=(20, 12))
+
+        # Extract data
+        symbol = results["symbol"]
+        timestamps = results["timestamps"]
+        original_prices = np.array(results["original_prices"])
+        filtered_prices = np.array(results["filtered_prices"])
+        peaks = results["peaks"]
+        troughs = results["troughs"]
+
+        # Convert timestamps to datetime objects for plotting
+        try:
+            from peak_trough_detection_plot import convert_to_nyc_timezone
+
+            timestamps_dt = [convert_to_nyc_timezone(ts) for ts in timestamps]
+            use_datetime = True
+        except:
+            timestamps_dt = range(len(original_prices))
+            use_datetime = False
+
+        # Plot main price lines
+        ax.plot(
+            timestamps_dt,
+            original_prices,
+            color="#2E86AB",
+            linewidth=1.5,
+            alpha=0.7,
+            label="Original Close Prices",
+            zorder=1,
+        )
+
+        ax.plot(
+            timestamps_dt,
+            filtered_prices,
+            color="#A23B72",
+            linewidth=2.5,
+            label=f"Filtered (Hanning w={results['filter_params']['window_len']})",
+            zorder=2,
+        )
+
+        # Plot peaks
+        if peaks:
+            peak_times = []
+            peak_prices = []
+            for peak in peaks:
+                if use_datetime:
+                    peak_times.append(convert_to_nyc_timezone(peak["timestamp"]))
+                else:
+                    peak_times.append(peak["index"])
+                peak_prices.append(peak["original_price"])
+
+            ax.scatter(
+                peak_times,
+                peak_prices,
+                color="#F18F01",
+                s=80,
+                marker="^",
+                label=f"Peaks ({len(peaks)})",
+                zorder=4,
+                edgecolors="none",
+                linewidths=0,
+            )
+
+            # Add peak annotations
+            for i, (time, price) in enumerate(zip(peak_times, peak_prices)):
+                ax.annotate(
+                    f"P{i + 1}: ${price:.4f}",
+                    (time, price),
+                    xytext=(5, 15),
+                    textcoords="offset points",
+                    fontsize=9,
+                    fontweight="bold",
+                    color="#F18F01",
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8),
+                )
+
+        # Plot troughs
+        if troughs:
+            trough_times = []
+            trough_prices = []
+            for trough in troughs:
+                if use_datetime:
+                    trough_times.append(convert_to_nyc_timezone(trough["timestamp"]))
+                else:
+                    trough_times.append(trough["index"])
+                trough_prices.append(trough["original_price"])
+
+            ax.scatter(
+                trough_times,
+                trough_prices,
+                color="#C73E1D",
+                s=80,
+                marker="v",
+                label=f"Troughs ({len(troughs)})",
+                zorder=4,
+                edgecolors="none",
+                linewidths=0,
+            )
+
+            # Add trough annotations
+            for i, (time, price) in enumerate(zip(trough_times, trough_prices)):
+                ax.annotate(
+                    f"T{i + 1}: ${price:.4f}",
+                    (time, price),
+                    xytext=(5, -20),
+                    textcoords="offset points",
+                    fontsize=9,
+                    fontweight="bold",
+                    color="#C73E1D",
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8),
+                )
+
+        # Set title and labels
+        title = (
+            f"{symbol} - Peak & Trough Detection\n"
+            f"Bars: {results['total_bars']} | Filter: Hanning(w={results['filter_params']['window_len']}) | "
+            f"Lookahead: {results['filter_params']['lookahead']} | Peaks: {len(peaks)} | Troughs: {len(troughs)}"
+        )
+        ax.set_title(title, fontsize=14, fontweight="bold", pad=20)
+        ax.set_ylabel("Price ($)", fontsize=12, fontweight="bold")
+
+        # Format x-axis
+        if use_datetime:
+            nyc_tz = tz.gettz("America/New_York")
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M", tz=nyc_tz))
+            ax.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha="right")
+            ax.set_xlabel("Time (NYC/EDT)", fontsize=12, fontweight="bold")
+        else:
+            ax.set_xlabel("Time", fontsize=12, fontweight="bold")
+
+        # Grid and legend
+        ax.grid(True, linestyle="--", alpha=0.7, color="gray")
+        ax.legend(
+            loc="best",
+            frameon=True,
+            fancybox=True,
+            shadow=True,
+            fontsize=11,
+            framealpha=0.9,
+        )
+
+        # Stats box
+        price_min = original_prices.min()
+        price_max = original_prices.max()
+        noise_reduction = (
+            (original_prices.std() - filtered_prices.std())
+            / original_prices.std()
+            * 100
+        )
+
+        stats_text = (
+            f"Price Range: ${price_min:.4f} - ${price_max:.4f}\n"
+            f"Filter Smoothing: {noise_reduction:.1f}%\n"
+            f"Peak/Trough Ratio: {len(peaks)}/{len(troughs)}"
+        )
+
+        ax.text(
+            0.02,
+            0.98,
+            stats_text,
+            transform=ax.transAxes,
+            fontsize=10,
+            verticalalignment="top",
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.8),
+        )
+
+        plt.tight_layout()
+
+        # Save the plot
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = os.path.join(plot_dir, f"{symbol}_peak_detection_{timestamp}.png")
+
+        # Save with specified DPI and proper file close (preserving exact figure size)
+        fig.savefig(filename, dpi=dpi, bbox_inches='tight', facecolor="white", edgecolor='none')
+        
+        # Get actual image dimensions for debug
+        fig_width_inches, fig_height_inches = fig.get_size_inches()
+        pixel_width = int(fig_width_inches * dpi)
+        pixel_height = int(fig_height_inches * dpi)
+        
+        plt.close(fig)  # Important: close the figure to free memory
+        
+        # Log the actual dimensions
+        logging.info(f"Plot saved: {pixel_width}x{pixel_height} pixels ({fig_width_inches}x{fig_height_inches} inches @ {dpi} DPI)")
+
+        # Auto-display disabled - use show_plot.py instead
+        logging.info(f"Plot saved (auto-display disabled): {filename}")
+
+        return filename, pixel_width, pixel_height
+
+    except Exception as e:
+        logging.error(f"Error creating headless plot for {symbol}: {e}")
+        return None, None, None
+
+
 async def generate_peak_trough_plots(
     symbols: str,
     timeframe: str = "1Min",
@@ -41,7 +256,7 @@ async def generate_peak_trough_plots(
     plot_mode: str = "single",
     save_plots: bool = True,
     display_plots: bool = False,
-    dpi: int = 400,
+    dpi: int = 100,
 ) -> str:
     """
     Generate professional peak/trough analysis plots for multiple symbols.
@@ -165,23 +380,22 @@ Current paper trading status: {os.environ.get('PAPER', 'Not set')}
         if plot_mode in ["single", "all"]:
             for results in all_results:
                 try:
-                    # Use your professional plotting function with DPI parameter
-                    fig = await asyncio.to_thread(
-                        plot_single_symbol, results, save_plots, plot_dir, dpi
+                    # Generate plot using matplotlib in headless mode
+                    plot_result = await asyncio.to_thread(
+                        create_headless_plot, results, plot_dir, dpi
                     )
-                    if save_plots:
-                        # Find the generated file
-                        import glob
-
-                        pattern = f"{plot_dir}/{results['symbol']}_peak_detection_*.png"
-                        matches = glob.glob(pattern)
-                        if matches:
-                            plot_file = max(
-                                matches, key=os.path.getctime
-                            )  # Latest file
-                            plot_files.append(plot_file)
+                    if plot_result:
+                        if isinstance(plot_result, tuple):
+                            plot_file, width, height = plot_result
+                            results['plot_dimensions'] = f"{width}x{height}"
+                        else:
+                            plot_file = plot_result
+                        plot_files.append(plot_file)
                 except Exception as e:
                     logging.warning(f"Failed to plot {results['symbol']}: {e}")
+                    import traceback
+
+                    logging.warning(f"Traceback: {traceback.format_exc()}")
 
         if plot_mode in ["combined", "all"] and len(all_results) > 1:
             try:
@@ -227,34 +441,60 @@ Current paper trading status: {os.environ.get('PAPER', 'Not set')}
         # Generate trading levels summary
         trading_levels = generate_trading_levels_summary(all_results)
 
-        # Display plots if requested
-        display_info = ""
+        # Get dimensions info if available
+        dimensions_info = ""
+        if all_results and 'plot_dimensions' in all_results[0]:
+            dimensions_info = f"\n• Plot dimensions: {all_results[0]['plot_dimensions']} pixels (16x10 inches @ 100 DPI)"
+        
+        # Handle display_plots functionality
         if display_plots and plot_files:
-            display_info = "\n🖼️  PLOT DISPLAY:"
+            display_success = []
             for plot_file in plot_files:
                 try:
-                    # Try to display using ImageMagick with optimized settings
-                    import subprocess
-                    import shutil
-
-                    if shutil.which("display"):
-                        subprocess.Popen(
-                            [
-                                "display",
-                                "-geometry",
-                                "1200x800",  # Reasonable window size
-                                "-resize",
-                                "1200x800>",  # Resize if larger
-                                plot_file,
-                            ]
-                        )
-                        display_info += f"\n• Displayed: {os.path.basename(plot_file)}"
-                    else:
-                        display_info += "\n• ImageMagick 'display' not available"
-                        display_info += f"\n• Manually open: {plot_file}"
-
+                    # Use the same display logic as show_plot.py
+                    viewers = [
+                        ['eog', '--new-instance', plot_file],
+                        ['feh', '--auto-zoom', '--borderless', plot_file],
+                        ['gthumb', plot_file],
+                        ['display', '-immutable', '-zoom', '100%', '-geometry', '+0+0', plot_file],
+                        ['xdg-open', plot_file]
+                    ]
+                    
+                    plot_opened = False
+                    for viewer_cmd in viewers:
+                        try:
+                            process = subprocess.Popen(
+                                viewer_cmd,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL
+                            )
+                            display_success.append(f"{os.path.basename(plot_file)} opened with {viewer_cmd[0]} (PID: {process.pid})")
+                            plot_opened = True
+                            break
+                        except FileNotFoundError:
+                            continue
+                        except Exception:
+                            continue
+                    
+                    if not plot_opened:
+                        display_success.append(f"{os.path.basename(plot_file)} - No suitable viewer found")
+                        
                 except Exception as e:
-                    display_info += f"\n• Display error: {str(e)[:50]}..."
+                    display_success.append(f"{os.path.basename(plot_file)} - Display failed: {e}")
+            
+            display_info = (
+                f"\n🖼️  PLOTS DISPLAYED:\n" + 
+                "\n".join(f"• {msg}" for msg in display_success) +
+                f"\n💡 Plots opened in background - windows should appear automatically"
+                f"{dimensions_info}"
+            )
+        else:
+            display_info = (
+                f"\n💾 PLOTS SAVED:\n• {len(plot_files)} plot(s) saved to disk"
+                f"{dimensions_info}"
+                f"\n• Use: python show_plot.py --symbol {symbol_list[0]} to view"
+                f"\n• In eog viewer: Press '1' for actual size, or use zoom controls"
+            )
 
         return f"""
 🎯 ADVANCED PEAK/TROUGH ANALYSIS WITH PROFESSIONAL PLOTS
@@ -281,6 +521,7 @@ Current paper trading status: {os.environ.get('PAPER', 'Not set')}
 {chr(10).join(f"• {os.path.basename(f)}" for f in plot_files)}
 
 📍 PLOT LOCATION: {plot_dir}
+📋 DEBUG: display_plots={display_plots}, plot_files={len(plot_files)}
 {display_info}
 
 💡 NEXT ACTIONS:
