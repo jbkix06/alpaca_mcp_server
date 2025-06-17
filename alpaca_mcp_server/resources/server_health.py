@@ -42,8 +42,8 @@ async def get_server_health() -> dict:
                 "account_id": account.id,
                 "account_status": account.status.value,
                 "response_time_ms": round(trading_latency, 1),
-                "buying_power": float(account.buying_power),
-                "cash": float(account.cash),
+                "buying_power": float(account.buying_power or 0),
+                "cash": float(account.cash or 0),
             }
         except Exception as e:
             connection_status["trading_api"] = {

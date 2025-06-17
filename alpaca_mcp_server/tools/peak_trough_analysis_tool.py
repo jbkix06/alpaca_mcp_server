@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import sys
 import os
 import requests
+import re
 from scipy.signal import filtfilt
 from scipy.signal.windows import hann as hanning
 import pytz
@@ -46,11 +47,12 @@ except ImportError:
         return peaks, troughs
 
 
-try:
-    from ..config import get_stock_historical_client
-except ImportError:
-    # Try absolute import
-    pass
+# Get client function from settings module
+# try:
+#     from ..config import get_stock_historical_client  # Currently unused
+# except ImportError:
+#     # Try absolute import
+#     pass
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +73,7 @@ def convert_to_nyc_timezone(timestamp_str):
                 # Try direct parsing first
                 try:
                     dt = datetime.fromisoformat(timestamp_str)
-                except:
+                except (ValueError, TypeError):
                     from dateutil import parser as date_parser
 
                     dt = date_parser.parse(timestamp_str)
@@ -102,7 +104,7 @@ def convert_to_nyc_timezone(timestamp_str):
                 if dt.tzinfo is None:
                     dt = dt.replace(tzinfo=pytz.UTC)
                 return dt.astimezone(pytz.timezone("America/New_York"))
-        except:
+        except (AttributeError, TypeError, ValueError, pytz.exceptions.UnknownTimeZoneError):
             pass
         return timestamp_str
 
@@ -402,7 +404,7 @@ def get_latest_signal(results):
 
 
 async def analyze_peaks_and_troughs(
-    symbols: str,
+    symbols: str = "AUTO",
     timeframe: str = "1Min",
     days: int = 1,
     limit: int = 1000,
@@ -427,7 +429,7 @@ async def analyze_peaks_and_troughs(
     - Enhanced signal interpretation based on proximity to latest signals
 
     Args:
-        symbols: Comma-separated list of stock symbols (e.g., "AAPL,MSFT,NVDA")
+        symbols: Stock symbols - use "AUTO" for current scanner results, or comma-separated list (e.g., "AAPL,MSFT,NVDA")
         timeframe: Bar timeframe - "1Min", "5Min", "15Min", "30Min", "1Hour" (default: "1Min")
         days: Number of trading days of historical data (default: 1, max: 30)
         limit: Maximum number of bars to fetch (default: 1000, max: 10000)
@@ -445,12 +447,63 @@ async def analyze_peaks_and_troughs(
         - Clear BUY/SELL signals based on proximity to latest trough/peak
 
     Examples:
-        analyze_peaks_and_troughs("RSLS")  # Quick analysis of RSLS
-        analyze_peaks_and_troughs("AAPL,MSFT", timeframe="5Min", days=2)  # 5min bars, 2 days
+        analyze_peaks_and_troughs()  # Auto-analyze current scanner results (default)
+        analyze_peaks_and_troughs("AUTO")  # Explicit auto mode
+        analyze_peaks_and_troughs("AAPL,MSFT", timeframe="5Min", days=2)  # Manual symbols, 5min bars, 2 days
         analyze_peaks_and_troughs("NVDA", window_len=21, lookahead=3)  # More smoothing, wider lookahead
     """
     try:
-        # Parse symbols
+        # Smart symbol resolution - AUTO mode extracts from current scanner results
+        if symbols.upper() == "AUTO":
+            try:
+                # Import the day trading scanner function
+                from .day_trading_scanner import scan_day_trading_opportunities
+                
+                # Get current active stocks from scanner
+                scanner_result = await scan_day_trading_opportunities(
+                    symbols="ALL",
+                    min_trades_per_minute=500,  # Use higher threshold for quality stocks
+                    min_percent_change=1.0,     # Lower threshold to get more symbols
+                    max_symbols=20,
+                    sort_by="trades"
+                )
+                
+                # Extract symbols from scanner output using improved regex pattern
+                # Look for lines like "   1 SRM        9,004 +   297.2% $  5.760"
+                symbol_pattern = r'^\s*\d+\s+([A-Z]{2,5})\s+'
+                symbol_list = []
+                
+                for line in scanner_result.split('\n'):
+                    match = re.match(symbol_pattern, line)
+                    if match:
+                        symbol_list.append(match.group(1))
+                
+                if not symbol_list:
+                    # Fallback to parse different format if needed
+                    logger.warning("Failed to extract symbols from scanner, trying alternative parsing")
+                    # Look for mentions of symbols in various formats
+                    symbol_mentions = re.findall(r'\b([A-Z]{2,5})\b', scanner_result)
+                    # Filter to likely stock symbols (2-5 chars, common patterns)
+                    likely_symbols = [s for s in symbol_mentions if 2 <= len(s) <= 5 and s not in ['SELL', 'STRONG', 'ACTIVE', 'READY', 'MARKET', 'SCAN', 'DAY']]
+                    symbol_list = list(dict.fromkeys(likely_symbols))[:20]  # Remove duplicates, limit to 20
+                
+                if symbol_list:
+                    logger.info(f"AUTO mode: Extracted {len(symbol_list)} symbols from scanner: {symbol_list}")
+                    symbols = ",".join(symbol_list)  # Convert back to comma-separated string
+                    # Add debug info to output
+                    debug_info = f"AUTO mode detected {len(symbol_list)} symbols: {symbol_list[:5]}{'...' if len(symbol_list) > 5 else ''}\n\n"
+                else:
+                    logger.warning("AUTO mode: No symbols found in scanner results")
+                    # Debug: show scanner output format for troubleshooting
+                    sample_lines = scanner_result.split('\n')[:10]
+                    debug_lines = '\n'.join(sample_lines)
+                    return f"Error: AUTO mode failed - no active symbols found in scanner results.\n\nDebug - Scanner output sample:\n{debug_lines}\n\nPlease run scanner first or specify symbols manually."
+                    
+            except Exception as e:
+                logger.error(f"AUTO mode failed: {e}")
+                return f"Error: AUTO mode failed - {str(e)}. Please specify symbols manually."
+        
+        # Parse symbols (now resolved from AUTO or provided manually)
         symbol_list = [s.strip().upper() for s in symbols.split(",") if s.strip()]
         if not symbol_list:
             return "Error: No valid symbols provided"
@@ -511,6 +564,11 @@ async def analyze_peaks_and_troughs(
         # Process each symbol
         results = []
         results.append("# Peak and Trough Analysis for Day Trading\n")
+        
+        # Add AUTO mode debug info if applicable
+        if 'debug_info' in locals():
+            results.append(debug_info)
+            
         results.append(
             f"Parameters: {timeframe} bars, {days} days, Window: {window_len}, Lookahead: {lookahead}\n"
         )
@@ -520,7 +578,7 @@ async def analyze_peaks_and_troughs(
             from datetime import datetime
             import pytz
 
-            utc_now = datetime.utcnow().replace(tzinfo=pytz.UTC)
+            utc_now = datetime.now(pytz.UTC)
             nyc_tz = pytz.timezone("America/New_York")
             nyc_now = utc_now.astimezone(nyc_tz)
 
@@ -557,13 +615,13 @@ async def analyze_peaks_and_troughs(
                 continue
 
             # Extract close prices and timestamps from API format
-            close_prices = []
+            close_prices_list = []
             timestamps = []
             for bar in symbol_bars:
-                close_prices.append(float(bar["c"]))  # Close price
+                close_prices_list.append(float(bar["c"]))  # Close price
                 timestamps.append(bar["t"])  # Timestamp
 
-            close_prices = np.array(close_prices)
+            close_prices = np.array(close_prices_list)
 
             if len(close_prices) < lookahead * 2:
                 results.append(

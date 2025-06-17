@@ -17,7 +17,7 @@ _latest_results: Dict = {}
 
 
 async def start_differential_trade_scanner(
-    symbols: str = "NEHC,HCTI,GNLN,SOAR,CGTL,CVAC,KLTO,GTI,IPA,YHC,IXHL,ORCL,NIVF,ZENA,VOYG,UVIX,QUBT,TSLA,AAPL,MSFT,NVDA,AMC,GME,PLTR,RIVN,LCID,NKLA,MULN,AIHS,HSDT,PROG,ATER,IRNT,EXPR,CLOV,WISH,AFRM,UPST,DKNG,SKLZ,ROOT,LMND,GOEV,RIDE,WKHS,BLNK,CHPT,SENS,BNGO,OCGN",
+    symbols: str = "ALL",  # Use ALL tradeable assets by default
     min_trades_per_minute: int = 50,
     min_percent_change: float = 5.0,
     update_interval: int = 60,
@@ -45,6 +45,26 @@ async def start_differential_trade_scanner(
     global _scanner_task, _scanner_running
 
     try:
+        # Resolve symbols - get ALL tradeable assets if needed
+        if symbols.upper() == "ALL":
+            try:
+                from ..utils.tickers import TickerList
+                ticker_list = TickerList()
+                assets = ticker_list.rest_api.list_assets(status="active")
+                
+                # Filter using TickerList validation logic
+                tradable_symbols = [
+                    asset.symbol for asset in assets 
+                    if asset.tradable and ticker_list.is_valid_symbol(asset.symbol)
+                ]
+                # Limit to reasonable number for scanning performance
+                symbol_list = sorted(tradable_symbols)[:max_symbols * 2]  # More symbols than max results
+                symbols = ",".join(symbol_list)
+                
+            except Exception as e:
+                logger.error(f"Error fetching ALL tradeable assets: {e}")
+                return f"Error: Unable to fetch ALL tradeable assets - {str(e)}"
+
         # Stop existing scanner if running
         if _scanner_running and _scanner_task:
             await stop_differential_trade_scanner()

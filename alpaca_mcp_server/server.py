@@ -12,6 +12,7 @@ else:
     from .config.settings import settings
 
 from mcp.server.fastmcp import FastMCP
+from typing import Optional
 
 # Import all tool modules
 if __name__ == "__main__" or not __package__:
@@ -31,7 +32,7 @@ if __name__ == "__main__" or not __package__:
         analyze_peaks_and_troughs as peak_trough_analysis,
     )
     from alpaca_mcp_server.tools.plot_py_tool import (
-        generate_stock_plot,
+        generate_stock_plot as plot_py_generate_stock_plot,
     )
     from alpaca_mcp_server.prompts import (
         account_analysis_prompt,
@@ -58,7 +59,7 @@ else:
         analyze_peaks_and_troughs as peak_trough_analysis,
     )
     from .tools.plot_py_tool import (
-        generate_stock_plot,
+        generate_stock_plot as plot_py_generate_stock_plot,
     )
     from .prompts import (
         account_analysis_prompt,
@@ -158,7 +159,7 @@ async def account_analysis() -> str:
 
 
 @mcp.prompt()
-async def position_management(symbol: str = None) -> str:
+async def position_management(symbol: Optional[str] = None) -> str:
     """Strategic position review and optimization."""
     return await position_management_prompt.position_management(symbol)
 
@@ -324,7 +325,7 @@ async def get_option_snapshot(symbol: str) -> str:
 # Stock Technical Analysis Tool
 @mcp.tool()
 async def get_stock_peak_trough_analysis(
-    symbols: str,
+    symbols: str = "AUTO",
     timeframe: str = "1Min",
     days: int = 1,
     limit: int = 1000,
@@ -347,7 +348,7 @@ async def get_stock_peak_trough_analysis(
     the technical analysis to find optimal entry points.
 
     Args:
-        symbols: Stock symbols (e.g., "CGTL" or "AAPL,MSFT,NVDA")
+        symbols: "AUTO" for current scanner results, or manual symbols (e.g., "AAPL,MSFT,NVDA")
         timeframe: "1Min", "5Min", "15Min", "30Min", "1Hour" (default: "1Min")
         days: Historical days to analyze (1-30, default: 1)
         limit: Max bars to fetch (1-10000, default: 1000)
@@ -619,7 +620,7 @@ async def get_corporate_announcements(
     ca_types: list,
     since: str,
     until: str,
-    symbol: str = None,
+    symbol: Optional[str] = None,
     cusip: str = None,
     date_type: str = None,
 ) -> str:
@@ -690,6 +691,23 @@ async def clear_stock_stream_buffers() -> str:
     return await streaming_tools.clear_stock_stream_buffers()
 
 
+# Stream-Centric Concurrent Architecture Tools (New)
+@mcp.tool()
+async def stream_aware_price_monitor(symbol: str, analysis_seconds: int = 10) -> str:
+    """Enhanced real-time price monitoring using shared stream with concurrent analysis."""
+    return await streaming_tools.stream_aware_price_monitor(symbol, analysis_seconds)
+
+
+@mcp.tool()
+async def stream_optimized_order_placement(
+    symbol: str, side: str, quantity: float, order_type: str = "limit"
+) -> str:
+    """Place order using optimal pricing from active stream."""
+    return await streaming_tools.stream_optimized_order_placement(
+        symbol, side, quantity, order_type
+    )
+
+
 # Order Management Tools
 @mcp.tool()
 async def place_stock_order(
@@ -698,12 +716,12 @@ async def place_stock_order(
     quantity: float,
     order_type: str = "market",
     time_in_force: str = "day",
-    limit_price: float = None,
-    stop_price: float = None,
-    trail_price: float = None,
-    trail_percent: float = None,
+    limit_price: Optional[float] = None,
+    stop_price: Optional[float] = None,
+    trail_price: Optional[float] = None,
+    trail_percent: Optional[float] = None,
     extended_hours: bool = False,
-    client_order_id: str = None,
+    client_order_id: Optional[str] = None,
 ) -> str:
     """Place a stock order of any type."""
     return await order_tools.place_stock_order(
@@ -741,7 +759,7 @@ async def cancel_all_orders() -> str:
 
 @mcp.tool()
 async def place_option_market_order(
-    legs: list, order_class: str = None, quantity: int = 1
+    legs: list, order_class: Optional[str] = None, quantity: int = 1
 ) -> str:
     """Place single or multi-leg options market order."""
     return await order_tools.place_option_market_order(legs, order_class, quantity)
@@ -917,7 +935,7 @@ async def resource_intraday_pnl(
     days_back: int = 0,
     include_open_positions: bool = True,
     min_trade_value: float = 0.0,
-    symbol_filter: str = None,
+    symbol_filter: Optional[str] = None,
 ) -> dict:
     """Tool mirror of positions://intraday_pnl resource."""
     return await intraday_pnl.get_intraday_pnl(
@@ -930,7 +948,7 @@ async def resource_intraday_pnl(
 
 @mcp.tool()
 async def resource_data_quality(
-    test_symbols: list = None,
+    test_symbols: Optional[list] = None,
     latency_threshold_ms: float = 500.0,
     quote_age_threshold_seconds: float = 60.0,
     spread_threshold_pct: float = 1.0,
@@ -1010,7 +1028,7 @@ async def get_extended_market_clock() -> str:
 
 @mcp.tool()
 async def validate_extended_hours_order(
-    symbol: str, order_type: str, extended_hours: bool = None
+    symbol: str, order_type: str, extended_hours: Optional[bool] = None
 ) -> dict:
     """Validate if order can be placed in current market session."""
     from .tools.extended_hours_orders import validate_extended_hours_order
@@ -1024,8 +1042,8 @@ async def place_extended_hours_order(
     side: str,
     quantity: float,
     order_type: str = "limit",
-    limit_price: float = None,
-    extended_hours: bool = None,
+    limit_price: Optional[float] = None,
+    extended_hours: Optional[bool] = None,
     time_in_force: str = "day",
 ) -> str:
     """Place order with automatic extended hours detection."""
@@ -1348,6 +1366,43 @@ async def scan() -> str:
     return await scan_prompt.scan(500, 20, "combined.lis")
 
 
+# Stream-Centric Trading Prompts (New Concurrent Architecture)
+@mcp.prompt()
+async def stream_centric_trading_cycle(symbols: str = "AUTO") -> str:
+    """Universal trading cycle with single-stream concurrent architecture.
+    
+    Args:
+        symbols: Comma-separated symbols (e.g., "AAPL,MSFT") or "AUTO" for scanner results
+    """
+    if __name__ == "__main__" or not __package__:
+        from alpaca_mcp_server.prompts.stream_centric_trading_prompt import (
+            stream_centric_trading_cycle as sctc_func,
+        )
+    else:
+        from .prompts.stream_centric_trading_prompt import (
+            stream_centric_trading_cycle as sctc_func,
+        )
+    return await sctc_func(symbols)
+
+
+@mcp.prompt()
+async def stream_concurrent_monitoring_cycle(symbols: str = "AUTO") -> str:
+    """Continuous monitoring cycle using stream-centric concurrent architecture.
+    
+    Args:
+        symbols: Comma-separated symbols or "AUTO" for current stream symbols
+    """
+    if __name__ == "__main__" or not __package__:
+        from alpaca_mcp_server.prompts.stream_centric_trading_prompt import (
+            stream_concurrent_monitoring_cycle as scmc_func,
+        )
+    else:
+        from .prompts.stream_centric_trading_prompt import (
+            stream_concurrent_monitoring_cycle as scmc_func,
+        )
+    return await scmc_func(symbols)
+
+
 # ============================================================================
 # SERVER INITIALIZATION
 # ============================================================================
@@ -1359,7 +1414,7 @@ def get_server():
 
 
 @mcp.prompt()
-async def day_trading_workflow(symbol: str = None) -> str:
+async def day_trading_workflow(symbol: Optional[str] = None) -> str:
     """Complete day trading analysis and setup workflow for any symbol."""
     from .prompts.day_trading_workflow import day_trading_workflow as dtw_func
 

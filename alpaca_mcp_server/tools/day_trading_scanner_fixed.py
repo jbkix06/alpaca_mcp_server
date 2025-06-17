@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 async def scan_day_trading_opportunities(
-    symbols: str = "SPY,QQQ,IWM,AAPL,MSFT,NVDA,TSLA,AMC,GME,PLTR,SOFI,RIVN,LCID,NIO,XPEV,BABA,META,GOOGL,AMZN,NFLX",
+    symbols: str = "ALL",  # Use ALL tradeable assets by default
     min_trades_per_minute: int = 50,
     min_percent_change: float = 5.0,
     max_symbols: int = 20,
@@ -263,11 +263,11 @@ async def scan_day_trading_opportunities(
 
 
 async def scan_explosive_momentum(
-    symbols: str = "CVAC,CGTL,GNLN,NEHC,SOUN,RIOT,MARA,COIN,HOOD,RBLX",
+    symbols: str = "ALL",  # Use ALL tradeable assets by default
     min_percent_change: float = 15.0,
 ) -> str:
     """
-    Quick scanner for explosive momentum moves like NEHC.
+    Quick scanner for explosive momentum moves.
 
     Focused on extreme % changes and volume spikes.
     """

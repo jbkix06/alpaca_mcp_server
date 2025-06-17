@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "alpaca-mcp": {
+      "type": "stdio",
+      "command": "bash",
+      "args": ["-c", "source .venv/bin/activate && python run_alpaca_mcp.py"],
+      "cwd": "/home/jjoravet/alpaca-mcp-server"
+    }
+  }
+}

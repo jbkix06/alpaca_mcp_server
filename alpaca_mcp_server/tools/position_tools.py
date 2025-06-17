@@ -31,11 +31,13 @@ async def close_position(
         # Close the position
         order = client.close_position(symbol, close_options)
 
+        order_id = getattr(order, 'id', 'Unknown')
+        order_status = getattr(order, 'status', 'Unknown')
         return f"""Position Closed Successfully:
 ----------------------------
 Symbol: {symbol}
-Order ID: {order.id}
-Status: {order.status}"""
+Order ID: {order_id}
+Status: {order_status}"""
 
     except APIError as api_error:
         error_message = str(api_error)
@@ -81,10 +83,13 @@ async def close_all_positions(cancel_orders: bool = False) -> str:
         response_parts.append("-" * 30)
 
         for response in close_responses:
-            response_parts.append(f"Symbol: {response.symbol}")
-            response_parts.append(f"Status: {response.status}")
-            if response.order_id:
-                response_parts.append(f"Order ID: {response.order_id}")
+            symbol = getattr(response, 'symbol', 'Unknown')
+            status = getattr(response, 'status', 'Unknown')
+            order_id = getattr(response, 'order_id', None)
+            response_parts.append(f"Symbol: {symbol}")
+            response_parts.append(f"Status: {status}")
+            if order_id:
+                response_parts.append(f"Order ID: {order_id}")
             response_parts.append("-" * 30)
 
         return "\n".join(response_parts)

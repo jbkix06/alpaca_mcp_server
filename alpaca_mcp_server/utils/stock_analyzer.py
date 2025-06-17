@@ -21,13 +21,13 @@ def load_previous_results():
         try:
             with open("previous_results.json", "w") as f:
                 json.dump({}, f)
-        except:
+        except (IOError, json.JSONDecodeError, PermissionError):
             return {}
     try:
         with open("previous_results.json", "r") as f:
             data = json.load(f)
             return data if isinstance(data, dict) else {}
-    except:
+    except (IOError, json.JSONDecodeError, PermissionError):
         return {}
 
 

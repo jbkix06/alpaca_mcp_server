@@ -2,7 +2,7 @@
 
 from datetime import datetime, time
 import pandas as pd
-import pandas_market_calendars as mcal
+import pandas_market_calendars as mcal  # type: ignore
 from ..config.settings import get_trading_client
 
 
@@ -136,7 +136,7 @@ async def get_session_status() -> dict:
         )
 
         # Session phase for regular market
-        if current_session == "regular_market":
+        if current_session == "regular_market" and progress_percent is not None:
             if progress_percent < 5:
                 session_phase = "opening"
             elif progress_percent < 25:

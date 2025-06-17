@@ -16,9 +16,10 @@ async def startup() -> str:
         Comprehensive startup status report with top trading opportunities
     """
 
-    # Use MCP day trading scanner for active stocks
+    # Use MCP day trading scanner for active stocks - scan ALL tradeable assets
     try:
         scanner_result = await scan_day_trading_opportunities(
+            symbols="ALL",  # Use ALL tradeable stock assets by default
             min_trades_per_minute=500,
             min_percent_change=0.0,  # Get all stocks, we'll filter later
             max_symbols=20,
@@ -27,16 +28,25 @@ async def startup() -> str:
 
         # Parse the formatted result to extract stock data
         top_20 = []
-        if "No active stocks found" not in scanner_result:
+        if "No opportunities found" not in scanner_result and "Total Qualified: 0" not in scanner_result:
             lines = scanner_result.split("\n")
             for line in lines:
-                if " | " in line and not line.startswith("Symbol"):
+                # Look for lines with rank numbers (e.g., "   1 NVDA      10,253 +     1.5% $144.029 1,469,127 ⚡ MODERATE")
+                if line.strip() and line.strip().split() and line.strip().split()[0].isdigit():
                     try:
-                        parts = line.split(" | ")
-                        if len(parts) >= 4:
-                            symbol = parts[0].strip()
-                            trades_str = parts[1].strip().replace(",", "")
-                            pct_str = parts[2].strip().rstrip("%")
+                        # Split by whitespace and extract fields
+                        parts = line.strip().split()
+                        if len(parts) >= 6:  # rank symbol trades +/- change% price
+                            symbol = parts[1]
+                            trades_str = parts[2].replace(",", "")
+                            # Handle the +/- sign separately from percentage
+                            if parts[3] in ['+', '-']:
+                                pct_str = parts[4].rstrip("%")
+                                if parts[3] == '-':
+                                    pct_str = '-' + pct_str
+                            else:
+                                # Handle case where +/- is attached to percentage
+                                pct_str = parts[3].rstrip("%")
 
                             trades = int(trades_str)
                             pct = float(pct_str)

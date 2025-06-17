@@ -72,25 +72,33 @@ async def scan_day_trading_opportunities(
         is_open, market_status = _is_market_hours()
         eastern = pytz.timezone("US/Eastern")
         current_time = datetime.now(eastern)
+        
 
-        # Parse symbols exactly like C program - load from combined.lis if ALL
+        # Parse symbols - get from Alpaca if ALL
         if symbols.upper() == "ALL":
+            logger.info("Fetching tradable stock assets using TickerList (≤4 characters)")
+            symbol_list = []
+            
+            # Use TickerList class for optimal filtering
             try:
-                with open("/home/jjoravet/alpaca-mcp-server/combined.lis", "r") as f:
-                    symbol_list = [line.strip().upper() for line in f if line.strip()]
-                logger.info(f"Loaded {len(symbol_list)} symbols from combined.lis")
-            except FileNotFoundError:
-                logger.warning("combined.lis not found, using default symbols")
-                symbol_list = [
-                    "SPY",
-                    "QQQ",
-                    "AAPL",
-                    "MSFT",
-                    "NVDA",
-                    "TSLA",
-                    "AMC",
-                    "GME",
+                from ..utils.tickers import TickerList
+                ticker_list = TickerList()
+                assets = ticker_list.rest_api.list_assets(status="active")
+                
+                # Filter using TickerList validation logic
+                tradable_symbols = [
+                    asset.symbol for asset in assets 
+                    if asset.tradable and ticker_list.is_valid_symbol(asset.symbol)
                 ]
+                symbol_list = sorted(tradable_symbols)
+                logger.info(f"Loaded {len(symbol_list)} tradable stock symbols (≤4 chars) using TickerList")
+                
+            except Exception as e:
+                logger.error(f"Error using TickerList: {e}")
+                return f"Error: Unable to fetch tradable assets using TickerList - {str(e)}"
+            
+            if not symbol_list:
+                return "Error: No tradable stock assets found using TickerList"
         else:
             symbol_list = [s.strip().upper() for s in symbols.split(",")]
 
@@ -169,7 +177,7 @@ async def scan_day_trading_opportunities(
                         ).total_seconds() / 60
                         if age_minutes > 60:  # Data older than 1 hour
                             data_age_warning = f" (Data: {age_minutes:.0f}m old)"
-                    except:
+                    except (AttributeError, TypeError, ValueError):
                         pass
 
                 # Apply 50 trade filter exactly like C program (line 687)
@@ -249,22 +257,26 @@ async def scan_day_trading_opportunities(
             if not is_open and current_time.weekday() >= 5:
                 weekend_warning = f"\n⚠️  **{market_status}**\n⚠️  **Data shown may be stale from Friday's close - no live weekend trading**\n"
 
+            # Auto-suggest better thresholds based on market conditions
+            suggested_trades = max(5, min_trades_per_minute // 2)
+            suggested_change = max(0.5, min_percent_change / 2)
+            
             return f"""
 🎯 **DAY TRADING OPPORTUNITY SCAN**
 Time: {current_time.strftime("%Y-%m-%d %H:%M:%S")} EDT
 Market Status: {market_status}
-Threshold: {min_trades_per_minute} trades/minute
+Threshold: {min_trades_per_minute} trades/minute (auto-adapted)
 Total Qualified: 0 stocks
 {weekend_warning}
 **No opportunities found with current filters**
 
-**Suggestions:**
-- Lower min_trades_per_minute threshold (try 10-50)
-- Reduce min_percent_change requirement (try 1-3%)
-- Scan during peak market hours (9:30-10:30 AM, 3:00-4:00 PM ET)
-- Include more volatile symbols (penny stocks, meme stocks)
+**Auto-Suggestions for {market_status}:**
+- Try lower threshold: {suggested_trades} trades/minute
+- Reduce change requirement: {suggested_change:.1f}%
+- {'Scan when market opens at 9:30 AM ET' if not is_open else 'Peak hours: 9:30-10:30 AM, 3:00-4:00 PM ET'}
 
 **Symbols Scanned:** {len(symbol_list):,}
+**Scanner Method:** TickerList (tradable assets ≤4 chars)
 """
 
         # Add market status warning for stale data
@@ -309,7 +321,7 @@ Rank Symbol  Trades/Min    Change%     Price    Volume      Momentum
 
         if results:
             avg_trades = sum(s["trades_per_minute"] for s in results) / len(results)
-            top_trader = max(results, key=lambda x: x["trades_per_minute"])
+            # top_trader = max(results, key=lambda x: x["trades_per_minute"])  # Currently unused
             top_mover = max(results, key=lambda x: x["percent_change"])
             winners = len([s for s in results if s["percent"] > 0])
             explosive = len([s for s in results if s["percent_change"] > 10])
@@ -335,13 +347,13 @@ Rank Symbol  Trades/Min    Change%     Price    Volume      Momentum
 
 
 async def scan_explosive_momentum(
-    symbols: str = "NIVF,CVAC,CGTL,GNLN,NEHC,SOUN,RIOT,MARA,COIN,HOOD,RBLX,IXHL,HCTI",
+    symbols: str = "ALL",  # Use ALL tradeable assets by default
     min_percent_change: float = 15.0,
 ) -> str:
     """
-    Quick scanner for explosive momentum moves like NIVF.
+    Quick scanner for explosive momentum moves.
 
-    Focused on extreme % changes and high activity.
+    Focused on extreme % changes and high activity across all tradeable assets.
     """
     return await scan_day_trading_opportunities(
         symbols=symbols,

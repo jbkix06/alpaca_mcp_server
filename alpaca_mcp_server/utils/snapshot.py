@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import asyncio
 import aiohttp
-import pandas_market_calendars as mcal
+import pandas_market_calendars as mcal  # type: ignore
 import pandas as pd
 
 # Load Alpaca API credentials from the environment variables
@@ -126,7 +126,7 @@ class StockAnalyzer:
                 "intraday_volatility": intraday_volatility,
                 "price_velocity": price_velocity,
             }
-        except:
+        except (KeyError, TypeError, ValueError, ZeroDivisionError):
             return {"volatility": 0, "intraday_volatility": 0, "price_velocity": 0}
 
     def analyze_volume_pattern(self, snapshot, historical_volumes, historical_trades):
@@ -187,7 +187,7 @@ class StockAnalyzer:
                 "daily_velocity": daily_velocity,
                 "multi_day_velocity": multi_day_velocity,
             }
-        except:
+        except (KeyError, TypeError, ValueError, ZeroDivisionError):
             return {"minute_velocity": 0, "daily_velocity": 0, "multi_day_velocity": 0}
 
     def analyze_breakout_potential(self, snapshot):
@@ -218,7 +218,7 @@ class StockAnalyzer:
                 "dist_to_support": dist_to_support,
                 "trade_acceleration": trade_acceleration,
             }
-        except:
+        except (KeyError, TypeError, ValueError, ZeroDivisionError):
             return {
                 "range_size": 0,
                 "dist_to_resistance": 0,
@@ -254,7 +254,7 @@ class StockAnalyzer:
                 "daily_vwap_divergence": daily_vwap_divergence,
                 "volume_exhaustion": volume_exhaustion,
             }
-        except:
+        except (KeyError, TypeError, ValueError, ZeroDivisionError):
             return {
                 "price_position": 0,
                 "minute_vwap_divergence": 0,
@@ -335,7 +335,7 @@ class StockAnalyzer:
 
             return signals, signal_strength
 
-        except:
+        except (KeyError, TypeError, ValueError, ZeroDivisionError, AttributeError):
             return [], 0
 
 

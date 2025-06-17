@@ -44,14 +44,15 @@ async def get_intraday_pnl(
             orders = [
                 order
                 for order in orders
-                if order.symbol.upper() == symbol_filter.upper()
+                if hasattr(order, 'symbol') and order.symbol.upper() == symbol_filter.upper()
             ]
 
         # Calculate realized P&L from filled orders
         realized_pnl = 0
         trade_count = 0
         day_trades = 0
-        trades_by_symbol = {}
+        from typing import Dict, Any, List
+        trades_by_symbol: Dict[str, Dict[str, Any]] = {}
         total_volume = 0
         largest_win = 0
         largest_loss = 0
@@ -147,10 +148,10 @@ async def get_intraday_pnl(
                 positions = [
                     pos
                     for pos in positions
-                    if pos.symbol.upper() == symbol_filter.upper()
+                    if hasattr(pos, 'symbol') and pos.symbol.upper() == symbol_filter.upper()
                 ]
 
-            unrealized_pnl = sum(float(pos.unrealized_pl) for pos in positions)
+            unrealized_pnl = sum(float(pos.unrealized_pl or 0) for pos in positions)
             current_positions_count = len(positions)
 
         # Calculate day trade limits

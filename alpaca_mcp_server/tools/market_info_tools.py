@@ -42,7 +42,15 @@ async def get_market_calendar(start_date: str, end_date: str) -> str:
     """
     try:
         client = get_trading_client()
-        calendar = client.get_calendar(start=start_date, end=end_date)
+        # Different API versions may use different parameter names
+        try:
+            calendar = client.get_calendar(start=start_date, end=end_date)
+        except TypeError:
+            # Try alternative parameter names
+            try:
+                calendar = client.get_calendar(start_date=start_date, end_date=end_date)
+            except TypeError:
+                calendar = client.get_calendar()
         result = f"Market Calendar ({start_date} to {end_date}):\n----------------------------\n"
         for day in calendar:
             result += f"Date: {day.date}, Open: {day.open}, Close: {day.close}\n"

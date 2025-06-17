@@ -173,9 +173,23 @@ class ConfigurableStockDataBuffer:
                 # Handle both string and numeric timestamps
                 if isinstance(timestamp, str):
                     try:
-                        # Try parsing ISO format first (e.g., "2025-06-17T14:30:25.123456")
-                        from datetime import datetime
-                        dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        # Try parsing ISO format with proper timezone handling
+                        from datetime import datetime, timezone
+                        import re
+                        
+                        # Parse timestamp correctly based on timezone info
+                        if timestamp.endswith('Z'):
+                            # UTC timestamp with Z suffix
+                            timestamp_clean = timestamp[:-1]
+                            dt = datetime.fromisoformat(timestamp_clean).replace(tzinfo=timezone.utc)
+                        elif re.search(r'[+-]\d{2}:\d{2}$', timestamp):
+                            # Timezone-aware timestamp
+                            dt = datetime.fromisoformat(timestamp)
+                        else:
+                            # No timezone info, assume local time
+                            dt = datetime.fromisoformat(timestamp)
+                        
+                        # Convert to UTC timestamp
                         timestamp = dt.timestamp()
                     except (ValueError, TypeError):
                         try:
@@ -183,6 +197,12 @@ class ConfigurableStockDataBuffer:
                             timestamp = float(timestamp)
                         except (ValueError, TypeError):
                             continue  # Skip invalid timestamps
+                elif isinstance(timestamp, (int, float)):
+                    # Already a numeric timestamp
+                    pass
+                else:
+                    continue  # Skip invalid types
+                
                 if timestamp > cutoff:
                     result.append(item)
             return result

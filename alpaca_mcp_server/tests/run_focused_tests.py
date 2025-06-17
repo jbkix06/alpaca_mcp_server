@@ -9,9 +9,10 @@ import time
 from pathlib import Path
 
 # Add project root to path
-project_root = Path(__file__).parent.parent
+project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+# Import after path modification
 from alpaca_mcp_server.prompts.master_scanning_workflow import master_scanning_workflow
 from alpaca_mcp_server.prompts.pro_technical_workflow import pro_technical_workflow
 from alpaca_mcp_server.prompts.market_session_workflow import market_session_workflow

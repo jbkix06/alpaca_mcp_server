@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 async def scan_after_hours_opportunities(
-    symbols: str = "AAPL,MSFT,NVDA,TSLA,GOOGL,AMZN,META,NFLX,COIN,HOOD,AMC,GME,PLTR,SOFI,RIVN,LCID",
+    symbols: str = "ALL",  # Use ALL tradeable assets by default
     min_volume: int = 100000,
     min_percent_change: float = 2.0,
     max_symbols: int = 15,
@@ -35,6 +35,26 @@ async def scan_after_hours_opportunities(
         Formatted analysis of after-hours opportunities
     """
     try:
+        # Resolve symbols - get ALL tradeable assets if needed
+        if symbols.upper() == "ALL":
+            try:
+                from ..utils.tickers import TickerList
+                ticker_list = TickerList()
+                assets = ticker_list.rest_api.list_assets(status="active")
+                
+                # Filter using TickerList validation logic
+                tradable_symbols = [
+                    asset.symbol for asset in assets 
+                    if asset.tradable and ticker_list.is_valid_symbol(asset.symbol)
+                ]
+                # Limit to top liquid stocks for after-hours scanning
+                symbol_list = sorted(tradable_symbols)[:200]  # Limit for performance
+                symbols = ",".join(symbol_list)
+                
+            except Exception:
+                # Fallback to major stocks if TickerList fails
+                symbols = "AAPL,MSFT,NVDA,TSLA,GOOGL,AMZN,META,NFLX,COIN,HOOD,AMC,GME,PLTR,SOFI,RIVN,LCID"
+
         # Get market session info
         market_clock = await get_extended_market_clock()
 
@@ -311,7 +331,7 @@ async def get_enhanced_streaming_analytics(
         snapshot = await get_stock_snapshots(symbol)
 
         # Get streaming data if available
-        from ..tools.streaming_tools import get_stock_stream_data
+        from .streaming_tools import get_stock_stream_data
 
         try:
             trades_data = await get_stock_stream_data(

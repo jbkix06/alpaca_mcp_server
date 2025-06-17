@@ -7,8 +7,6 @@ import os
 import sys
 import asyncio
 import logging
-import subprocess
-from typing import Optional
 from pathlib import Path
 
 # Add project root to path to import plot.py

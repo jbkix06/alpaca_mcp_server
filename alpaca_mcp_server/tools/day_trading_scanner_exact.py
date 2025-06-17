@@ -12,7 +12,7 @@ _snapshot_cache = {}
 
 
 async def scan_day_trading_opportunities_exact(
-    symbols: str = "SPY,QQQ,IWM,AAPL,MSFT,NVDA,TSLA,AMC,GME,PLTR,SOFI,RIVN,LCID,NIO,XPEV,BABA,META,GOOGL,AMZN,NFLX",
+    symbols: str = "ALL",  # Use ALL tradeable assets by default
     min_trades_per_minute: int = 50,
     min_percent_change: float = 5.0,
     max_symbols: int = 20,
@@ -61,9 +61,7 @@ async def scan_day_trading_opportunities_exact(
 
         # Calculate exact differentials
         results = []
-        time_interval_minutes = (
-            wait_seconds / 60.0
-        )  # Convert to minutes for per-minute calculation
+        # time_interval_minutes = wait_seconds / 60.0  # Currently unused
 
         for symbol in snapshot1_metrics:
             if symbol not in snapshot2_metrics:
@@ -233,14 +231,14 @@ def _parse_snapshot_metrics(snapshot_data: str) -> dict:
                     volume_value = int(float(vol_text))
                     if volume_value < 10000000:  # Minute volume
                         minute_volume = volume_value
-                except:
+                except (ValueError, TypeError, AttributeError):
                     pass
 
             elif line.startswith("• Daily Change:") and "%" in line:
                 pct_text = line.split("%")[0].replace("• Daily Change: ", "")
                 try:
                     daily_change = abs(float(pct_text))
-                except:
+                except (ValueError, TypeError, AttributeError):
                     pass
 
             elif line.startswith("• Previous Close: $"):
@@ -260,12 +258,12 @@ def _parse_snapshot_metrics(snapshot_data: str) -> dict:
 
 
 async def scan_explosive_momentum_exact(
-    symbols: str = "NIVF,CVAC,CGTL,GNLN,NEHC,SOUN,RIOT,MARA,COIN,HOOD,RBLX,IXHL,HCTI",
+    symbols: str = "ALL",  # Use ALL tradeable assets by default
     min_percent_change: float = 15.0,
     wait_seconds: int = 60,
 ) -> str:
     """
-    Exact measurement scanner for explosive momentum like NIVF.
+    Exact measurement scanner for explosive momentum.
 
     Uses differential snapshots for precise trade counting.
     """

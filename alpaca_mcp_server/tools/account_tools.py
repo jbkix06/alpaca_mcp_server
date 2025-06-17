@@ -29,12 +29,12 @@ async def get_account_info() -> str:
 Account ID: {account.id}
 Status: {account.status}
 Currency: {account.currency}
-Buying Power: ${float(account.buying_power):.2f}
-Cash: ${float(account.cash):.2f}
-Portfolio Value: ${float(account.portfolio_value):.2f}
-Equity: ${float(account.equity):.2f}
-Long Market Value: ${float(account.long_market_value):.2f}
-Short Market Value: ${float(account.short_market_value):.2f}
+Buying Power: ${float(account.buying_power or 0):.2f}
+Cash: ${float(account.cash or 0):.2f}
+Portfolio Value: ${float(account.portfolio_value or 0):.2f}
+Equity: ${float(account.equity or 0):.2f}
+Long Market Value: ${float(account.long_market_value or 0):.2f}
+Short Market Value: ${float(account.short_market_value or 0):.2f}
 Pattern Day Trader: {"Yes" if account.pattern_day_trader else "No"}
 Day Trades Remaining: {account.daytrade_count if hasattr(account, "daytrade_count") else "Unknown"}"""
 
@@ -68,10 +68,10 @@ async def get_positions() -> str:
         for position in positions:
             result += f"""Symbol: {position.symbol}
 Quantity: {position.qty} shares
-Market Value: ${float(position.market_value):.2f}
-Average Entry Price: ${float(position.avg_entry_price):.2f}
-Current Price: ${float(position.current_price):.2f}
-Unrealized P/L: ${float(position.unrealized_pl):.2f} ({float(position.unrealized_plpc) * 100:.2f}%)
+Market Value: ${float(position.market_value or 0):.2f}
+Average Entry Price: ${float(position.avg_entry_price or 0):.2f}
+Current Price: ${float(position.current_price or 0):.2f}
+Unrealized P/L: ${float(position.unrealized_pl or 0):.2f} ({float(position.unrealized_plpc or 0) * 100:.2f}%)
 -------------------
 """
         return result
@@ -103,10 +103,10 @@ async def get_open_position(symbol: str) -> str:
         return f"""Position Details for {symbol}:
 ---------------------------
 Quantity: {quantity_text}
-Market Value: ${float(position.market_value):.2f}
-Average Entry Price: ${float(position.avg_entry_price):.2f}
-Current Price: ${float(position.current_price):.2f}
-Unrealized P/L: ${float(position.unrealized_pl):.2f}"""
+Market Value: ${float(position.market_value or 0):.2f}
+Average Entry Price: ${float(position.avg_entry_price or 0):.2f}
+Current Price: ${float(position.current_price or 0):.2f}
+Unrealized P/L: ${float(position.unrealized_pl or 0):.2f}"""
 
     except Exception as e:
         return f"Error fetching position for {symbol}: {str(e)}"

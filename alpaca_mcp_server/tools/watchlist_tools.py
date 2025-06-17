@@ -1,6 +1,6 @@
 """Watchlist management tools."""
 
-from typing import List
+from typing import List, Optional
 from alpaca.trading.requests import CreateWatchlistRequest, UpdateWatchlistRequest
 from ..config.settings import get_trading_client
 
@@ -32,10 +32,13 @@ async def get_watchlists() -> str:
         watchlists = client.get_watchlists()
         result = "Watchlists:\n------------\n"
         for wl in watchlists:
-            result += f"Name: {wl.name}\n"
-            result += f"ID: {wl.id}\n"
-            result += f"Created: {wl.created_at}\n"
-            result += f"Updated: {wl.updated_at}\n"
+            if hasattr(wl, 'name'):
+                result += f"Name: {wl.name}\n"
+                result += f"ID: {wl.id}\n"
+                result += f"Created: {wl.created_at}\n"
+                result += f"Updated: {wl.updated_at}\n"
+            else:
+                result += f"Watchlist: {wl}\n"
             result += f"Symbols: {', '.join(getattr(wl, 'symbols', []) or [])}\n\n"
         return result
     except Exception as e:
@@ -43,13 +46,14 @@ async def get_watchlists() -> str:
 
 
 async def update_watchlist(
-    watchlist_id: str, name: str = None, symbols: List[str] = None
+    watchlist_id: str, name: Optional[str] = None, symbols: Optional[List[str]] = None
 ) -> str:
     """Update an existing watchlist."""
     try:
         client = get_trading_client()
         update_request = UpdateWatchlistRequest(name=name, symbols=symbols)
         watchlist = client.update_watchlist_by_id(watchlist_id, update_request)
-        return f"Watchlist updated successfully: {watchlist.name}"
+        name_str = getattr(watchlist, 'name', str(watchlist))
+        return f"Watchlist updated successfully: {name_str}"
     except Exception as e:
         return f"Error updating watchlist: {str(e)}"

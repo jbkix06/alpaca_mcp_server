@@ -20,9 +20,9 @@ class HelpSystem:
 
     def __init__(self, mcp_server: FastMCP):
         self.mcp_server = mcp_server
-        self._tool_registry = {}
-        self._prompt_registry = {}
-        self._resource_registry = {}
+        self._tool_registry: Dict[str, Any] = {}
+        self._prompt_registry: Dict[str, Any] = {}
+        self._resource_registry: Dict[str, Any] = {}
         self._build_registries()
 
     def _build_registries(self):
@@ -174,6 +174,12 @@ class HelpSystem:
             func = tool_info.get("func") if isinstance(tool_info, dict) else tool_info
 
             # Get function signature
+            if func is None:
+                return {
+                    "name": tool_name,
+                    "description": "Tool function not found",
+                    "inputSchema": {"type": "object", "properties": {}}
+                }
             sig = inspect.signature(func)
 
             # Extract docstring
@@ -279,13 +285,13 @@ class HelpSystem:
         self, tool_name: str, docstring: str
     ) -> Dict[str, Any]:
         """Generate MCP-compliant tool annotations based on tool analysis."""
-        annotations = {
+        annotations: Dict[str, Any] = {
             "title": self._generate_human_title(tool_name),
         }
 
         # Analyze tool behavior from name and description
         name_lower = tool_name.lower()
-        doc_lower = docstring.lower() if docstring else ""
+        # doc_lower = docstring.lower() if docstring else ""  # Currently unused
 
         # Determine if tool is read-only
         read_only_indicators = [
@@ -368,6 +374,11 @@ class HelpSystem:
                 if isinstance(prompt_info, dict)
                 else prompt_info
             )
+            if func is None:
+                return {
+                    "name": prompt_name,
+                    "description": "Prompt function not found"
+                }
             sig = inspect.signature(func)
             docstring = inspect.getdoc(func) or "No description available"
 
@@ -712,7 +723,7 @@ Use get_all_prompts_help() to see all available prompts.
         # Refresh registries to get latest tools
         self._update_tool_registry()
 
-        categories = {}
+        categories: Dict[str, List[Any]] = {}
 
         for tool_name, tool_info in self._tool_registry.items():
             category = tool_info["category"]
@@ -799,7 +810,7 @@ Found {len(matches)} matching tools:
 
         return help_text
 
-    def get_mcp_tool_schema(self, tool_name: str) -> Dict[str, Any]:
+    def get_mcp_tool_schema(self, tool_name: str) -> Optional[Dict[str, Any]]:
         """Get MCP-compliant tool schema for tools/list response."""
         self._update_tool_registry()
 
@@ -878,6 +889,11 @@ async def search_tools_resource(query: str) -> str:
     return get_help_system().search_tools(query)
 
 
+async def get_all_prompts_help_resource() -> str:
+    """Resource endpoint for all prompts help."""
+    return get_help_system().get_all_prompts_help()
+
+
 # ============================================================================
 # HELP PARAMETER DECORATOR - CLI-style --help support
 # ============================================================================
@@ -934,7 +950,10 @@ def check_help_parameter(**kwargs) -> Optional[str]:
             # Extract tool name from call stack
             import inspect
 
-            frame = inspect.currentframe().f_back
-            tool_name = frame.f_code.co_name
+            frame = inspect.currentframe()
+            if frame and frame.f_back:
+                tool_name = frame.f_back.f_code.co_name
+            else:
+                tool_name = "unknown_tool"
             return get_help_system().get_tool_help(tool_name)
     return None

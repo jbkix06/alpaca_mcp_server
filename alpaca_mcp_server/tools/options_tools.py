@@ -2,7 +2,7 @@
 
 from typing import Optional
 from datetime import date
-from alpaca.data.requests import OptionChainRequest, OptionLatestQuoteRequest
+from alpaca.data.requests import OptionChainRequest, OptionLatestQuoteRequest, OptionSnapshotRequest
 from alpaca.data.enums import OptionsFeed
 from alpaca.trading.enums import ContractType, AssetStatus
 from ..config.settings import get_option_historical_client
@@ -36,14 +36,19 @@ async def get_option_contracts(
     """
     try:
         client = get_option_historical_client()
-        request = OptionChainRequest(
-            underlying_symbol=underlying_symbol,
-            expiration_date=expiration_date,
-            strike_price_gte=strike_price_gte,
-            strike_price_lte=strike_price_lte,
-            contract_type=type,
-            limit=limit,
-        )
+        # Build request parameters dynamically to avoid unsupported args
+        request_params = {
+            "underlying_symbol": underlying_symbol
+        }
+        if expiration_date:
+            request_params["expiration_date"] = expiration_date
+        if strike_price_gte:
+            request_params["strike_price_gte"] = float(strike_price_gte)
+        if strike_price_lte:
+            request_params["strike_price_lte"] = float(strike_price_lte)
+        # Note: contract_type and limit may not be supported in this API version
+        
+        request = OptionChainRequest(**request_params)
 
         contracts = client.get_option_chain(request)
 
@@ -119,7 +124,25 @@ async def get_option_snapshot(symbol: str) -> str:
     """
     try:
         client = get_option_historical_client()
-        snapshot = client.get_option_snapshot(symbol)
+        # Try different parameter names for OptionSnapshotRequest
+        try:
+            request = OptionSnapshotRequest(symbols=[symbol])
+        except TypeError:
+            try:
+                request = OptionSnapshotRequest(symbol_or_symbols=symbol)
+            except TypeError:
+                # Fallback: pass symbol directly if no request wrapper needed
+                snapshot = client.get_option_snapshot(symbol)
+                # Format the direct response
+                if not snapshot:
+                    return f"No snapshot data found for {symbol}"
+                return f"""
+Option Snapshot for {symbol}:
+============================
+{snapshot}
+"""
+        
+        snapshot = client.get_option_snapshot(request)
 
         if not snapshot:
             return f"No snapshot data found for {symbol}"

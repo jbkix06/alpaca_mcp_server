@@ -659,13 +659,62 @@ async def get_stock_snapshots(symbols: Union[str, List[str]]) -> str:
                     daily_range = float(daily_bar.high) - float(daily_bar.low)
                     daily_range_pct = (daily_range / float(daily_bar.open)) * 100
 
-                    result += f"""• Today's OHLC: ${float(daily_bar.open):.2f} / ${float(daily_bar.high):.2f} / ${float(daily_bar.low):.2f} / ${float(daily_bar.close):.2f}
+                    # Check if daily bar is stale (current price way outside daily range)
+                    is_stale_daily = False
+                    if latest_trade:
+                        current_price = float(latest_trade.price)
+                        daily_high = float(daily_bar.high)
+                        daily_low = float(daily_bar.low)
+                        
+                        
+                        if current_price > daily_high * 1.5 or (daily_high < 2.0 and current_price > daily_high + 0.5):
+                            is_stale_daily = True
+                            result += "⚠️ **STALE DATA WARNING**: Daily bar appears to be from previous day\n"
+                            result += f"   Current price ${current_price:.2f} is way above daily high ${daily_high:.2f}\n"
+
+                    result += f"""• {'Yesterday' if is_stale_daily else 'Today'}'s OHLC: ${float(daily_bar.open):.2f} / ${float(daily_bar.high):.2f} / ${float(daily_bar.low):.2f} / ${float(daily_bar.close):.2f}
 • Volume: {daily_bar.volume:,}
 • Range: ${daily_range:.2f} ({daily_range_pct:.2f}%)
 """
 
-                    # Calculate daily change if previous close is available
-                    if previous_daily_bar:
+                    # Calculate daily change using stock_analyzer.py logic
+                    eastern = pytz.timezone("US/Eastern")
+                    current_time_et = datetime.now(eastern)
+                    market_open = current_time_et.replace(hour=9, minute=30, second=0, microsecond=0)
+                    is_pre_market = current_time_et < market_open and current_time_et.hour >= 4
+                    
+                    
+                    # Check for data availability and calculate daily change
+                    if latest_trade and daily_bar:
+                        current_price = float(latest_trade.price)
+                        
+                        # Use stock_analyzer.py logic: if pre-market, use daily_bar.close as reference
+                        if is_pre_market:
+                            reference_price = float(daily_bar.close)
+                            result += f"""• Market Status: PRE-MARKET ({current_time_et.strftime('%H:%M %Z')})
+• Daily Change: {((current_price - reference_price) / reference_price) * 100:+.2f}% (${current_price - reference_price:+.2f})
+• Reference Close: ${reference_price:.2f} (yesterday's daily bar close)
+• Current Price: ${current_price:.2f}
+"""
+                        else:
+                            # Regular hours - use previous daily bar if available, otherwise daily bar close
+                            if previous_daily_bar:
+                                reference_price = float(previous_daily_bar.close)
+                            else:
+                                reference_price = float(daily_bar.close)
+                            
+                            daily_change = ((current_price - reference_price) / reference_price) * 100
+                            
+                            result += f"""• Daily Change: {daily_change:+.2f}% (${current_price - reference_price:+.2f})
+• Reference Close: ${reference_price:.2f}
+• Current Price: ${current_price:.2f}
+"""
+                        
+                        # Set daily_change for performance indicators
+                        daily_change = ((current_price - reference_price) / reference_price) * 100
+                    
+                    elif previous_daily_bar and daily_bar:
+                        # Fallback to daily bar calculation
                         daily_change = (
                             (float(daily_bar.close) - float(previous_daily_bar.close))
                             / float(previous_daily_bar.close)
@@ -673,44 +722,22 @@ async def get_stock_snapshots(symbols: Union[str, List[str]]) -> str:
                         result += f"""• Daily Change: {daily_change:+.2f}% (${float(daily_bar.close) - float(previous_daily_bar.close):+.2f})
 • Previous Close: ${float(previous_daily_bar.close):.2f}
 """
-
-                        # Add performance indicators
+                        
+                    # Add performance indicators
+                    if 'daily_change' in locals():
                         result += "\n### Performance Indicators\n"
                         if daily_change > 3:
-                            result += (
-                                "• Strong Upward Movement - Consider momentum plays\n"
-                            )
+                            result += "• Strong Upward Movement - Consider momentum plays\n"
                         elif daily_change > 1:
                             result += "• Positive Momentum - Watch for continuation\n"
                         elif daily_change < -3:
-                            result += (
-                                "• Significant Decline - Risk management critical\n"
-                            )
+                            result += "• Significant Decline - Risk management critical\n"
                         elif daily_change < -1:
                             result += "• Negative Pressure - Monitor for reversal\n"
                         else:
                             result += "• Consolidating - Await directional break\n"
                     else:
-                        # Calculate intraday change without previous close
-                        intraday_change = (
-                            (float(daily_bar.close) - float(daily_bar.open))
-                            / float(daily_bar.open)
-                        ) * 100
-                        result += f"""• Intraday Change: {intraday_change:+.2f}%
-• Previous Close: Not available
-"""
-
-                        result += "\n### Performance Indicators\n"
-                        if intraday_change > 2:
-                            result += "• Strong Intraday Performance\n"
-                        elif intraday_change > 0.5:
-                            result += "• Positive Intraday Movement\n"
-                        elif intraday_change < -2:
-                            result += "• Weak Intraday Performance\n"
-                        elif intraday_change < -0.5:
-                            result += "• Negative Intraday Movement\n"
-                        else:
-                            result += "• Neutral Intraday Action\n"
+                        result += "• Change data not available\n"
 
                 else:
                     result += "• Daily bar data not available\n"

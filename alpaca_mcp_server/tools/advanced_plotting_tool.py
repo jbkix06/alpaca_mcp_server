@@ -42,7 +42,6 @@ def create_headless_plot(results, plot_dir, dpi=100):
     import matplotlib.dates as mdates
     from dateutil import tz
     import numpy as np
-    import subprocess
     from datetime import datetime
 
     if not results:
@@ -67,7 +66,7 @@ def create_headless_plot(results, plot_dir, dpi=100):
 
             timestamps_dt = [convert_to_nyc_timezone(ts) for ts in timestamps]
             use_datetime = True
-        except:
+        except (ValueError, TypeError, AttributeError, ImportError):
             timestamps_dt = range(len(original_prices))
             use_datetime = False
 
@@ -483,7 +482,7 @@ Current paper trading status: {os.environ.get('PAPER', 'Not set')}
                     display_success.append(f"{os.path.basename(plot_file)} - Display failed: {e}")
             
             display_info = (
-                f"\n🖼️  PLOTS DISPLAYED:\n" + 
+                "\n🖼️  PLOTS DISPLAYED:\n" + 
                 "\n".join(f"• {msg}" for msg in display_success) +
                 f"\n💡 Plots opened in background - windows should appear automatically"
                 f"{dimensions_info}"

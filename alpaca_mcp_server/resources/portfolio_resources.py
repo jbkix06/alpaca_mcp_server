@@ -11,7 +11,7 @@ async def get_portfolio_performance() -> dict:
         account = client.get_account()
         positions = client.get_all_positions()
 
-        total_unrealized_pnl = sum(float(pos.unrealized_pl) for pos in positions)
+        total_unrealized_pnl = sum(float(pos.unrealized_pl or 0) for pos in positions)
         total_value = float(account.portfolio_value)
         cash_value = float(account.cash)
         equity_value = float(account.equity)

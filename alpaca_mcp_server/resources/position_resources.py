@@ -11,7 +11,7 @@ async def get_current_positions() -> dict:
         positions = client.get_all_positions()
 
         position_summary = []
-        total_unrealized_pnl = 0
+        total_unrealized_pnl = 0.0
 
         for pos in positions:
             unrealized_pnl = float(pos.unrealized_pl)
