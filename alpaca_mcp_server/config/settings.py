@@ -2,7 +2,7 @@
 
 import os
 from dotenv import load_dotenv
-from typing import Optional
+from typing import Optional, Any
 import time
 import threading
 from collections import deque, defaultdict
@@ -111,7 +111,7 @@ def get_option_historical_client() -> OptionHistoricalDataClient:
 _global_stock_stream = None
 _stock_stream_thread = None
 _stock_stream_active = False
-_stock_stream_subscriptions = {
+_stock_stream_subscriptions: dict[str, set[str]] = {
     "trades": set(),
     "quotes": set(),
     "bars": set(),
@@ -121,8 +121,8 @@ _stock_stream_subscriptions = {
 }
 
 # Configurable stock data buffers - no artificial limits for active stocks
-_stock_data_buffers = {}
-_stock_stream_stats = defaultdict(int)
+_stock_data_buffers: dict[str, Any] = {}
+_stock_stream_stats: defaultdict[str, int] = defaultdict(int)
 _stock_stream_start_time = None
 _stock_stream_end_time = None
 _stock_stream_config = {
@@ -147,6 +147,7 @@ class ConfigurableStockDataBuffer:
             max_size: Maximum number of items to store. None = unlimited.
                      For active stocks, consider 10000+ or unlimited.
         """
+        self.data: deque[Any]
         if max_size is None:
             self.data = deque()  # Unlimited
         else:
@@ -166,7 +167,25 @@ class ConfigurableStockDataBuffer:
     def get_recent(self, seconds: int = 60):
         with self.lock:
             cutoff = time.time() - seconds
-            return [item for item in self.data if item.get("timestamp", 0) > cutoff]
+            result = []
+            for item in self.data:
+                timestamp = item.get("timestamp", 0)
+                # Handle both string and numeric timestamps
+                if isinstance(timestamp, str):
+                    try:
+                        # Try parsing ISO format first (e.g., "2025-06-17T14:30:25.123456")
+                        from datetime import datetime
+                        dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        timestamp = dt.timestamp()
+                    except (ValueError, TypeError):
+                        try:
+                            # Fallback to direct float conversion
+                            timestamp = float(timestamp)
+                        except (ValueError, TypeError):
+                            continue  # Skip invalid timestamps
+                if timestamp > cutoff:
+                    result.append(item)
+            return result
 
     def get_all(self):
         with self.lock:
@@ -199,6 +218,9 @@ def get_or_create_stock_buffer(
             if buffer_size is not None
             else _stock_stream_config.get("buffer_size")
         )
+        # Ensure effective_size is None or int
+        if effective_size is not None and not isinstance(effective_size, int):
+            effective_size = int(effective_size) if str(effective_size).isdigit() else None
         _stock_data_buffers[buffer_key] = ConfigurableStockDataBuffer(effective_size)
     return _stock_data_buffers[buffer_key]
 
