@@ -25,7 +25,7 @@ class ServiceConfig:
     check_interval: int = 2  # seconds between monitoring cycles
     signal_confidence_threshold: float = 0.75
     max_concurrent_positions: int = 5
-    watchlist_size_limit: int = 20
+    watchlist_size_limit: int = 50
     enable_auto_alerts: bool = True
     state_file: str = "hybrid_service_state.json"
     log_file: str = "hybrid_monitoring.log"
@@ -143,6 +143,25 @@ class HybridTradingService:
             self.check_count = 0
             self.error_count = 0
             
+            # CRITICAL: Check positions immediately on startup
+            if self.position_tracker:
+                await self.position_tracker.update_positions()
+                initial_position_count = len(self.position_tracker.positions)
+                self._last_position_count = initial_position_count
+                
+                if initial_position_count > 0:
+                    position_symbols = list(self.position_tracker.positions.keys())
+                    self.logger.warning(f"🔔 STARTUP: Found {initial_position_count} existing positions: {position_symbols}")
+                    
+                    # Alert Claude about existing positions
+                    await self.alert_system.send_alert(
+                        "📊 Existing Positions Detected at Startup",
+                        f"Found {initial_position_count} open positions: {', '.join(position_symbols)}",
+                        priority="high"
+                    )
+                else:
+                    self.logger.info("✅ STARTUP: No existing positions found")
+            
             # Start monitoring task
             self.monitoring_task = asyncio.create_task(self._monitoring_loop())
             
@@ -155,6 +174,9 @@ class HybridTradingService:
             
             # Save initial state
             await self._save_state()
+            
+            # Register global service instance for tool access
+            set_service_instance(self)
             
             self.logger.info("✅ Hybrid Trading Service started successfully")
             
@@ -306,9 +328,92 @@ class HybridTradingService:
             self.logger.error(f"Error removing from watchlist: {e}")
             return {"status": "error", "message": str(e)}
     
+    async def add_symbols_to_watchlist(self, symbols: List[str]) -> Dict:
+        """Add symbols to the monitoring watchlist"""
+        try:
+            added = []
+            
+            for symbol in symbols:
+                symbol = symbol.upper().strip()
+                if symbol not in self.watchlist:
+                    if len(self.watchlist) >= self.config.watchlist_size_limit:
+                        self.logger.warning(f"Watchlist limit reached ({self.config.watchlist_size_limit}). Cannot add {symbol}")
+                        break
+                    
+                    self.watchlist.add(symbol)
+                    added.append(symbol)
+            
+            if added:
+                await self._save_state()
+                self.logger.info(f"Added to watchlist: {added}")
+                
+                if self.alert_system:
+                    await self.alert_system.send_alert(
+                        "📊 Watchlist Updated",
+                        f"Added symbols: {', '.join(added)}. Total watchlist: {len(self.watchlist)}",
+                        priority="info"
+                    )
+            
+            return {
+                "status": "success",
+                "added": added,
+                "watchlist_size": len(self.watchlist),
+                "current_watchlist": sorted(list(self.watchlist))
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error adding to watchlist: {e}")
+            return {"status": "error", "message": str(e)}
+    
     async def get_current_signals(self) -> List[Dict]:
         """Get current trading signals"""
         return self.current_signals.copy()
+    
+    async def check_positions_after_order(self, order_info: Dict = None) -> Dict:
+        """
+        Check positions immediately after an order is processed.
+        This ensures Claude gets immediate feedback on position changes.
+        """
+        if not self.position_tracker:
+            return {"status": "error", "message": "Position tracker not available"}
+        
+        try:
+            # Force immediate position update
+            await self.position_tracker.update_positions()
+            position_count = len(self.position_tracker.positions)
+            position_symbols = list(self.position_tracker.positions.keys())
+            
+            # Log the check for Claude awareness
+            if order_info:
+                self.logger.warning(f"🔔 POST-ORDER CHECK: After {order_info.get('action', 'order')}, found {position_count} positions: {position_symbols}")
+            else:
+                self.logger.warning(f"🔔 POSITION CHECK: Currently {position_count} positions: {position_symbols}")
+            
+            # Send alert about current position status
+            if self.alert_system:
+                message = f"Post-order position check: {position_count} positions"
+                if position_symbols:
+                    message += f" ({', '.join(position_symbols)})"
+                
+                await self.alert_system.send_alert(
+                    "📊 Position Status Check",
+                    message,
+                    priority="high"
+                )
+            
+            # Update tracking
+            self._last_position_count = position_count
+            
+            return {
+                "status": "success",
+                "position_count": position_count,
+                "positions": position_symbols,
+                "message": f"Found {position_count} positions: {position_symbols}"
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error checking positions after order: {e}")
+            return {"status": "error", "message": str(e)}
     
     async def _monitoring_loop(self):
         """Main monitoring loop - runs continuously"""
@@ -342,13 +447,32 @@ class HybridTradingService:
         self.last_check = datetime.now(timezone.utc)
         self.check_count += 1
         
-        # Log heartbeat every 100 cycles
+        # Log heartbeat every 100 cycles with position summary
         if self.check_count % 100 == 0:
-            self.logger.info(f"💓 Heartbeat - Cycle {self.check_count}, Watchlist: {len(self.watchlist)}")
+            position_count = len(self.position_tracker.positions) if self.position_tracker else 0
+            self.logger.info(f"💓 Heartbeat - Cycle {self.check_count}, Watchlist: {len(self.watchlist)}, Positions: {position_count}")
         
-        # Update positions
+        # Update positions - CRITICAL for Claude monitoring
         if self.position_tracker:
             await self.position_tracker.update_positions()
+            
+            # Log position changes for Claude awareness
+            position_count = len(self.position_tracker.positions)
+            if hasattr(self, '_last_position_count') and self._last_position_count != position_count:
+                if position_count > self._last_position_count:
+                    self.logger.warning(f"🔔 NEW POSITIONS DETECTED: {position_count} total positions now active")
+                elif position_count < self._last_position_count:
+                    self.logger.warning(f"🔔 POSITIONS CLOSED: {position_count} positions remaining (was {self._last_position_count})")
+                    
+                # Alert Claude about position changes
+                if self.alert_system:
+                    await self.alert_system.send_alert(
+                        "📊 Position Change Detected",
+                        f"Position count changed from {getattr(self, '_last_position_count', 0)} to {position_count}",
+                        priority="high"
+                    )
+            
+            self._last_position_count = position_count
         
         # Detect signals for watchlist
         if self.signal_detector and self.watchlist:

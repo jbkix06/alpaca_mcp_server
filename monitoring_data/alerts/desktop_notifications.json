@@ -1,0 +1,24 @@
+{
+  "notifications": [
+    {
+      "timestamp": "2025-06-18T16:43:36.388446+00:00",
+      "notification": {
+        "title": "\ud83d\udcf8 Trade Confirmation Required",
+        "message": "Action: BUY 100 shares @ $25.5000 TEST\nPlease provide screenshot proof\nand verify execution details",
+        "priority": "urgent",
+        "category": "confirmation",
+        "sound": true,
+        "timeout": 20,
+        "actions": [
+          "Screenshot Taken",
+          "Skip"
+        ],
+        "metadata": {
+          "symbol": "TEST",
+          "action": "BUY 100 shares @ $25.5000"
+        }
+      }
+    }
+  ],
+  "last_updated": "2025-06-18T16:43:36.388446+00:00"
+}

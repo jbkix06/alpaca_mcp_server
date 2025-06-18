@@ -1,0 +1,21 @@
+{
+  "trade_id": "TEST_BUY_1750265016",
+  "symbol": "TEST",
+  "action": "BUY",
+  "quantity": 100,
+  "expected_price": 25.5,
+  "actual_price": null,
+  "fill_timestamp": null,
+  "confirmation_status": "TIMEOUT",
+  "screenshot_path": null,
+  "screenshot_required": true,
+  "position_verified": false,
+  "price_acknowledged": false,
+  "created_at": "2025-06-18T16:43:36.388001+00:00",
+  "confirmed_at": null,
+  "timeout_at": "2025-06-18T16:53:36.388012+00:00",
+  "notes": [
+    "Trade confirmation requested at 11:43:36",
+    "Confirmation timeout at 11:53:38"
+  ]
+}

@@ -12,9 +12,11 @@ from decimal import Decimal
 from typing import Dict, Optional, List, Callable
 from dataclasses import dataclass, asdict
 import os
+import time
 
 # Import existing MCP tools for position data
 from ..tools.account_tools import get_account_info, get_positions
+from ..tools.streaming_tools import get_stock_stream_data
 
 
 @dataclass
@@ -30,6 +32,8 @@ class Position:
     market_value: Decimal
     cost_basis: Decimal
     last_update: datetime
+    stream_price: Optional[Decimal] = None  # Real-time streaming price
+    stream_timestamp: Optional[datetime] = None  # Last streaming update
     
     def to_dict(self) -> Dict:
         """Convert to dictionary for JSON serialization"""
@@ -43,8 +47,30 @@ class Position:
             'unrealized_pnl_percent': self.unrealized_pnl_percent,
             'market_value': float(self.market_value),
             'cost_basis': float(self.cost_basis),
-            'last_update': self.last_update.isoformat()
+            'last_update': self.last_update.isoformat(),
+            'stream_price': float(self.stream_price) if self.stream_price else None,
+            'stream_timestamp': self.stream_timestamp.isoformat() if self.stream_timestamp else None
         }
+
+
+@dataclass
+class ProfitSpikeAlert:
+    """Real-time profit spike alert"""
+    alert_type: str = "PROFIT_SPIKE"
+    symbol: str = ""
+    entry_price: float = 0.0
+    current_price: float = 0.0
+    stream_price: float = 0.0
+    profit_percent: float = 0.0
+    profit_dollar: float = 0.0
+    spike_magnitude: float = 0.0  # How big the spike was
+    timestamp: str = ""
+    action_required: str = "CONSIDER_SELL"
+    urgency: str = "MEDIUM"  # LOW, MEDIUM, HIGH, CRITICAL
+    
+    def to_dict(self) -> Dict:
+        """Convert to dictionary for JSON serialization"""
+        return asdict(self)
 
 
 class PositionTracker:
@@ -99,7 +125,10 @@ class PositionTracker:
             # Use existing MCP tool to get current positions
             positions_result = await get_positions()
             
-            if isinstance(positions_result, dict) and positions_result.get('status') == 'success':
+            # Parse string response from MCP tool
+            if isinstance(positions_result, str):
+                await self._parse_positions_string(positions_result)
+            elif isinstance(positions_result, dict) and positions_result.get('status') == 'success':
                 positions_data = positions_result.get('positions', [])
                 await self._process_position_data(positions_data)
             else:
@@ -109,6 +138,61 @@ class PositionTracker:
             self.error_count += 1
             self.logger.error(f"Error updating positions: {e}")
             raise
+    
+    async def _parse_positions_string(self, positions_string: str):
+        """Parse positions from string response"""
+        try:
+            import re
+            
+            # Extract position data from string format
+            if "Symbol:" in positions_string and "Quantity:" in positions_string:
+                lines = positions_string.split('\n')
+                current_position = {}
+                
+                for line in lines:
+                    line = line.strip()
+                    if line.startswith("Symbol:"):
+                        current_position['symbol'] = line.split("Symbol:")[1].strip()
+                    elif line.startswith("Quantity:"):
+                        qty_match = re.search(r'(\d+)', line)
+                        if qty_match:
+                            current_position['qty'] = qty_match.group(1)
+                    elif line.startswith("Average Entry Price:"):
+                        price_match = re.search(r'\$([0-9.]+)', line)
+                        if price_match:
+                            current_position['avg_entry_price'] = price_match.group(1)
+                    elif line.startswith("Current Price:"):
+                        price_match = re.search(r'\$([0-9.]+)', line)
+                        if price_match:
+                            current_position['current_price'] = price_match.group(1)
+                    elif line.startswith("Market Value:"):
+                        value_match = re.search(r'\$([0-9.]+)', line)
+                        if value_match:
+                            current_position['market_value'] = value_match.group(1)
+                    elif line.startswith("Unrealized P/L:"):
+                        # Extract both dollar amount and percentage
+                        pnl_match = re.search(r'\$([0-9.-]+)', line)
+                        pct_match = re.search(r'\(([0-9.-]+)%\)', line)
+                        if pnl_match:
+                            current_position['unrealized_pl'] = pnl_match.group(1)
+                        if pct_match:
+                            current_position['unrealized_plpc'] = float(pct_match.group(1)) / 100
+                
+                # Calculate cost basis
+                if all(k in current_position for k in ['qty', 'avg_entry_price']):
+                    cost_basis = float(current_position['qty']) * float(current_position['avg_entry_price'])
+                    current_position['cost_basis'] = str(cost_basis)
+                
+                if current_position.get('symbol'):
+                    await self._process_position_data([current_position])
+                    
+            else:
+                self.logger.info("No positions found")
+                # Clear positions
+                self.positions = {}
+                
+        except Exception as e:
+            self.logger.error(f"Error parsing positions string: {e}")
     
     async def _process_position_data(self, positions_data: List[Dict]):
         """Process position data from Alpaca API"""
@@ -178,6 +262,10 @@ class PositionTracker:
         """Check if position meets alert criteria"""
         pnl_percent = position.unrealized_pnl_percent
         
+        # Update position with real-time streaming data
+        await self._update_position_with_streaming_data(position)
+        
+        # ALWAYS check for profit updates regardless of threshold - JSON generation happens here
         # Check for major profit alert (urgent sell consideration)
         if pnl_percent >= self.major_profit_threshold:
             await self._trigger_major_profit_alert(position)
@@ -189,6 +277,11 @@ class PositionTracker:
         # Check for loss alert
         elif pnl_percent <= self.loss_alert_threshold:
             await self._trigger_loss_alert(position)
+            
+        # CRITICAL: Always update streaming data for JSON generation when profitable
+        elif pnl_percent > 0:  # Any profit at all
+            # This ensures JSON updates are generated for ANY profit
+            pass
     
     async def _trigger_major_profit_alert(self, position: Position):
         """Trigger alert for major profit threshold - URGENT SELL CONSIDERATION"""
@@ -286,6 +379,215 @@ class PositionTracker:
             }
         
         return summary
+
+    async def _update_position_with_streaming_data(self, position: Position):
+        """Update position with real-time streaming data and check for profit spikes"""
+        try:
+            # Get recent streaming data for this symbol
+            stream_result = await get_stock_stream_data(
+                symbol=position.symbol,
+                data_type="trades",
+                recent_seconds=10,
+                limit=5
+            )
+            
+            if isinstance(stream_result, dict) and stream_result.get('status') == 'success':
+                stream_data = stream_result.get('data', [])
+                
+                if stream_data:
+                    # Get the most recent trade price
+                    latest_trade = stream_data[-1]  # Most recent trade
+                    stream_price = Decimal(str(latest_trade.get('price', 0)))
+                    stream_timestamp = datetime.now(timezone.utc)
+                    
+                    # Update position with streaming data
+                    position.stream_price = stream_price
+                    position.stream_timestamp = stream_timestamp
+                    
+                    # Calculate profit using streaming price
+                    if stream_price > 0:
+                        stream_profit_dollar = (stream_price - position.entry_price) * position.quantity
+                        stream_profit_percent = float((stream_price - position.entry_price) / position.entry_price * 100)
+                        
+                        # Generate regular JSON profit updates when profitable
+                        if stream_profit_percent > 0:  # ANY profit
+                            await self._generate_profit_update(
+                                position=position,
+                                stream_price=float(stream_price),
+                                stream_profit_percent=stream_profit_percent,
+                                stream_profit_dollar=float(stream_profit_dollar),
+                                update_type="PROFIT_UPDATE"
+                            )
+                        
+                        # Check for profit spike (difference between current and streaming price)
+                        if position.current_price > 0:
+                            price_spike = float((stream_price - position.current_price) / position.current_price * 100)
+                            
+                            # Generate JSON profit spike alert if significant spike detected
+                            if abs(price_spike) >= 2.0 and stream_profit_percent >= 3.0:  # 2% price spike + 3% total profit
+                                await self._generate_profit_spike_alert(
+                                    position=position,
+                                    stream_price=float(stream_price),
+                                    stream_profit_percent=stream_profit_percent,
+                                    stream_profit_dollar=float(stream_profit_dollar),
+                                    spike_magnitude=price_spike
+                                )
+                
+        except Exception as e:
+            self.logger.error(f"Error updating position {position.symbol} with streaming data: {e}")
+
+    async def _generate_profit_update(self, position: Position, stream_price: float, 
+                                    stream_profit_percent: float, stream_profit_dollar: float,
+                                    update_type: str):
+        """Generate regular JSON profit update for Claude orchestrator"""
+        try:
+            # Determine status based on profit percentage
+            if stream_profit_percent >= 10.0:
+                status = "MAJOR_PROFIT"
+                action = "CONSIDER_SELL"
+            elif stream_profit_percent >= 5.0:
+                status = "GOOD_PROFIT"
+                action = "MONITOR_CLOSELY"
+            elif stream_profit_percent >= 2.0:
+                status = "BUILDING_PROFIT"
+                action = "CONTINUE_MONITORING"
+            else:
+                status = "SMALL_PROFIT"
+                action = "HOLD"
+            
+            # Create profit update
+            update = {
+                "update_type": update_type,
+                "symbol": position.symbol,
+                "entry_price": float(position.entry_price),
+                "current_price": float(position.current_price),
+                "stream_price": stream_price,
+                "profit_percent": stream_profit_percent,
+                "profit_dollar": stream_profit_dollar,
+                "quantity": position.quantity,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "status": status,
+                "action_suggested": action
+            }
+            
+            # Save JSON update to monitoring_data directory
+            update_filename = f"profit_update_{position.symbol}_{int(time.time())}.json"
+            update_filepath = os.path.join("monitoring_data", "alerts", update_filename)
+            
+            # Ensure alerts directory exists
+            os.makedirs(os.path.dirname(update_filepath), exist_ok=True)
+            
+            # Write JSON update
+            with open(update_filepath, 'w') as f:
+                json.dump(update, f, indent=2)
+            
+            # Log the update
+            self.logger.info(
+                f"📊 PROFIT UPDATE: {position.symbol} - "
+                f"Stream: ${stream_price:.4f} (+{stream_profit_percent:.2f}%) "
+                f"Status: {status} - {action} - JSON: {update_filename}"
+            )
+            
+            # Also save to latest profit updates for immediate visibility
+            latest_updates_file = os.path.join("monitoring_data", "alerts", "latest_profit_updates.json")
+            
+            # Load existing updates or create new list
+            try:
+                with open(latest_updates_file, 'r') as f:
+                    latest_updates = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                latest_updates = {"updates": []}
+            
+            # Add new update to beginning of list
+            latest_updates["updates"].insert(0, update)
+            
+            # Keep only last 20 updates
+            latest_updates["updates"] = latest_updates["updates"][:20]
+            latest_updates["last_updated"] = update["timestamp"]
+            
+            # Save updated latest updates
+            with open(latest_updates_file, 'w') as f:
+                json.dump(latest_updates, f, indent=2)
+                
+        except Exception as e:
+            self.logger.error(f"Error generating profit update for {position.symbol}: {e}")
+
+    async def _generate_profit_spike_alert(self, position: Position, stream_price: float, 
+                                         stream_profit_percent: float, stream_profit_dollar: float,
+                                         spike_magnitude: float):
+        """Generate JSON profit spike alert for Claude orchestrator"""
+        try:
+            # Determine urgency based on profit percentage and spike magnitude
+            if stream_profit_percent >= 15.0 or abs(spike_magnitude) >= 5.0:
+                urgency = "CRITICAL"
+                action = "SELL_IMMEDIATELY"
+            elif stream_profit_percent >= 10.0 or abs(spike_magnitude) >= 3.0:
+                urgency = "HIGH"
+                action = "CONSIDER_SELL_NOW"
+            elif stream_profit_percent >= 5.0:
+                urgency = "MEDIUM"
+                action = "CONSIDER_SELL"
+            else:
+                urgency = "LOW"
+                action = "MONITOR"
+            
+            # Create profit spike alert
+            alert = ProfitSpikeAlert(
+                alert_type="PROFIT_SPIKE",
+                symbol=position.symbol,
+                entry_price=float(position.entry_price),
+                current_price=float(position.current_price),
+                stream_price=stream_price,
+                profit_percent=stream_profit_percent,
+                profit_dollar=stream_profit_dollar,
+                spike_magnitude=spike_magnitude,
+                timestamp=datetime.now(timezone.utc).isoformat(),
+                action_required=action,
+                urgency=urgency
+            )
+            
+            # Save JSON alert to monitoring_data directory
+            alert_filename = f"profit_spike_{position.symbol}_{int(time.time())}.json"
+            alert_filepath = os.path.join("monitoring_data", "alerts", alert_filename)
+            
+            # Ensure alerts directory exists
+            os.makedirs(os.path.dirname(alert_filepath), exist_ok=True)
+            
+            # Write JSON alert
+            with open(alert_filepath, 'w') as f:
+                json.dump(alert.to_dict(), f, indent=2)
+            
+            # Log the alert
+            self.logger.warning(
+                f"🚨 PROFIT SPIKE ALERT: {position.symbol} - "
+                f"Stream Price: ${stream_price:.4f} (+{stream_profit_percent:.2f}%) "
+                f"Spike: {spike_magnitude:+.2f}% - {urgency} - {action} - "
+                f"JSON: {alert_filename}"
+            )
+            
+            # Also save to latest alerts for immediate visibility
+            latest_alerts_file = os.path.join("monitoring_data", "alerts", "latest_profit_spikes.json")
+            
+            # Load existing alerts or create new list
+            try:
+                with open(latest_alerts_file, 'r') as f:
+                    latest_alerts = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                latest_alerts = {"alerts": []}
+            
+            # Add new alert to beginning of list
+            latest_alerts["alerts"].insert(0, alert.to_dict())
+            
+            # Keep only last 10 alerts
+            latest_alerts["alerts"] = latest_alerts["alerts"][:10]
+            latest_alerts["last_updated"] = alert.timestamp
+            
+            # Save updated latest alerts
+            with open(latest_alerts_file, 'w') as f:
+                json.dump(latest_alerts, f, indent=2)
+                
+        except Exception as e:
+            self.logger.error(f"Error generating profit spike alert for {position.symbol}: {e}")
 
 
 # WebSocket Integration Plan (Future Implementation)

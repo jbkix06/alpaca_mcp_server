@@ -38,6 +38,8 @@ dependencies = [
     "aiohttp>=3.12.9",
     "websockets>=10.4",
     "requests>=2.32.3",
+    "fastapi>=0.115.13",
+    "uvicorn>=0.34.3",
 ]
 
 [project.scripts]
