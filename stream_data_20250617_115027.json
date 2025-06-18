@@ -1,0 +1,844 @@
+{
+  "metadata": {
+    "start_time": "2025-06-17T11:50:22.459444",
+    "end_time": "2025-06-17T11:50:27.466208",
+    "summary": {
+      "total_events": 69,
+      "symbols_count": 1,
+      "duration_seconds": 5.006764,
+      "events_per_second": 13.78135658081747,
+      "breakdown": {
+        "trades": 69
+      },
+      "symbols": [
+        "CERO"
+      ]
+    }
+  },
+  "data": {
+    "CERO": [
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 5,
+        "timestamp": "2025-06-17T16:50:22.719183+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 71,
+        "timestamp": "2025-06-17T16:50:22.719185+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 100,
+        "timestamp": "2025-06-17T16:50:22.719187+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 100,
+        "timestamp": "2025-06-17T16:50:22.719191+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 29,
+        "timestamp": "2025-06-17T16:50:22.719205+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 17,
+        "timestamp": "2025-06-17T16:50:22.719206+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 59,
+        "timestamp": "2025-06-17T16:50:22.719211+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 57,
+        "timestamp": "2025-06-17T16:50:22.719225+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 43,
+        "timestamp": "2025-06-17T16:50:22.719317+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 33,
+        "timestamp": "2025-06-17T16:50:22.719327+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 100,
+        "timestamp": "2025-06-17T16:50:22.719341+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 100,
+        "timestamp": "2025-06-17T16:50:22.719373+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 98,
+        "timestamp": "2025-06-17T16:50:22.719484+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.76,
+        "size": 2,
+        "timestamp": "2025-06-17T16:50:22.719528+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.72,
+        "size": 17,
+        "timestamp": "2025-06-17T16:50:22.719532+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 60,
+        "timestamp": "2025-06-17T16:50:22.719584+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 1,
+        "timestamp": "2025-06-17T16:50:22.951303+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.77,
+        "size": 3,
+        "timestamp": "2025-06-17T16:50:23.538807+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.6119,
+        "size": 1000,
+        "timestamp": "2025-06-17T16:50:23.554768+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.75,
+        "size": 5,
+        "timestamp": "2025-06-17T16:50:23.644147+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.705,
+        "size": 10,
+        "timestamp": "2025-06-17T16:50:23.825131+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.705,
+        "size": 1100,
+        "timestamp": "2025-06-17T16:50:23.829554+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.77,
+        "size": 73,
+        "timestamp": "2025-06-17T16:50:23.984448+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.79,
+        "size": 39,
+        "timestamp": "2025-06-17T16:50:23.991946+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.79,
+        "size": 500,
+        "timestamp": "2025-06-17T16:50:23.992176+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.79,
+        "size": 7,
+        "timestamp": "2025-06-17T16:50:23.994558+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 500,
+        "timestamp": "2025-06-17T16:50:23.996801+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 1,
+        "timestamp": "2025-06-17T16:50:23.996895+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 100,
+        "timestamp": "2025-06-17T16:50:23.997087+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 5,
+        "timestamp": "2025-06-17T16:50:23.997178+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 15,
+        "timestamp": "2025-06-17T16:50:23.997180+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 680,
+        "timestamp": "2025-06-17T16:50:23.997180+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 9,
+        "timestamp": "2025-06-17T16:50:23.997213+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 820,
+        "timestamp": "2025-06-17T16:50:23.997251+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 10,
+        "timestamp": "2025-06-17T16:50:23.997254+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 42,
+        "timestamp": "2025-06-17T16:50:23.997254+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.81,
+        "size": 46,
+        "timestamp": "2025-06-17T16:50:23.997254+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.81,
+        "size": 35,
+        "timestamp": "2025-06-17T16:50:23.997258+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 1,
+        "timestamp": "2025-06-17T16:50:23.997284+00:00",
+        "exchange": "H",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 4,
+        "timestamp": "2025-06-17T16:50:23.997406+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7999,
+        "size": 500,
+        "timestamp": "2025-06-17T16:50:23.997816+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7999,
+        "size": 5,
+        "timestamp": "2025-06-17T16:50:23.998811+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7999,
+        "size": 15,
+        "timestamp": "2025-06-17T16:50:23.999164+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7999,
+        "size": 680,
+        "timestamp": "2025-06-17T16:50:23.999562+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7999,
+        "size": 423,
+        "timestamp": "2025-06-17T16:50:23.999912+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7999,
+        "size": 258,
+        "timestamp": "2025-06-17T16:50:24.000263+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.87,
+        "size": 1000,
+        "timestamp": "2025-06-17T16:50:24.776297+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7348,
+        "size": 1000,
+        "timestamp": "2025-06-17T16:50:24.834205+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.83,
+        "size": 11,
+        "timestamp": "2025-06-17T16:50:25.060405+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.82,
+        "size": 100,
+        "timestamp": "2025-06-17T16:50:25.138755+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.82,
+        "size": 100,
+        "timestamp": "2025-06-17T16:50:25.139087+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.83,
+        "size": 100,
+        "timestamp": "2025-06-17T16:50:25.143404+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.83,
+        "size": 156,
+        "timestamp": "2025-06-17T16:50:25.143596+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.83,
+        "size": 5,
+        "timestamp": "2025-06-17T16:50:25.146034+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8608,
+        "size": 39,
+        "timestamp": "2025-06-17T16:50:25.147774+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.86,
+        "size": 118,
+        "timestamp": "2025-06-17T16:50:25.212726+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.86,
+        "size": 300,
+        "timestamp": "2025-06-17T16:50:25.212973+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.86,
+        "size": 9,
+        "timestamp": "2025-06-17T16:50:25.215647+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.87,
+        "size": 573,
+        "timestamp": "2025-06-17T16:50:25.218067+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8699,
+        "size": 573,
+        "timestamp": "2025-06-17T16:50:25.218936+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.62,
+        "size": 5,
+        "timestamp": "2025-06-17T16:50:25.339853+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.715,
+        "size": 100,
+        "timestamp": "2025-06-17T16:50:25.878476+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8,
+        "size": 1,
+        "timestamp": "2025-06-17T16:50:25.995541+00:00",
+        "exchange": "U",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.82,
+        "size": 27,
+        "timestamp": "2025-06-17T16:50:26.066061+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7002,
+        "size": 85,
+        "timestamp": "2025-06-17T16:50:26.256374+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7914,
+        "size": 46,
+        "timestamp": "2025-06-17T16:50:26.697134+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.7901,
+        "size": 5,
+        "timestamp": "2025-06-17T16:50:27.235742+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.85,
+        "size": 5,
+        "timestamp": "2025-06-17T16:50:27.322482+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "CERO",
+        "price": 21.8581,
+        "size": 25,
+        "timestamp": "2025-06-17T16:50:27.516219+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      }
+    ]
+  }
+}

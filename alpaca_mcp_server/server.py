@@ -27,6 +27,7 @@ if __name__ == "__main__" or not __package__:
         asset_tools,
         corporate_action_tools,
         streaming_tools,
+        monitoring_tools,
     )
     from alpaca_mcp_server.tools.peak_trough_analysis_tool import (
         analyze_peaks_and_troughs as peak_trough_analysis,
@@ -48,6 +49,7 @@ else:
         position_tools,
         order_tools,
         market_data_tools,
+        monitoring_tools,
         market_info_tools,
         options_tools,
         watchlist_tools,
@@ -1448,6 +1450,79 @@ async def market_session_workflow(session_type: str = "full_day") -> str:
         from .prompts.market_session_workflow import market_session_workflow as msw_func
 
     return await msw_func(session_type)
+
+
+# ============================================================================
+# HYBRID MONITORING TOOLS - Genuine Automated Monitoring
+# ============================================================================
+
+
+@mcp.tool()
+async def start_hybrid_monitoring(
+    check_interval: int = 2,
+    signal_confidence_threshold: float = 0.75,
+    max_concurrent_positions: int = 5,
+    watchlist_size_limit: int = 20,
+    enable_auto_alerts: bool = True,
+    alert_channels: list = None
+) -> dict:
+    """Start the hybrid trading monitoring service."""
+    return await monitoring_tools.start_hybrid_monitoring(
+        check_interval,
+        signal_confidence_threshold,
+        max_concurrent_positions,
+        watchlist_size_limit,
+        enable_auto_alerts,
+        alert_channels
+    )
+
+
+@mcp.tool()
+async def stop_hybrid_monitoring() -> dict:
+    """Stop the hybrid trading monitoring service."""
+    return await monitoring_tools.stop_hybrid_monitoring()
+
+
+@mcp.tool()
+async def get_hybrid_monitoring_status() -> dict:
+    """Get current status of the hybrid monitoring service."""
+    return await monitoring_tools.get_hybrid_monitoring_status()
+
+
+@mcp.tool()
+async def verify_monitoring_active() -> dict:
+    """Verify that monitoring is actually running and provide proof."""
+    return await monitoring_tools.verify_monitoring_active()
+
+
+@mcp.tool()
+async def add_symbols_to_watchlist(symbols: list) -> dict:
+    """Add symbols to the monitoring watchlist."""
+    return await monitoring_tools.add_symbols_to_watchlist(symbols)
+
+
+@mcp.tool()
+async def remove_symbols_from_watchlist(symbols: list) -> dict:
+    """Remove symbols from the monitoring watchlist."""
+    return await monitoring_tools.remove_symbols_from_watchlist(symbols)
+
+
+@mcp.tool()
+async def get_current_watchlist() -> dict:
+    """Get the current monitoring watchlist."""
+    return await monitoring_tools.get_current_watchlist()
+
+
+@mcp.tool()
+async def get_current_trading_signals() -> dict:
+    """Get current trading signals detected by the monitoring service."""
+    return await monitoring_tools.get_current_trading_signals()
+
+
+@mcp.tool()
+async def get_monitoring_alerts(count: int = 10) -> dict:
+    """Get recent monitoring alerts."""
+    return await monitoring_tools.get_monitoring_alerts(count)
 
 
 # Initialize help system after all tools and prompts are registered

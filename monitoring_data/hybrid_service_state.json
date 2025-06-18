@@ -1,0 +1,29 @@
+{
+  "active": true,
+  "start_time": "2025-06-18T13:53:55.346429+00:00",
+  "last_check": "2025-06-18T13:53:55.346520+00:00",
+  "check_count": 1,
+  "error_count": 0,
+  "watchlist": [
+    "AAPL",
+    "APVO",
+    "AVPO",
+    "MSFT",
+    "NVDA",
+    "TSLA"
+  ],
+  "current_signals": [],
+  "config": {
+    "check_interval": 3,
+    "signal_confidence_threshold": 0.7,
+    "max_concurrent_positions": 5,
+    "watchlist_size_limit": 20,
+    "enable_auto_alerts": true,
+    "state_file": "hybrid_service_state.json",
+    "log_file": "hybrid_monitoring.log",
+    "alert_channels": [
+      "file",
+      "console"
+    ]
+  }
+}

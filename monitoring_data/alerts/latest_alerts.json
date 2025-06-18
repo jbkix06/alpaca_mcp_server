@@ -1,0 +1,32 @@
+{
+  "last_updated": "2025-06-18T13:53:57.531714+00:00",
+  "alert_count": 2,
+  "alerts": [
+    {
+      "id": "alert_1750254835",
+      "timestamp": "2025-06-18T13:53:55.346443+00:00",
+      "title": "\ud83d\ude80 Hybrid Trading Service STARTED",
+      "message": "Genuine automated monitoring is now active",
+      "priority": "info",
+      "metadata": {},
+      "channels_sent": [
+        "file",
+        "console"
+      ]
+    },
+    {
+      "id": "alert_1750254837",
+      "timestamp": "2025-06-18T13:53:57.530886+00:00",
+      "title": "\ud83e\uddea Alert System Test",
+      "message": "This is a test alert to verify all channels are working correctly.",
+      "priority": "info",
+      "metadata": {
+        "test": true
+      },
+      "channels_sent": [
+        "file",
+        "console"
+      ]
+    }
+  ]
+}

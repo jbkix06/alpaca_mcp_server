@@ -1,0 +1,5644 @@
+{
+  "metadata": {
+    "start_time": "2025-06-17T12:05:00.745223",
+    "end_time": "2025-06-17T12:05:30.781918",
+    "summary": {
+      "total_events": 474,
+      "symbols_count": 1,
+      "duration_seconds": 30.036695,
+      "events_per_second": 15.780697576747373,
+      "breakdown": {
+        "trades": 474
+      },
+      "symbols": [
+        "RBNE"
+      ]
+    }
+  },
+  "data": {
+    "RBNE": [
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:01.065282+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 12,
+        "timestamp": "2025-06-17T17:05:01.065319+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.92,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:01.066158+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9399,
+        "size": 131,
+        "timestamp": "2025-06-17T17:05:01.104569+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9399,
+        "size": 152,
+        "timestamp": "2025-06-17T17:05:01.104929+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9399,
+        "size": 17,
+        "timestamp": "2025-06-17T17:05:01.105287+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9001,
+        "size": 500,
+        "timestamp": "2025-06-17T17:05:01.426818+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.92,
+        "size": 1000,
+        "timestamp": "2025-06-17T17:05:01.914137+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.932,
+        "size": 200,
+        "timestamp": "2025-06-17T17:05:01.924129+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9362,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:02.039511+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9362,
+        "size": 125,
+        "timestamp": "2025-06-17T17:05:02.039871+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9353,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:02.162402+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9353,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:02.162440+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9385,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:02.185333+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9385,
+        "size": 4,
+        "timestamp": "2025-06-17T17:05:02.185684+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9385,
+        "size": 495,
+        "timestamp": "2025-06-17T17:05:02.186036+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.93,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:02.220971+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.93,
+        "size": 400,
+        "timestamp": "2025-06-17T17:05:02.249753+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.93,
+        "size": 52,
+        "timestamp": "2025-06-17T17:05:02.249754+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:02.250274+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.94,
+        "size": 52,
+        "timestamp": "2025-06-17T17:05:02.259841+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:02.366256+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:02.484613+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 32,
+        "timestamp": "2025-06-17T17:05:02.485193+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 8,
+        "timestamp": "2025-06-17T17:05:02.497757+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.905,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:02.507470+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9088,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:02.636266+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9088,
+        "size": 66,
+        "timestamp": "2025-06-17T17:05:02.684923+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:02.726040+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:02.892022+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:02.892024+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:02.892024+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:02.892030+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 3,
+        "timestamp": "2025-06-17T17:05:02.892036+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 57,
+        "timestamp": "2025-06-17T17:05:02.892038+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 300,
+        "timestamp": "2025-06-17T17:05:02.892042+00:00",
+        "exchange": "U",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 157,
+        "timestamp": "2025-06-17T17:05:02.892042+00:00",
+        "exchange": "U",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:02.892296+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 8,
+        "timestamp": "2025-06-17T17:05:02.892435+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 19,
+        "timestamp": "2025-06-17T17:05:02.897242+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:03.030831+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8799,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:03.032136+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8799,
+        "size": 23,
+        "timestamp": "2025-06-17T17:05:03.032563+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8799,
+        "size": 27,
+        "timestamp": "2025-06-17T17:05:03.032914+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 23,
+        "timestamp": "2025-06-17T17:05:03.034961+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 27,
+        "timestamp": "2025-06-17T17:05:03.036116+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 30,
+        "timestamp": "2025-06-17T17:05:03.164324+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 52,
+        "timestamp": "2025-06-17T17:05:03.164383+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 367,
+        "timestamp": "2025-06-17T17:05:03.164402+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 44,
+        "timestamp": "2025-06-17T17:05:03.164414+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:03.164573+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8776,
+        "size": 169,
+        "timestamp": "2025-06-17T17:05:03.178149+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9082,
+        "size": 36,
+        "timestamp": "2025-06-17T17:05:03.204386+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9094,
+        "size": 500,
+        "timestamp": "2025-06-17T17:05:03.216786+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:03.224266+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 16,
+        "timestamp": "2025-06-17T17:05:03.316506+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:03.316506+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:03.319358+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8901,
+        "size": 778,
+        "timestamp": "2025-06-17T17:05:03.321361+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 200,
+        "timestamp": "2025-06-17T17:05:03.434280+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.905,
+        "size": 22,
+        "timestamp": "2025-06-17T17:05:03.483792+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 500,
+        "timestamp": "2025-06-17T17:05:03.693098+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 45,
+        "timestamp": "2025-06-17T17:05:03.704748+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8953,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:03.734387+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.885,
+        "size": 800,
+        "timestamp": "2025-06-17T17:05:03.797514+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:03.938208+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8953,
+        "size": 89,
+        "timestamp": "2025-06-17T17:05:03.962041+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8601,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:03.975538+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:03.989143+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8601,
+        "size": 2500,
+        "timestamp": "2025-06-17T17:05:04.201280+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 39,
+        "timestamp": "2025-06-17T17:05:04.379714+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:04.607533+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9082,
+        "size": 15,
+        "timestamp": "2025-06-17T17:05:04.638792+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9053,
+        "size": 38,
+        "timestamp": "2025-06-17T17:05:04.722278+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.875,
+        "size": 135,
+        "timestamp": "2025-06-17T17:05:04.738451+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8701,
+        "size": 75,
+        "timestamp": "2025-06-17T17:05:04.832898+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:04.846059+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:04.846060+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 70,
+        "timestamp": "2025-06-17T17:05:04.846655+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9053,
+        "size": 33,
+        "timestamp": "2025-06-17T17:05:04.887882+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:05.002111+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 30,
+        "timestamp": "2025-06-17T17:05:05.003031+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:05.007083+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 64,
+        "timestamp": "2025-06-17T17:05:05.013287+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8616,
+        "size": 33,
+        "timestamp": "2025-06-17T17:05:05.063816+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8785,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:05.100335+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8782,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:05.314424+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:05.438064+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8601,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:05.678732+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8624,
+        "size": 353,
+        "timestamp": "2025-06-17T17:05:05.746526+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:05.789075+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8864,
+        "size": 92,
+        "timestamp": "2025-06-17T17:05:05.814289+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 33,
+        "timestamp": "2025-06-17T17:05:06.019833+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:06.214448+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 3000,
+        "timestamp": "2025-06-17T17:05:06.279305+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:06.427275+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:06.455124+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:06.455811+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 70,
+        "timestamp": "2025-06-17T17:05:06.456105+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:06.596461+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:06.627493+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:06.707612+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8714,
+        "size": 500,
+        "timestamp": "2025-06-17T17:05:07.194198+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.874,
+        "size": 3,
+        "timestamp": "2025-06-17T17:05:07.265673+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:07.281912+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8717,
+        "size": 200,
+        "timestamp": "2025-06-17T17:05:07.283244+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:07.323920+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8747,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:07.381164+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 275,
+        "timestamp": "2025-06-17T17:05:07.451982+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:07.452793+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8747,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:07.990426+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.878,
+        "size": 500,
+        "timestamp": "2025-06-17T17:05:08.341299+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 472,
+        "timestamp": "2025-06-17T17:05:08.341384+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:08.341958+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 9,
+        "timestamp": "2025-06-17T17:05:08.341962+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:08.341962+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:08.341962+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:08.341964+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 583,
+        "timestamp": "2025-06-17T17:05:08.341975+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 20,
+        "timestamp": "2025-06-17T17:05:08.342004+00:00",
+        "exchange": "U",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:08.342010+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 445,
+        "timestamp": "2025-06-17T17:05:08.342021+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:08.342266+00:00",
+        "exchange": "H",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 30,
+        "timestamp": "2025-06-17T17:05:08.342334+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 69,
+        "timestamp": "2025-06-17T17:05:08.342623+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 20,
+        "timestamp": "2025-06-17T17:05:08.342625+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:08.342625+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:08.342627+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:08.342629+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:08.342632+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:08.342632+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 40,
+        "timestamp": "2025-06-17T17:05:08.343152+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 119,
+        "timestamp": "2025-06-17T17:05:08.343394+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 3,
+        "timestamp": "2025-06-17T17:05:08.343400+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:08.343402+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:08.630871+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 7,
+        "timestamp": "2025-06-17T17:05:08.630872+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:08.631007+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 20,
+        "timestamp": "2025-06-17T17:05:08.631014+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 62,
+        "timestamp": "2025-06-17T17:05:08.631333+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:08.631371+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 150,
+        "timestamp": "2025-06-17T17:05:08.631373+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 70,
+        "timestamp": "2025-06-17T17:05:08.631374+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 121,
+        "timestamp": "2025-06-17T17:05:08.631374+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 11,
+        "timestamp": "2025-06-17T17:05:08.631435+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:08.631435+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 48,
+        "timestamp": "2025-06-17T17:05:08.631437+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 7,
+        "timestamp": "2025-06-17T17:05:08.631439+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:08.631552+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 14,
+        "timestamp": "2025-06-17T17:05:08.631587+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8476,
+        "size": 3,
+        "timestamp": "2025-06-17T17:05:09.022512+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:09.121516+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8476,
+        "size": 9,
+        "timestamp": "2025-06-17T17:05:09.151556+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8301,
+        "size": 1000,
+        "timestamp": "2025-06-17T17:05:09.227855+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8388,
+        "size": 15,
+        "timestamp": "2025-06-17T17:05:09.378047+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 8,
+        "timestamp": "2025-06-17T17:05:09.565035+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8388,
+        "size": 53,
+        "timestamp": "2025-06-17T17:05:09.632942+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8388,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:09.632976+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:09.663171+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:09.663174+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:09.663174+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 11,
+        "timestamp": "2025-06-17T17:05:09.663174+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.835,
+        "size": 75,
+        "timestamp": "2025-06-17T17:05:09.774209+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8388,
+        "size": 30,
+        "timestamp": "2025-06-17T17:05:09.922759+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8388,
+        "size": 20,
+        "timestamp": "2025-06-17T17:05:10.075611+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:10.257681+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 250,
+        "timestamp": "2025-06-17T17:05:10.257777+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 7,
+        "timestamp": "2025-06-17T17:05:10.257810+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 9,
+        "timestamp": "2025-06-17T17:05:10.257821+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 394,
+        "timestamp": "2025-06-17T17:05:10.258160+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8398,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:10.297102+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:10.333468+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 11,
+        "timestamp": "2025-06-17T17:05:10.333472+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 27,
+        "timestamp": "2025-06-17T17:05:10.333472+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 42,
+        "timestamp": "2025-06-17T17:05:10.333472+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:10.333475+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:10.342860+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 20,
+        "timestamp": "2025-06-17T17:05:10.342878+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8292,
+        "size": 194,
+        "timestamp": "2025-06-17T17:05:10.352344+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.825,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:10.391090+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8388,
+        "size": 16,
+        "timestamp": "2025-06-17T17:05:10.412718+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.825,
+        "size": 30,
+        "timestamp": "2025-06-17T17:05:10.504034+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:10.519821+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 200,
+        "timestamp": "2025-06-17T17:05:10.519832+00:00",
+        "exchange": "U",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 46,
+        "timestamp": "2025-06-17T17:05:10.520238+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:10.520242+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 169,
+        "timestamp": "2025-06-17T17:05:10.522612+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8001,
+        "size": 750,
+        "timestamp": "2025-06-17T17:05:10.572807+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8288,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:10.599381+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8001,
+        "size": 1200,
+        "timestamp": "2025-06-17T17:05:10.808837+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 14,
+        "timestamp": "2025-06-17T17:05:10.809219+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 64,
+        "timestamp": "2025-06-17T17:05:10.809777+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:10.926912+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 26,
+        "timestamp": "2025-06-17T17:05:10.926916+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:10.926916+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 60,
+        "timestamp": "2025-06-17T17:05:10.926916+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:10.926918+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:10.926924+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:10.926931+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 60,
+        "timestamp": "2025-06-17T17:05:10.926931+00:00",
+        "exchange": "U",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 238,
+        "timestamp": "2025-06-17T17:05:10.926934+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 59,
+        "timestamp": "2025-06-17T17:05:10.926984+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 141,
+        "timestamp": "2025-06-17T17:05:10.926985+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 30,
+        "timestamp": "2025-06-17T17:05:10.926993+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 7,
+        "timestamp": "2025-06-17T17:05:10.927032+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 59,
+        "timestamp": "2025-06-17T17:05:10.927078+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 59,
+        "timestamp": "2025-06-17T17:05:10.927330+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 59,
+        "timestamp": "2025-06-17T17:05:10.927330+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:10.927574+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 1000,
+        "timestamp": "2025-06-17T17:05:11.026145+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8258,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:11.026516+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8046,
+        "size": 601,
+        "timestamp": "2025-06-17T17:05:11.209547+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:11.261247+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8282,
+        "size": 20,
+        "timestamp": "2025-06-17T17:05:11.460855+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8046,
+        "size": 61,
+        "timestamp": "2025-06-17T17:05:11.488873+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 60,
+        "timestamp": "2025-06-17T17:05:11.539109+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 59,
+        "timestamp": "2025-06-17T17:05:11.539127+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 13,
+        "timestamp": "2025-06-17T17:05:11.539223+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:11.579216+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 13,
+        "timestamp": "2025-06-17T17:05:11.579282+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:11.579282+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 29,
+        "timestamp": "2025-06-17T17:05:11.579283+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:11.579285+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:11.579288+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:11.579290+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 200,
+        "timestamp": "2025-06-17T17:05:11.579290+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 200,
+        "timestamp": "2025-06-17T17:05:11.579298+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:11.579387+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:11.584356+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:11.585357+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 21,
+        "timestamp": "2025-06-17T17:05:11.613403+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8301,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:11.624517+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8354,
+        "size": 4,
+        "timestamp": "2025-06-17T17:05:11.632317+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8427,
+        "size": 9,
+        "timestamp": "2025-06-17T17:05:11.713308+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.865,
+        "size": 200,
+        "timestamp": "2025-06-17T17:05:11.718791+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.865,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:11.721508+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.865,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:11.722291+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8401,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:11.723139+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 60,
+        "timestamp": "2025-06-17T17:05:11.728760+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8344,
+        "size": 200,
+        "timestamp": "2025-06-17T17:05:11.730238+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 18,
+        "timestamp": "2025-06-17T17:05:11.734537+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.865,
+        "size": 500,
+        "timestamp": "2025-06-17T17:05:11.794250+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:11.944383+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8247,
+        "size": 3,
+        "timestamp": "2025-06-17T17:05:11.982373+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8781,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:12.007480+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 40,
+        "timestamp": "2025-06-17T17:05:12.016588+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:12.895430+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8515,
+        "size": 1500,
+        "timestamp": "2025-06-17T17:05:12.926708+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:12.934824+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8501,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:12.992437+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8952,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:13.201077+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8547,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:13.266842+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.922,
+        "size": 157,
+        "timestamp": "2025-06-17T17:05:13.337581+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:13.519130+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9013,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:13.521170+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9299,
+        "size": 475,
+        "timestamp": "2025-06-17T17:05:13.523222+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 14,
+        "timestamp": "2025-06-17T17:05:13.635953+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 30,
+        "timestamp": "2025-06-17T17:05:13.667645+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:13.847644+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:13.848226+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:13.954398+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8947,
+        "size": 23,
+        "timestamp": "2025-06-17T17:05:14.251455+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:14.288502+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:14.683148+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 2500,
+        "timestamp": "2025-06-17T17:05:14.774513+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:14.922762+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 7,
+        "timestamp": "2025-06-17T17:05:14.922784+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:14.922882+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:14.922884+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:14.922889+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:14.922891+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:14.923219+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:14.923279+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 8,
+        "timestamp": "2025-06-17T17:05:14.923279+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:14.923325+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:14.924179+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.89,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:14.924713+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.885,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:15.001126+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8899,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:15.001906+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9089,
+        "size": 500,
+        "timestamp": "2025-06-17T17:05:15.038342+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 78,
+        "timestamp": "2025-06-17T17:05:15.271347+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9092,
+        "size": 600,
+        "timestamp": "2025-06-17T17:05:15.569935+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8616,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:15.626585+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.885,
+        "size": 500,
+        "timestamp": "2025-06-17T17:05:15.713473+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9081,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:15.773581+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 44,
+        "timestamp": "2025-06-17T17:05:16.125665+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8688,
+        "size": 31,
+        "timestamp": "2025-06-17T17:05:16.218683+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9,
+        "size": 70,
+        "timestamp": "2025-06-17T17:05:16.230528+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.92,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:16.438101+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9153,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:16.620963+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9191,
+        "size": 38,
+        "timestamp": "2025-06-17T17:05:17.265388+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:17.600350+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.91,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:18.354789+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9112,
+        "size": 6,
+        "timestamp": "2025-06-17T17:05:18.384944+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9188,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:18.385010+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.9053,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:18.420089+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 75,
+        "timestamp": "2025-06-17T17:05:18.821054+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 155,
+        "timestamp": "2025-06-17T17:05:19.213331+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8792,
+        "size": 39,
+        "timestamp": "2025-06-17T17:05:19.582573+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8536,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:19.745406+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.88,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:19.789483+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.87,
+        "size": 3,
+        "timestamp": "2025-06-17T17:05:19.829342+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:19.837795+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:19.837795+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 21,
+        "timestamp": "2025-06-17T17:05:19.838141+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8753,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:20.277505+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.872,
+        "size": 201,
+        "timestamp": "2025-06-17T17:05:20.426095+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8754,
+        "size": 240,
+        "timestamp": "2025-06-17T17:05:20.498174+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.865,
+        "size": 200,
+        "timestamp": "2025-06-17T17:05:20.571475+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:20.725889+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:20.726189+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:20.726192+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:20.900363+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.855,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:20.918492+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:20.920224+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.851,
+        "size": 277,
+        "timestamp": "2025-06-17T17:05:21.050222+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:21.054139+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:21.054499+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 23,
+        "timestamp": "2025-06-17T17:05:21.054915+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 11,
+        "timestamp": "2025-06-17T17:05:21.055009+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 59,
+        "timestamp": "2025-06-17T17:05:21.087752+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 27,
+        "timestamp": "2025-06-17T17:05:21.087756+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.845,
+        "size": 19,
+        "timestamp": "2025-06-17T17:05:21.095041+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8493,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:21.339690+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8488,
+        "size": 289,
+        "timestamp": "2025-06-17T17:05:21.472771+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:21.494899+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8412,
+        "size": 24,
+        "timestamp": "2025-06-17T17:05:21.805206+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8388,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:21.851752+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8388,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:21.994200+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:22.054968+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 20,
+        "timestamp": "2025-06-17T17:05:22.054969+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8399,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:22.262278+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 816,
+        "timestamp": "2025-06-17T17:05:22.283647+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 351,
+        "timestamp": "2025-06-17T17:05:22.283654+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8301,
+        "size": 833,
+        "timestamp": "2025-06-17T17:05:22.285818+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8201,
+        "size": 2000,
+        "timestamp": "2025-06-17T17:05:23.005656+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8288,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:23.095913+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:23.131100+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:23.131102+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:23.131150+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 80,
+        "timestamp": "2025-06-17T17:05:23.131170+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 4,
+        "timestamp": "2025-06-17T17:05:23.131170+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8012,
+        "size": 19,
+        "timestamp": "2025-06-17T17:05:23.350972+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8088,
+        "size": 90,
+        "timestamp": "2025-06-17T17:05:23.618316+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8093,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:23.851260+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.805,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:23.867599+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:24.003946+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 1524,
+        "timestamp": "2025-06-17T17:05:24.003975+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 45,
+        "timestamp": "2025-06-17T17:05:24.004051+00:00",
+        "exchange": "Z",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 46,
+        "timestamp": "2025-06-17T17:05:24.004110+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 221,
+        "timestamp": "2025-06-17T17:05:24.004121+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.805,
+        "size": 66,
+        "timestamp": "2025-06-17T17:05:24.004339+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.805,
+        "size": 66,
+        "timestamp": "2025-06-17T17:05:24.004344+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.805,
+        "size": 66,
+        "timestamp": "2025-06-17T17:05:24.004385+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 4,
+        "timestamp": "2025-06-17T17:05:24.063647+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 132,
+        "timestamp": "2025-06-17T17:05:24.092048+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:24.092142+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:24.092152+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:24.092154+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:24.092160+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:24.092168+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:24.092170+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:24.092177+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.81,
+        "size": 3,
+        "timestamp": "2025-06-17T17:05:24.250642+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8088,
+        "size": 4,
+        "timestamp": "2025-06-17T17:05:24.380802+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8088,
+        "size": 8,
+        "timestamp": "2025-06-17T17:05:24.458814+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.805,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:24.513039+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.805,
+        "size": 302,
+        "timestamp": "2025-06-17T17:05:24.513451+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 647,
+        "timestamp": "2025-06-17T17:05:24.517043+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 46,
+        "timestamp": "2025-06-17T17:05:24.517050+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 20,
+        "timestamp": "2025-06-17T17:05:24.517393+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 46,
+        "timestamp": "2025-06-17T17:05:24.517395+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 212,
+        "timestamp": "2025-06-17T17:05:24.517484+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:24.517485+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:24.517508+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8001,
+        "size": 1339,
+        "timestamp": "2025-06-17T17:05:24.519259+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.795,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:24.819289+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.795,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:24.819653+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 550,
+        "timestamp": "2025-06-17T17:05:24.823052+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.7993,
+        "size": 500,
+        "timestamp": "2025-06-17T17:05:24.835352+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.795,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:24.939411+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.795,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:24.994857+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:24.998101+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:24.999727+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:25.000906+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:25.001106+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:25.001354+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.795,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:25.286937+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.7901,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:25.463163+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 4,
+        "timestamp": "2025-06-17T17:05:25.541996+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 300,
+        "timestamp": "2025-06-17T17:05:25.712755+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 296,
+        "timestamp": "2025-06-17T17:05:25.712755+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 104,
+        "timestamp": "2025-06-17T17:05:25.712770+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 125,
+        "timestamp": "2025-06-17T17:05:25.713310+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 44,
+        "timestamp": "2025-06-17T17:05:25.713329+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.7996,
+        "size": 40,
+        "timestamp": "2025-06-17T17:05:25.800662+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.7988,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:25.913020+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 3000,
+        "timestamp": "2025-06-17T17:05:26.269196+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 42,
+        "timestamp": "2025-06-17T17:05:26.790549+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.7901,
+        "size": 300,
+        "timestamp": "2025-06-17T17:05:26.802486+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:26.844070+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 1000,
+        "timestamp": "2025-06-17T17:05:26.850693+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8461,
+        "size": 155,
+        "timestamp": "2025-06-17T17:05:27.033024+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 7,
+        "timestamp": "2025-06-17T17:05:27.036467+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.84,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:27.051067+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.85,
+        "size": 192,
+        "timestamp": "2025-06-17T17:05:27.051661+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 150,
+        "timestamp": "2025-06-17T17:05:27.152719+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8653,
+        "size": 12,
+        "timestamp": "2025-06-17T17:05:27.477455+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8246,
+        "size": 477,
+        "timestamp": "2025-06-17T17:05:27.655957+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8583,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:27.847301+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8315,
+        "size": 14,
+        "timestamp": "2025-06-17T17:05:27.890447+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8247,
+        "size": 30,
+        "timestamp": "2025-06-17T17:05:27.998896+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 120,
+        "timestamp": "2025-06-17T17:05:28.002339+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 3,
+        "timestamp": "2025-06-17T17:05:28.119908+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8247,
+        "size": 20,
+        "timestamp": "2025-06-17T17:05:28.246173+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.86,
+        "size": 15,
+        "timestamp": "2025-06-17T17:05:28.441373+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8247,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:28.522017+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8247,
+        "size": 23,
+        "timestamp": "2025-06-17T17:05:28.555754+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8201,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:28.626698+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.838,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:28.680460+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.83,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:28.681052+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:28.683355+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.835,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:28.683760+00:00",
+        "exchange": "N",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.802,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:28.685775+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:28.685971+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:28.686189+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.82,
+        "size": 57,
+        "timestamp": "2025-06-17T17:05:28.686190+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.815,
+        "size": 59,
+        "timestamp": "2025-06-17T17:05:28.686194+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8288,
+        "size": 9,
+        "timestamp": "2025-06-17T17:05:29.007128+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8254,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:29.127047+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:29.554426+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.8,
+        "size": 43,
+        "timestamp": "2025-06-17T17:05:29.746350+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:29.794308+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:29.794311+00:00",
+        "exchange": "J",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 31,
+        "timestamp": "2025-06-17T17:05:29.794314+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 111,
+        "timestamp": "2025-06-17T17:05:29.794318+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:29.794320+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:29.794327+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:29.794675+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 28,
+        "timestamp": "2025-06-17T17:05:29.794675+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:29.794676+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 791,
+        "timestamp": "2025-06-17T17:05:29.795578+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:29.810736+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 5,
+        "timestamp": "2025-06-17T17:05:29.893759+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.785,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:30.129472+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.7835,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:30.217919+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.79,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:30.263182+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.7809,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:30.417449+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.785,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:30.512243+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 156,
+        "timestamp": "2025-06-17T17:05:30.622672+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 39,
+        "timestamp": "2025-06-17T17:05:30.622968+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 30,
+        "timestamp": "2025-06-17T17:05:30.622969+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 1,
+        "timestamp": "2025-06-17T17:05:30.623067+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 10,
+        "timestamp": "2025-06-17T17:05:30.623067+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 15,
+        "timestamp": "2025-06-17T17:05:30.623067+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 18,
+        "timestamp": "2025-06-17T17:05:30.623068+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.78,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:30.623236+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:30.623610+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:30.623613+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 327,
+        "timestamp": "2025-06-17T17:05:30.623613+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 400,
+        "timestamp": "2025-06-17T17:05:30.623613+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 2,
+        "timestamp": "2025-06-17T17:05:30.623617+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 8,
+        "timestamp": "2025-06-17T17:05:30.623687+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 50,
+        "timestamp": "2025-06-17T17:05:30.623687+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 205,
+        "timestamp": "2025-06-17T17:05:30.623688+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 21,
+        "timestamp": "2025-06-17T17:05:30.623695+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 156,
+        "timestamp": "2025-06-17T17:05:30.623698+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 44,
+        "timestamp": "2025-06-17T17:05:30.624439+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@",
+          "F",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:30.625196+00:00",
+        "exchange": "K",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:30.625427+00:00",
+        "exchange": "Q",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 100,
+        "timestamp": "2025-06-17T17:05:30.625594+00:00",
+        "exchange": "P",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.77,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:30.654976+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.7601,
+        "size": 25,
+        "timestamp": "2025-06-17T17:05:30.683023+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "RBNE",
+        "price": 12.7692,
+        "size": 70,
+        "timestamp": "2025-06-17T17:05:30.754444+00:00",
+        "exchange": "D",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      }
+    ]
+  }
+}

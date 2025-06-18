@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "start_time": "2025-06-17T11:49:02.143425",
+    "end_time": "2025-06-17T11:49:07.150426",
+    "summary": {
+      "total_events": 4,
+      "symbols_count": 2,
+      "duration_seconds": 5.007001,
+      "events_per_second": 0.7988814062549618,
+      "breakdown": {
+        "trades": 4
+      },
+      "symbols": [
+        "AAPL",
+        "MSFT"
+      ]
+    }
+  },
+  "data": {
+    "AAPL": [
+      {
+        "type": "trade",
+        "symbol": "AAPL",
+        "price": 197.22,
+        "size": 100,
+        "timestamp": "2025-06-17T16:49:04.128289+00:00",
+        "exchange": "V",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "AAPL",
+        "price": 197.25,
+        "size": 100,
+        "timestamp": "2025-06-17T16:49:07.254543+00:00",
+        "exchange": "V",
+        "conditions": [
+          "@"
+        ]
+      },
+      {
+        "type": "trade",
+        "symbol": "AAPL",
+        "price": 197.25,
+        "size": 100,
+        "timestamp": "2025-06-17T16:49:07.254580+00:00",
+        "exchange": "V",
+        "conditions": [
+          "@"
+        ]
+      }
+    ],
+    "MSFT": [
+      {
+        "type": "trade",
+        "symbol": "MSFT",
+        "price": 477.68,
+        "size": 2,
+        "timestamp": "2025-06-17T16:49:05.106589+00:00",
+        "exchange": "V",
+        "conditions": [
+          "@",
+          "I"
+        ]
+      }
+    ]
+  }
+}
