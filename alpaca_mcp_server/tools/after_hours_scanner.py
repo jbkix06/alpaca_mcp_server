@@ -5,15 +5,18 @@ from datetime import datetime
 from ..tools.market_data_tools import get_stock_snapshots
 from ..tools.enhanced_market_clock import get_extended_market_clock
 
+# Import global configuration
+from ..config import get_trading_config, get_scanner_config
+
 logger = logging.getLogger(__name__)
 
 
 async def scan_after_hours_opportunities(
     symbols: str = "ALL",  # Use ALL tradeable assets by default
-    min_volume: int = 100000,
-    min_percent_change: float = 2.0,
-    max_symbols: int = 15,
-    sort_by: str = "percent_change",  # "percent_change", "volume", "price"
+    min_volume: int = None,             # Use global config default
+    min_percent_change: float = None,   # Use global config default
+    max_symbols: int = None,            # Use global config default
+    sort_by: str = None,                # Use global config default
 ) -> str:
     """
     Scan for after-hours trading opportunities with enhanced analytics.
@@ -34,6 +37,20 @@ async def scan_after_hours_opportunities(
     Returns:
         Formatted analysis of after-hours opportunities
     """
+    # Get defaults from global configuration
+    trading_config = get_trading_config()
+    scanner_config = get_scanner_config()
+    
+    # Use global config defaults if parameters not provided
+    if min_volume is None:
+        min_volume = 100000  # After-hours specific default
+    if min_percent_change is None:
+        min_percent_change = trading_config.min_percent_change_threshold / 5  # Lower threshold for after-hours
+    if max_symbols is None:
+        max_symbols = min(15, scanner_config.max_watchlist_size)
+    if sort_by is None:
+        sort_by = scanner_config.scanner_sort_method or "percent_change"
+    
     try:
         # Resolve symbols - get ALL tradeable assets if needed
         if symbols.upper() == "ALL":

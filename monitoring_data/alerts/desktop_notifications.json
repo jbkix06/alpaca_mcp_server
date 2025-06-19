@@ -1,6 +1,82 @@
 {
   "notifications": [
     {
+      "timestamp": "2025-06-19T00:40:05.014994+00:00",
+      "notification": {
+        "title": "\ud83d\udcf8 Trade Confirmation Required",
+        "message": "Action: BUY 100 shares @ $150.0000 AAPL\nPlease provide screenshot proof\nand verify execution details",
+        "priority": "urgent",
+        "category": "confirmation",
+        "sound": true,
+        "timeout": 20,
+        "actions": [
+          "Screenshot Taken",
+          "Skip"
+        ],
+        "metadata": {
+          "symbol": "AAPL",
+          "action": "BUY 100 shares @ $150.0000"
+        }
+      }
+    },
+    {
+      "timestamp": "2025-06-19T00:37:43.343017+00:00",
+      "notification": {
+        "title": "\ud83d\udcf8 Trade Confirmation Required",
+        "message": "Action: BUY 100 shares @ $150.0000 AAPL\nPlease provide screenshot proof\nand verify execution details",
+        "priority": "urgent",
+        "category": "confirmation",
+        "sound": true,
+        "timeout": 20,
+        "actions": [
+          "Screenshot Taken",
+          "Skip"
+        ],
+        "metadata": {
+          "symbol": "AAPL",
+          "action": "BUY 100 shares @ $150.0000"
+        }
+      }
+    },
+    {
+      "timestamp": "2025-06-19T00:35:59.617780+00:00",
+      "notification": {
+        "title": "\ud83d\udcf8 Trade Confirmation Required",
+        "message": "Action: BUY 100 shares @ $150.0000 AAPL\nPlease provide screenshot proof\nand verify execution details",
+        "priority": "urgent",
+        "category": "confirmation",
+        "sound": true,
+        "timeout": 20,
+        "actions": [
+          "Screenshot Taken",
+          "Skip"
+        ],
+        "metadata": {
+          "symbol": "AAPL",
+          "action": "BUY 100 shares @ $150.0000"
+        }
+      }
+    },
+    {
+      "timestamp": "2025-06-19T00:35:44.583020+00:00",
+      "notification": {
+        "title": "\ud83d\udcf8 Trade Confirmation Required",
+        "message": "Action: BUY 100 shares @ $150.0000 AAPL\nPlease provide screenshot proof\nand verify execution details",
+        "priority": "urgent",
+        "category": "confirmation",
+        "sound": true,
+        "timeout": 20,
+        "actions": [
+          "Screenshot Taken",
+          "Skip"
+        ],
+        "metadata": {
+          "symbol": "AAPL",
+          "action": "BUY 100 shares @ $150.0000"
+        }
+      }
+    },
+    {
       "timestamp": "2025-06-18T16:43:36.388446+00:00",
       "notification": {
         "title": "\ud83d\udcf8 Trade Confirmation Required",
@@ -20,5 +96,5 @@
       }
     }
   ],
-  "last_updated": "2025-06-18T16:43:36.388446+00:00"
+  "last_updated": "2025-06-19T00:40:05.014994+00:00"
 }

@@ -26,6 +26,7 @@ from .hybrid_service import ServiceConfig, ServiceStatus
 from .streaming_integration import AlpacaStreamingService
 from .desktop_notifications import DesktopNotificationService
 from .trade_confirmation import TradeConfirmationService
+from ..config import get_global_config, get_scanner_config, get_system_config
 
 
 class AddSymbolsRequest(BaseModel):
@@ -38,6 +39,21 @@ class RemoveSymbolsRequest(BaseModel):
 
 class OrderCheckRequest(BaseModel):
     order_info: Optional[Dict] = Field(None, description="Order information for tracking")
+
+
+class ScanSyncRequest(BaseModel):
+    min_trades_per_minute: int = Field(500, description="Minimum trades per minute for active stocks")
+    min_percent_change: float = Field(5.0, description="Minimum percentage change")
+    max_symbols: int = Field(20, description="Maximum symbols to monitor")
+    force_update: bool = Field(False, description="Force update even if symbols are the same")
+
+
+class AutoScanConfigRequest(BaseModel):
+    enabled: bool = Field(..., description="Enable/disable automatic scanning")
+    interval_seconds: int = Field(60, description="Scan interval in seconds (minimum 30)")
+    min_trades_per_minute: int = Field(500, description="Minimum trades per minute threshold")
+    min_percent_change: float = Field(5.0, description="Minimum percentage change threshold")
+    max_symbols: int = Field(20, description="Maximum symbols to monitor")
 
 
 class TradeConfirmationRequest(BaseModel):
@@ -54,6 +70,15 @@ class ConfirmExecutionRequest(BaseModel):
     screenshot_path: Optional[str] = Field(None, description="Path to screenshot proof")
 
 
+class OrderRequest(BaseModel):
+    symbol: str = Field(..., description="Stock symbol")
+    side: str = Field(..., description="buy or sell")
+    quantity: int = Field(..., description="Number of shares")
+    order_type: str = Field("limit", description="Order type")
+    limit_price: Optional[float] = Field(None, description="Limit price for limit orders")
+    time_in_force: str = Field("day", description="Time in force")
+
+
 class MonitoringServiceAPI:
     """Core monitoring service with FastAPI integration"""
     
@@ -68,19 +93,47 @@ class MonitoringServiceAPI:
         self.check_count = 0
         self.error_count = 0
         
-        # Components
-        self.position_tracker: Optional[PositionTracker] = None
-        self.signal_detector: Optional[SignalDetector] = None
-        self.alert_system: Optional[AlertSystem] = None
-        self.streaming_service: Optional[AlpacaStreamingService] = None
-        self.desktop_notifications: Optional[DesktopNotificationService] = None
-        self.trade_confirmation: Optional[TradeConfirmationService] = None
+        # Initialize core components immediately for API availability
+        try:
+            self.position_tracker = PositionTracker()
+            self.signal_detector = SignalDetector()
+            self.alert_system = AlertSystem(self.config.alert_channels)
+            self.desktop_notifications = DesktopNotificationService()
+            self.trade_confirmation = TradeConfirmationService(self.desktop_notifications)
+            self.streaming_service = AlpacaStreamingService()
+            self.logger.info("All services initialized successfully")
+        except Exception as e:
+            self.logger.warning(f"Some services failed to initialize: {e}")
+            # Initialize with minimal fallback services to ensure API responses work
+            self.position_tracker = PositionTracker() if not hasattr(self, 'position_tracker') else self.position_tracker
+            self.signal_detector = SignalDetector() if not hasattr(self, 'signal_detector') else self.signal_detector
+            self.alert_system = AlertSystem([]) if not hasattr(self, 'alert_system') else self.alert_system
+            self.desktop_notifications = DesktopNotificationService() if not hasattr(self, 'desktop_notifications') else self.desktop_notifications
+            self.trade_confirmation = TradeConfirmationService(self.desktop_notifications) if not hasattr(self, 'trade_confirmation') else self.trade_confirmation
+            self.streaming_service = AlpacaStreamingService() if not hasattr(self, 'streaming_service') else self.streaming_service
         
         # Monitoring state
         self.watchlist: Set[str] = set()
         self.current_signals: List[Dict] = []
         self.signal_history: List[Dict] = []
         self.monitoring_task: Optional[asyncio.Task] = None
+        
+        # Auto-scanning configuration from global config
+        scanner_config = get_scanner_config()
+        self.auto_scan_enabled = True
+        self.scan_interval_seconds = scanner_config.active_scan_interval_seconds
+        self.scan_params = {
+            "min_trades_per_minute": None,  # Use global config defaults
+            "min_percent_change": None,     # Use global config defaults
+            "max_symbols": None             # Use global config defaults
+        }
+        self.last_scan_time: Optional[datetime] = None
+        
+        # Hibernation mode for resource optimization from global config
+        system_config = get_system_config()
+        self.hibernation_enabled = system_config.hibernation_enabled
+        self.is_hibernating = False
+        self.hibernation_reason: Optional[str] = None
         
         # WebSocket connections for real-time updates
         self.websocket_connections: Set[WebSocket] = set()
@@ -304,6 +357,14 @@ class MonitoringServiceAPI:
             await self._save_state()
             self.logger.info(f"Added to watchlist: {added}")
             
+            # Update streaming subscriptions for new symbols
+            if self.streaming_service and self.streaming_service.is_running:
+                try:
+                    await self.streaming_service.subscribe_market_data(added)
+                    self.logger.info(f"Added streaming subscriptions for: {added}")
+                except Exception as e:
+                    self.logger.error(f"Failed to subscribe to streaming for {added}: {e}")
+            
             # Send WebSocket update
             await self._broadcast_update({
                 "type": "watchlist_update",
@@ -318,6 +379,13 @@ class MonitoringServiceAPI:
                     f"Added symbols: {', '.join(added)}. Total watchlist: {len(self.watchlist)}",
                     priority="info"
                 )
+            
+            # Check hibernation conditions after adding symbols
+            if self.hibernation_enabled:
+                try:
+                    await self.check_hibernation_conditions()
+                except Exception as e:
+                    self.logger.error(f"❌ Hibernation check failed after adding symbols: {e}")
         
         return {
             "status": "success",
@@ -341,6 +409,14 @@ class MonitoringServiceAPI:
             await self._save_state()
             self.logger.info(f"Removed from watchlist: {removed}")
             
+            # Update streaming subscriptions for removed symbols
+            if self.streaming_service and self.streaming_service.is_running:
+                try:
+                    await self.streaming_service.unsubscribe_market_data(removed)
+                    self.logger.info(f"Removed streaming subscriptions for: {removed}")
+                except Exception as e:
+                    self.logger.error(f"Failed to unsubscribe from streaming for {removed}: {e}")
+            
             # Send WebSocket update
             await self._broadcast_update({
                 "type": "watchlist_update",
@@ -355,12 +431,287 @@ class MonitoringServiceAPI:
                     f"Removed symbols: {', '.join(removed)}. Total watchlist: {len(self.watchlist)}",
                     priority="info"
                 )
+            
+            # Check hibernation conditions after removing symbols
+            if self.hibernation_enabled:
+                try:
+                    await self.check_hibernation_conditions()
+                except Exception as e:
+                    self.logger.error(f"❌ Hibernation check failed after removing symbols: {e}")
         
         return {
             "status": "success",
             "removed": removed,
             "watchlist_size": len(self.watchlist),
             "current_watchlist": sorted(list(self.watchlist))
+        }
+    
+    async def sync_with_scanner_results(self, scan_params: Dict) -> Dict:
+        """Sync watchlist with active scanner results"""
+        try:
+            # Use MCP scan tool for accurate results - same tool as /alpaca-trading:scan
+            from ..tools.day_trading_scanner import scan_day_trading_opportunities
+            
+            # Call the MCP scan tool with exact parameters
+            scan_result_text = await scan_day_trading_opportunities(
+                symbols="ALL",
+                min_trades_per_minute=scan_params.get("min_trades_per_minute", 500),
+                min_percent_change=scan_params.get("min_percent_change", 10.0),
+                max_symbols=scan_params.get("max_symbols", 20),
+                sort_by="trades"
+            )
+            
+            # Extract active symbols from scan result text
+            active_symbols = set()
+            if scan_result_text:
+                # Look for the specific data table format in scan results
+                lines = scan_result_text.split('\n')
+                in_data_section = False
+                
+                for line in lines:
+                    line = line.strip()
+                    
+                    # Start of data table (look for header with "Rank Symbol")
+                    if "Rank Symbol" in line or "Rank  Symbol" in line:
+                        in_data_section = True
+                        continue
+                    
+                    # End of data table (empty line or section break)
+                    if in_data_section and (not line or line.startswith('**') or line.startswith('=')):
+                        break
+                    
+                    # Parse data rows (should start with a number and have symbol as second element)
+                    if in_data_section and line and line[0].isdigit():
+                        parts = line.split()
+                        if len(parts) >= 2:
+                            potential_symbol = parts[1].strip()
+                            # Validate: 1-5 chars, all uppercase letters, no common words
+                            if (1 <= len(potential_symbol) <= 5 and 
+                                potential_symbol.isalpha() and 
+                                potential_symbol.isupper() and
+                                potential_symbol not in ['FOR', 'SCAN', 'TRY', 'THE', 'AND', 'WITH']):
+                                active_symbols.add(potential_symbol)
+            
+            # Get active positions to protect from removal
+            protected_symbols = set()
+            if self.position_tracker:
+                await self.position_tracker.update_positions()
+                protected_symbols = set(self.position_tracker.positions.keys())
+            
+            # Compare with current watchlist
+            current_watchlist = set(self.watchlist)
+            to_add = active_symbols - current_watchlist
+            
+            # CRITICAL: Never remove symbols with active positions
+            potential_removals = current_watchlist - active_symbols
+            to_remove = potential_removals - protected_symbols
+            protected_from_removal = potential_removals & protected_symbols
+            
+            if protected_from_removal:
+                self.logger.warning(f"Protected symbols with active positions from removal: {protected_from_removal}")
+                # Keep protected symbols in active list for continued monitoring
+                active_symbols.update(protected_from_removal)
+            
+            # Only proceed if there are changes or force_update is True
+            if not to_add and not to_remove and not scan_params.get("force_update", False):
+                message = "Watchlist already synced with active stocks"
+                if protected_from_removal:
+                    message += f". Protected {len(protected_from_removal)} position stocks from removal."
+                    
+                return {
+                    "status": "no_changes",
+                    "message": message,
+                    "protected": sorted(list(protected_from_removal)) if protected_from_removal else [],
+                    "active_symbols": sorted(list(active_symbols)),
+                    "watchlist_size": len(self.watchlist)
+                }
+            
+            sync_results = []
+            
+            # Remove inactive symbols
+            if to_remove:
+                remove_result = await self.remove_symbols(list(to_remove))
+                sync_results.append(f"Removed {len(to_remove)} inactive symbols")
+            
+            # Add new active symbols
+            if to_add:
+                add_result = await self.add_symbols(list(to_add))
+                sync_results.append(f"Added {len(to_add)} new active symbols")
+            
+            self.logger.info(f"Watchlist synced with scanner: +{len(to_add)}, -{len(to_remove)}")
+            
+            sync_message = f"Watchlist synced with active stocks. {'; '.join(sync_results)}"
+            if protected_from_removal:
+                sync_message += f" Protected {len(protected_from_removal)} position stocks from removal."
+            
+            return {
+                "status": "success",
+                "message": sync_message,
+                "added": sorted(list(to_add)),
+                "removed": sorted(list(to_remove)),
+                "protected": sorted(list(protected_from_removal)) if protected_from_removal else [],
+                "active_symbols": sorted(list(active_symbols)),
+                "watchlist_size": len(self.watchlist),
+                "scan_parameters": scan_params
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to sync with scanner results: {e}")
+            return {
+                "status": "error",
+                "message": f"Sync failed: {str(e)}",
+                "watchlist_size": len(self.watchlist)
+            }
+    
+    async def configure_auto_scan(self, config: Dict) -> Dict:
+        """Configure automatic scanning parameters"""
+        try:
+            # Validate interval (minimum 30 seconds)
+            interval = max(30, config.get("interval_seconds", 60))
+            
+            # Update configuration
+            old_enabled = self.auto_scan_enabled
+            self.auto_scan_enabled = config.get("enabled", True)
+            self.scan_interval_seconds = interval
+            self.scan_params = {
+                "min_trades_per_minute": config.get("min_trades_per_minute", 500),
+                "min_percent_change": config.get("min_percent_change", 5.0),
+                "max_symbols": config.get("max_symbols", 20)
+            }
+            
+            # Reset scan timer if enabled/disabled changed
+            if old_enabled != self.auto_scan_enabled:
+                self.last_scan_time = None
+            
+            await self._save_state()
+            
+            status_msg = "enabled" if self.auto_scan_enabled else "disabled"
+            self.logger.info(f"📊 Auto-scanning {status_msg}: {interval}s interval, {self.scan_params}")
+            
+            return {
+                "status": "success",
+                "message": f"Auto-scanning {status_msg}",
+                "config": {
+                    "enabled": self.auto_scan_enabled,
+                    "interval_seconds": self.scan_interval_seconds,
+                    **self.scan_params
+                }
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to configure auto-scan: {e}")
+            return {
+                "status": "error",
+                "message": f"Configuration failed: {str(e)}"
+            }
+    
+    async def get_auto_scan_status(self) -> Dict:
+        """Get current auto-scanning configuration and status"""
+        next_scan = None
+        if self.auto_scan_enabled and self.last_scan_time:
+            next_scan_time = self.last_scan_time.timestamp() + self.scan_interval_seconds
+            next_scan = datetime.fromtimestamp(next_scan_time, timezone.utc).isoformat()
+        
+        return {
+            "enabled": self.auto_scan_enabled,
+            "interval_seconds": self.scan_interval_seconds,
+            "last_scan": self.last_scan_time.isoformat() if self.last_scan_time else None,
+            "next_scan": next_scan,
+            "scan_parameters": self.scan_params
+        }
+    
+    async def check_hibernation_conditions(self) -> bool:
+        """Check if system should enter hibernation mode"""
+        if not self.hibernation_enabled:
+            return False
+        
+        # Get current positions
+        position_count = 0
+        if self.position_tracker:
+            await self.position_tracker.update_positions()
+            position_count = len(self.position_tracker.positions)
+        
+        # Check conditions for hibernation
+        no_watchlist = len(self.watchlist) == 0
+        no_positions = position_count == 0
+        
+        should_hibernate = no_watchlist and no_positions
+        
+        if should_hibernate and not self.is_hibernating:
+            await self._enter_hibernation()
+        elif not should_hibernate and self.is_hibernating:
+            await self._exit_hibernation()
+        
+        return self.is_hibernating
+    
+    async def _enter_hibernation(self):
+        """Enter hibernation mode - stop streaming to save resources"""
+        if self.is_hibernating:
+            return
+        
+        self.logger.info("💤 Entering hibernation mode: No active stocks or positions to monitor")
+        
+        # Stop streaming service
+        if self.streaming_service and self.streaming_service.is_running:
+            try:
+                await self.streaming_service.stop()
+                self.logger.info("🛑 Streaming service stopped for hibernation")
+            except Exception as e:
+                self.logger.error(f"Error stopping streaming for hibernation: {e}")
+        
+        self.is_hibernating = True
+        self.hibernation_reason = f"No watchlist ({len(self.watchlist)}) and no positions"
+        
+        # Broadcast hibernation status
+        await self._broadcast_update({
+            "type": "hibernation_started",
+            "reason": self.hibernation_reason,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+    
+    async def _exit_hibernation(self):
+        """Exit hibernation mode - restart streaming"""
+        if not self.is_hibernating:
+            return
+        
+        self.logger.info("🔥 Exiting hibernation mode: Active stocks or positions detected")
+        
+        # Restart streaming service if there are symbols to monitor
+        if len(self.watchlist) > 0 and self.streaming_service:
+            try:
+                await self.streaming_service.start()
+                await self.streaming_service.subscribe_market_data(list(self.watchlist))
+                self.logger.info(f"🚀 Streaming service restarted for {len(self.watchlist)} symbols")
+            except Exception as e:
+                self.logger.error(f"Error restarting streaming after hibernation: {e}")
+        
+        self.is_hibernating = False
+        old_reason = self.hibernation_reason
+        self.hibernation_reason = None
+        
+        # Broadcast wake status
+        await self._broadcast_update({
+            "type": "hibernation_ended",
+            "previous_reason": old_reason,
+            "watchlist_size": len(self.watchlist),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+    
+    async def get_hibernation_status(self) -> Dict:
+        """Get current hibernation status with fresh data"""
+        # Get fresh position count
+        position_count = 0
+        if self.position_tracker:
+            await self.position_tracker.update_positions()
+            position_count = len(self.position_tracker.positions)
+        
+        return {
+            "hibernation_enabled": self.hibernation_enabled,
+            "is_hibernating": self.is_hibernating,
+            "hibernation_reason": self.hibernation_reason,
+            "watchlist_size": len(self.watchlist),
+            "active_positions": position_count,
+            "streaming_active": self.streaming_service.is_running if self.streaming_service else False
         }
     
     async def get_positions(self) -> Dict:
@@ -527,6 +878,40 @@ class MonitoringServiceAPI:
             # Process new signals
             for signal in new_signals:
                 await self._process_signal(signal)
+        
+        # Automatic watchlist synchronization with scanner results
+        if self.auto_scan_enabled:
+            now = datetime.now(timezone.utc)
+            if (self.last_scan_time is None or 
+                (now - self.last_scan_time).total_seconds() >= self.scan_interval_seconds):
+                
+                try:
+                    self.logger.info("🔍 Starting automatic watchlist sync with scanner")
+                    sync_result = await self.sync_with_scanner_results(self.scan_params)
+                    self.last_scan_time = now
+                    
+                    if sync_result.get("status") in ["success", "no_changes"]:
+                        self.logger.info(f"📊 Auto-scan completed: {sync_result.get('message', 'No changes')}")
+                        
+                        # Broadcast scan results to WebSocket clients
+                        await self._broadcast_update({
+                            "type": "auto_scan_update",
+                            "result": sync_result,
+                            "timestamp": now.isoformat()
+                        })
+                    else:
+                        self.logger.warning(f"⚠️ Auto-scan had issues: {sync_result.get('message', 'Unknown error')}")
+                        
+                except Exception as e:
+                    self.logger.error(f"❌ Auto-scan failed: {e}")
+                    self.error_count += 1
+        
+        # Check hibernation conditions after auto-scan
+        if self.hibernation_enabled:
+            try:
+                await self.check_hibernation_conditions()
+            except Exception as e:
+                self.logger.error(f"❌ Hibernation check failed: {e}")
         
         # Save state periodically
         if self.check_count % 50 == 0:  # Every ~100 seconds
@@ -770,6 +1155,12 @@ async def get_status():
     }
 
 
+@app.get("/hibernation")
+async def get_hibernation_status():
+    """Get current hibernation status and resource optimization info"""
+    return await monitoring_service.get_hibernation_status()
+
+
 # Watchlist Management
 @app.get("/watchlist")
 async def get_watchlist():
@@ -789,6 +1180,37 @@ async def remove_symbols(request: RemoveSymbolsRequest):
     return await monitoring_service.remove_symbols(request.symbols)
 
 
+@app.post("/watchlist/sync")
+async def sync_watchlist_with_scanner(request: ScanSyncRequest):
+    """Sync watchlist with active scanner results"""
+    scan_params = {
+        "min_trades_per_minute": request.min_trades_per_minute,
+        "min_percent_change": request.min_percent_change,
+        "max_symbols": request.max_symbols,
+        "force_update": request.force_update
+    }
+    return await monitoring_service.sync_with_scanner_results(scan_params)
+
+
+@app.get("/watchlist/auto-scan")
+async def get_auto_scan_status():
+    """Get automatic scanning configuration and status"""
+    return await monitoring_service.get_auto_scan_status()
+
+
+@app.post("/watchlist/auto-scan")
+async def configure_auto_scan(request: AutoScanConfigRequest):
+    """Configure automatic scanning parameters"""
+    config = {
+        "enabled": request.enabled,
+        "interval_seconds": request.interval_seconds,
+        "min_trades_per_minute": request.min_trades_per_minute,
+        "min_percent_change": request.min_percent_change,
+        "max_symbols": request.max_symbols
+    }
+    return await monitoring_service.configure_auto_scan(config)
+
+
 # Position Management
 @app.get("/positions")
 async def get_positions():
@@ -800,6 +1222,43 @@ async def get_positions():
 async def check_positions(request: OrderCheckRequest):
     """Check positions after order"""
     return await monitoring_service.check_positions_after_order(request.order_info)
+
+
+# Order Management
+@app.post("/orders")
+async def place_order(request: OrderRequest):
+    """Place a stock order using MCP tools"""
+    try:
+        monitoring_service.logger.info(f"📋 Order request: {request.side.upper()} {request.quantity} {request.symbol} @ ${request.limit_price}")
+        
+        # Use MCP tool directly
+        from ..tools.place_order_tool import place_stock_order
+        
+        order_result = await place_stock_order(
+            symbol=request.symbol,
+            side=request.side,
+            quantity=request.quantity,
+            order_type=request.order_type,
+            limit_price=request.limit_price,
+            time_in_force=request.time_in_force
+        )
+        
+        if order_result and 'order' in order_result:
+            monitoring_service.logger.info(f"✅ Order placed successfully: {order_result['order'].get('id', 'unknown')}")
+            return {
+                "status": "success",
+                "order": order_result['order']
+            }
+        else:
+            monitoring_service.logger.error(f"❌ Order placement failed: {order_result}")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Order placement failed: {order_result}"
+            )
+            
+    except Exception as e:
+        monitoring_service.logger.error(f"❌ Error placing order: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 
 # Signal Management
@@ -854,7 +1313,7 @@ async def confirm_trade_execution(request: ConfirmExecutionRequest):
 async def get_trade_confirmations():
     """Get pending trade confirmations"""
     return {
-        "pending": monitoring_service.trade_confirmation.get_pending_confirmations(),
+        "confirmations": monitoring_service.trade_confirmation.get_pending_confirmations(),
         "history": monitoring_service.trade_confirmation.get_confirmation_history()
     }
 

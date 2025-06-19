@@ -1,48 +1,12 @@
 {
-  "last_updated": "2025-06-18T16:54:39.712760+00:00",
-  "alert_count": 4,
+  "last_updated": "2025-06-19T02:27:13.505574+00:00",
+  "alert_count": 1,
   "alerts": [
     {
-      "id": "alert_1750264966",
-      "timestamp": "2025-06-18T16:42:46.299581+00:00",
+      "id": "alert_1750300025",
+      "timestamp": "2025-06-19T02:27:05.984800+00:00",
       "title": "\ud83d\ude80 FastAPI Monitoring Service STARTED",
-      "message": "Service running with 10 symbols in watchlist",
-      "priority": "info",
-      "metadata": {},
-      "channels_sent": [
-        "file",
-        "console"
-      ]
-    },
-    {
-      "id": "alert_1750265170",
-      "timestamp": "2025-06-18T16:46:10.712125+00:00",
-      "title": "\ud83d\udcca Watchlist Updated",
-      "message": "Added symbols: SOFI, GME. Total watchlist: 12",
-      "priority": "info",
-      "metadata": {},
-      "channels_sent": [
-        "file",
-        "console"
-      ]
-    },
-    {
-      "id": "alert_1750265348",
-      "timestamp": "2025-06-18T16:49:08.822059+00:00",
-      "title": "\ud83d\udcca Watchlist Updated",
-      "message": "Added symbols: CAI, MRVL. Total watchlist: 14",
-      "priority": "info",
-      "metadata": {},
-      "channels_sent": [
-        "file",
-        "console"
-      ]
-    },
-    {
-      "id": "alert_1750265679",
-      "timestamp": "2025-06-18T16:54:39.712514+00:00",
-      "title": "\ud83d\udcca Watchlist Updated",
-      "message": "Added symbols: MRIN. Total watchlist: 15",
+      "message": "Service running with 0 symbols in watchlist",
       "priority": "info",
       "metadata": {},
       "channels_sent": [

@@ -11,17 +11,18 @@ async def scan(
     filename: Optional[str] = "combined.lis",
 ) -> str:
     """
-    Execute comprehensive day trading opportunity scan using MCP scanner with enhanced analysis.
+    Execute EXPLOSIVE UP-ONLY day trading opportunity scan with extreme volatility focus.
 
-    Uses the updated MCP scanner that scans all symbols from combined.lis with professional formatting.
+    Uses the updated MCP scanner that filters for ONLY UP STOCKS with minimum +10% gains.
+    NO BORING STOCKS - Only extreme volatility explosive movers.
 
     Args:
-        trades_threshold: Minimum trades/minute threshold for liquidity (default: 500)
-        limit: Maximum number of opportunities to analyze (default: 20)
-        filename: Stock symbols list filename (default: "combined.lis")
+        trades_threshold: Minimum trades/minute threshold for extreme liquidity (default: 500)
+        limit: Maximum number of explosive opportunities to analyze (default: 20)
+        filename: Not used - scans ALL tradeable assets for explosive moves
 
     Returns:
-        Formatted analysis with ranked trading opportunities and market context
+        Formatted analysis with EXPLOSIVE UP-ONLY trading opportunities
     """
 
     # Robust input validation and conversion
@@ -49,11 +50,11 @@ async def scan(
         # Use the updated MCP scanner that scans all symbols from combined.lis
         from ..tools.day_trading_scanner import scan_day_trading_opportunities
 
-        # Call the updated scanner with proper parameters
+        # Call the updated scanner with EXPLOSIVE UP-ONLY parameters
         result = await scan_day_trading_opportunities(
-            symbols="ALL",  # Scan all symbols from combined.lis
+            symbols="ALL",  # Scan all tradeable assets for explosive moves
             min_trades_per_minute=trades_threshold,
-            min_percent_change=1.0,  # Lower threshold to find more opportunities
+            min_percent_change=10.0,  # EXPLOSIVE moves only - minimum +10%
             max_symbols=limit,
             sort_by="trades",
         )

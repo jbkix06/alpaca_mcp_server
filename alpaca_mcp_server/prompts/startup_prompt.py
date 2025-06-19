@@ -1,5 +1,7 @@
 """Day Trading Startup Prompt - Parallel execution of all startup checks."""
 
+import subprocess
+import requests
 from datetime import datetime
 from ..tools.day_trading_scanner import scan_day_trading_opportunities
 
@@ -15,6 +17,30 @@ async def startup() -> str:
     Returns:
         Comprehensive startup status report with top trading opportunities
     """
+
+    # Check and start FastAPI monitoring service if needed
+    fastapi_status = "❌ Service not running"
+    try:
+        # Check if FastAPI service is running
+        response = requests.get("http://localhost:8001/health", timeout=2)
+        if response.status_code == 200:
+            health_data = response.json()
+            uptime = health_data.get("uptime_seconds", 0)
+            watchlist_size = health_data.get("watchlist_size", 0)
+            fastapi_status = f"✅ Running - {uptime:.0f}s uptime, {watchlist_size} stocks monitored"
+        else:
+            fastapi_status = "❌ Service unhealthy"
+    except requests.exceptions.RequestException:
+        # Service not running, try to start it
+        try:
+            subprocess.Popen([
+                "python", "-m", "uvicorn", 
+                "alpaca_mcp_server.monitoring.fastapi_service:app",
+                "--host", "0.0.0.0", "--port", "8001", "--reload"
+            ], cwd="/home/jjoravet/alpaca-mcp-server-enhanced")
+            fastapi_status = "🚀 Starting service..."
+        except Exception as e:
+            fastapi_status = f"❌ Failed to start: {str(e)[:50]}"
 
     # Use MCP day trading scanner for active stocks - scan ALL tradeable assets
     try:
@@ -138,6 +164,7 @@ async def startup() -> str:
         "- **Scanner**: ✅ High-liquidity scanner operational (./scripts/trades_per_minute.sh)"
     )
     report.append("- **Server**: ✅ MCP server running with 41 tools, 11 resources")
+    report.append(f"- **FastAPI**: {fastapi_status}")
     report.append("- **Market**: ✅ Regular hours - optimal trading conditions")
     report.append("- **Account**: ✅ Active with $688K cash, $2.7M buying power")
     report.append("- **Data**: ✅ <50ms latency, 100% connection rate")
@@ -156,6 +183,13 @@ async def startup() -> str:
     report.append("**Command:** `./scripts/trades_per_minute.sh -f scripts/combined.lis -t 500`")
     report.append("**Purpose:** Find stocks with 500+ trades/minute for optimal liquidity")
     report.append("**Fixed:** Script path corrected from root to scripts/ directory")
+
+    # FastAPI monitoring system
+    report.append("\n### 🔧 FASTAPI MONITORING SYSTEM")
+    report.append("**Port 8001**: REST API + WebSocket streaming")
+    report.append("**Features**: Real-time position tracking, profit spike alerts, desktop notifications")
+    report.append("**Endpoints**: /health, /status, /positions, /watchlist, /signals")
+    report.append("**WebSocket**: /stream for live updates")
 
     report.append("\n**🚀 READY FOR DAY TRADING! 🚀**")
 

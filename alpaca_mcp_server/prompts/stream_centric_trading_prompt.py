@@ -77,7 +77,7 @@ async def stream_centric_trading_cycle(symbols: str = "AUTO") -> str:
         
         # Execute concurrent analysis for all symbols (independent of stream)
         analysis_tasks = [
-            analyze_peaks_and_troughs(",".join(target_symbols), timeframe="1Min", window_len=11),
+            analyze_peaks_and_troughs(",".join(target_symbols), timeframe="1Min", window_len=21),
             get_account_info(),
             get_positions(), 
             get_orders("open"),

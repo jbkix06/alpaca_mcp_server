@@ -22,8 +22,8 @@ from .alert_system import AlertSystem
 @dataclass
 class ServiceConfig:
     """Configuration for the hybrid trading service"""
-    check_interval: int = 2  # seconds between monitoring cycles
-    signal_confidence_threshold: float = 0.75
+    check_interval: int = 60  # seconds between monitoring cycles
+    signal_confidence_threshold: float = 0.0
     max_concurrent_positions: int = 5
     watchlist_size_limit: int = 50
     enable_auto_alerts: bool = True

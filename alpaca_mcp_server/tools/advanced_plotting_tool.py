@@ -250,7 +250,7 @@ async def generate_peak_trough_plots(
     symbols: str,
     timeframe: str = "1Min",
     days: int = 1,
-    window_len: int = 11,
+    window_len: int = 21,
     lookahead: int = 1,
     plot_mode: str = "single",
     save_plots: bool = True,

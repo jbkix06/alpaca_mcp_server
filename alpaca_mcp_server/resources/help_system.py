@@ -590,6 +590,12 @@ class HelpSystem:
             return "Market Info"
         elif "asset" in tool_name.lower() or "watchlist" in tool_name.lower():
             return "Assets & Organization"
+        elif "cleanup" in tool_name.lower() or "clean" in tool_name.lower():
+            return "System Maintenance"
+        elif "help" in tool_name.lower() or "debug" in tool_name.lower():
+            return "Help & Debugging"
+        elif "monitor" in tool_name.lower() or "fastapi" in tool_name.lower():
+            return "Monitoring Services"
         else:
             return "Other"
 

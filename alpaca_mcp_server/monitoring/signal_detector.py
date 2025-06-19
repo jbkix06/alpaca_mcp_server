@@ -38,7 +38,7 @@ class SignalDetector:
         
         # Signal parameters
         self.fresh_signal_bars = 5  # Signal must be <5 bars old
-        self.min_confidence = 0.5
+        self.min_confidence = 0.0
         self.min_volume_threshold = 100000
         
         # Cache for recent scans to avoid duplicate signals
@@ -117,7 +117,7 @@ class SignalDetector:
                     symbols=symbol,
                     timeframe="1Min",
                     days=1,
-                    window_len=11,
+                    window_len=21,
                     lookahead=1
                 )
                 
@@ -136,22 +136,51 @@ class SignalDetector:
         signals = []
         
         try:
-            # Look for fresh trough signals in the analysis
+            # Look for the latest peak/trough information in the analysis
             lines = analysis_result.split('\n')
             
+            # Find the symbol section
+            symbol_section = False
+            latest_peak_info = None
+            latest_trough_info = None
+            
             for line in lines:
-                # Look for trough information
-                if 'trough' in line.lower() and 'bars ago' in line.lower():
-                    # Extract signal information
-                    signal = await self._extract_trough_signal(symbol, line, analysis_result)
-                    if signal:
-                        signals.append(signal)
+                # Check if we're in the right symbol section
+                if line.strip().startswith(f"## {symbol}"):
+                    symbol_section = True
+                    continue
+                elif line.strip().startswith("## ") and not line.strip().startswith(f"## {symbol}"):
+                    symbol_section = False
+                    continue
                 
-                # Look for peak information (for sell signals)
-                elif 'peak' in line.lower() and 'bars ago' in line.lower():
-                    signal = await self._extract_peak_signal(symbol, line, analysis_result)
+                if not symbol_section:
+                    continue
+                
+                # Look for latest peak information
+                if line.strip().startswith("Latest peak:"):
+                    latest_peak_info = line.strip()
+                
+                # Look for latest trough information  
+                elif line.strip().startswith("Latest trough:"):
+                    latest_trough_info = line.strip()
+                
+                # Look for trading signal summary
+                elif "Last signal:" in line and ("PEAK" in line or "TROUGH" in line):
+                    # Extract signal from trading summary
+                    signal = await self._extract_signal_from_summary(symbol, line, analysis_result)
                     if signal:
                         signals.append(signal)
+            
+            # Also check latest peak/trough lines for fresh signals
+            if latest_peak_info:
+                signal = await self._extract_latest_signal(symbol, latest_peak_info, 'peak', analysis_result)
+                if signal:
+                    signals.append(signal)
+                    
+            if latest_trough_info:
+                signal = await self._extract_latest_signal(symbol, latest_trough_info, 'trough', analysis_result)
+                if signal:
+                    signals.append(signal)
             
             # Cache any detected signals
             if signals:
@@ -162,6 +191,111 @@ class SignalDetector:
             self.logger.error(f"Error parsing analysis for {symbol}: {e}")
         
         return signals
+    
+    async def _extract_signal_from_summary(self, symbol: str, line: str, full_analysis: str) -> Optional[Dict]:
+        """Extract signal from trading signal summary line"""
+        try:
+            # Parse line like: "📊 Last signal: PEAK at sample 381 ($1.5700)"
+            import re
+            
+            # Extract signal type
+            signal_type = None
+            if "PEAK" in line.upper():
+                signal_type = "fresh_peak"
+            elif "TROUGH" in line.upper():
+                signal_type = "fresh_trough"
+            else:
+                return None
+            
+            # Extract price
+            price_match = re.search(r'\$(\d+\.?\d*)', line)
+            price = float(price_match.group(1)) if price_match else None
+            
+            # Extract sample/bars info - look for pattern like "sample 381" or "(7 bars ago)"
+            bars_ago = None
+            sample_match = re.search(r'sample\s+(\d+)', line)
+            bars_match = re.search(r'\((\d+)\s+bars?\s+ago\)', line)
+            
+            if bars_match:
+                bars_ago = int(bars_match.group(1))
+            elif sample_match:
+                # Estimate bars ago from context or set to reasonable default
+                bars_ago = 1  # Assume recent if no bars ago specified
+            
+            if bars_ago is None or bars_ago > self.fresh_signal_bars * 2:  # Allow some flexibility
+                return None
+            
+            # Calculate confidence (no threshold since we removed confidence requirements)
+            confidence = self._calculate_signal_confidence(bars_ago, signal_type, full_analysis)
+            
+            # Validate signal
+            is_valid = await self._validate_signal(symbol, price, signal_type.replace('fresh_', ''))
+            if not is_valid:
+                return None
+            
+            action = "buy_candidate" if signal_type == "fresh_trough" else "sell_candidate"
+            
+            signal = {
+                'symbol': symbol,
+                'signal_type': signal_type,
+                'price': price,
+                'bars_ago': bars_ago,
+                'confidence': confidence,
+                'action': action,
+                'detected_at': datetime.now(timezone.utc).isoformat(),
+                'source': 'peak_trough_analysis'
+            }
+            
+            return signal
+            
+        except Exception as e:
+            self.logger.error(f"Error extracting signal from summary for {symbol}: {e}")
+            return None
+    
+    async def _extract_latest_signal(self, symbol: str, line: str, signal_type: str, full_analysis: str) -> Optional[Dict]:
+        """Extract signal from latest peak/trough line"""
+        try:
+            # Parse line like: "Latest peak: Sample 381, $1.5700 (7 bars ago)"
+            import re
+            
+            # Extract price
+            price_match = re.search(r'\$(\d+\.?\d*)', line)
+            price = float(price_match.group(1)) if price_match else None
+            
+            # Extract bars ago
+            bars_match = re.search(r'\((\d+)\s+bars?\s+ago\)', line)
+            bars_ago = int(bars_match.group(1)) if bars_match else None
+            
+            if bars_ago is None or bars_ago > self.fresh_signal_bars * 2:  # Allow some flexibility
+                return None
+            
+            # Calculate confidence
+            confidence = self._calculate_signal_confidence(bars_ago, signal_type, full_analysis)
+            
+            # Validate signal
+            is_valid = await self._validate_signal(symbol, price, signal_type)
+            if not is_valid:
+                return None
+            
+            signal_type_name = f"fresh_{signal_type}"
+            action = "buy_candidate" if signal_type == "trough" else "sell_candidate"
+            
+            signal = {
+                'symbol': symbol,
+                'signal_type': signal_type_name,
+                'price': price,
+                'bars_ago': bars_ago,
+                'confidence': confidence,
+                'action': action,
+                'detected_at': datetime.now(timezone.utc).isoformat(),
+                'source': 'peak_trough_analysis'
+            }
+            
+            return signal
+            
+        except Exception as e:
+            self.logger.error(f"Error extracting latest signal for {symbol}: {e}")
+            return None
     
     async def _extract_trough_signal(self, symbol: str, line: str, full_analysis: str) -> Optional[Dict]:
         """Extract trough signal from analysis line"""

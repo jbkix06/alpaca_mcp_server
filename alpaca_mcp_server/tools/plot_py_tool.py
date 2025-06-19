@@ -20,7 +20,7 @@ async def generate_stock_plot(
     symbols: str,
     timeframe: str = "1Min",
     days: int = 1,
-    window: int = 11,
+    window: int = 21,
     lookahead: int = 1,
     feed: str = "sip",
     no_plot: bool = False,

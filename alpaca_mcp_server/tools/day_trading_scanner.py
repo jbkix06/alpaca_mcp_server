@@ -6,6 +6,9 @@ import os
 from datetime import datetime, timezone
 import pytz
 
+# Import global configuration
+from ..config import get_trading_config, get_scanner_config
+
 logger = logging.getLogger(__name__)
 
 
@@ -43,29 +46,42 @@ def _is_market_hours() -> tuple[bool, str]:
 
 async def scan_day_trading_opportunities(
     symbols: str = "ALL",  # Default to ALL symbols from combined.lis
-    min_trades_per_minute: int = 50,
-    min_percent_change: float = 5.0,
-    max_symbols: int = 20,
-    sort_by: str = "trades",  # "trades", "percent_change", or "volume"
+    min_trades_per_minute: int = None,
+    min_percent_change: float = None,
+    max_symbols: int = None,
+    sort_by: str = None,  # "trades", "percent_change", or "volume"
 ) -> str:
+    """Scan with global config defaults"""
+    # Load global config defaults
+    trading_config = get_trading_config()
+    scanner_config = get_scanner_config()
+    
+    if min_trades_per_minute is None:
+        min_trades_per_minute = trading_config.trades_per_minute_threshold
+    if min_percent_change is None:
+        min_percent_change = trading_config.min_percent_change_threshold
+    if max_symbols is None:
+        max_symbols = scanner_config.max_watchlist_size
+    if sort_by is None:
+        sort_by = scanner_config.scanner_sort_method
     """
-    Scan for active day-trading opportunities using EXACT same method as stock_analyzer.c
+    Scan for EXPLOSIVE UP-ONLY day-trading opportunities with extreme volatility.
 
-    This replicates the C program's exact logic:
-    1. Direct REST API call to Alpaca snapshots endpoint
-    2. Extract minuteBar.n field for trade count (NOT trade_count from SDK)
-    3. Apply same filters: 50+ trades, % change thresholds
-    4. Same calculations and sorting as the C program
+    UPDATED FILTER CRITERIA:
+    1. ONLY UP STOCKS - No negative movers ever
+    2. Minimum +10% daily gain for consideration  
+    3. Minimum 500 trades/minute for extreme liquidity
+    4. EXPLOSIVE VOLATILITY FOCUS - Penny stocks and rocket ships preferred
 
     Args:
         symbols: Comma-separated symbols to scan
-        min_trades_per_minute: Minimum trades in current minute bar (default: 50, same as C program)
-        min_percent_change: Minimum absolute % change from reference (default: 5.0%)
+        min_trades_per_minute: Minimum trades in current minute bar (default: 500 for extreme liquidity)
+        min_percent_change: Minimum % change from reference (default: 10.0% for explosive moves)
         max_symbols: Maximum results to return (default: 20)
         sort_by: Sort results by "trades", "percent_change", or "volume"
 
     Returns:
-        Formatted string with trading opportunities using exact C program methodology
+        Formatted string with EXPLOSIVE UP-ONLY trading opportunities
     """
     try:
         # Check market status first
@@ -218,8 +234,8 @@ async def scan_day_trading_opportunities(
                 percent = ((price_now - reference_price) / reference_price) * 100.0
                 percent_change = abs(percent)  # Use absolute value for filtering
 
-                # Apply percent change filter
-                if percent_change < min_percent_change:
+                # Apply percent change filter - ONLY UP STOCKS
+                if percent_change < min_percent_change or percent <= 0:
                     continue
 
                 # Store results exactly like C program structure (lines 743-754)
@@ -351,13 +367,14 @@ async def scan_explosive_momentum(
     min_percent_change: float = 15.0,
 ) -> str:
     """
-    Quick scanner for explosive momentum moves.
+    Quick scanner for explosive momentum moves - EXPLOSIVE UP-ONLY.
 
     Focused on extreme % changes and high activity across all tradeable assets.
+    ONLY UP STOCKS - No crashes or negative movers.
     """
     return await scan_day_trading_opportunities(
         symbols=symbols,
-        min_trades_per_minute=50,  # Higher threshold for quality explosive moves
+        min_trades_per_minute=500,  # Extreme liquidity threshold
         min_percent_change=min_percent_change,
         max_symbols=10,
         sort_by="percent_change",

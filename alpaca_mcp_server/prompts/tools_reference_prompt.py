@@ -13,7 +13,7 @@ async def list_all_tools() -> str:
 
 ## 🔥 Featured Tool - NEW Peak/Trough Analysis
 
-### `get_stock_peak_trough_analysis(symbols, timeframe="1Min", window_len=11, lookahead=1)`
+### `get_stock_peak_trough_analysis(symbols, timeframe="1Min", window_len=21, lookahead=1)`
 **Advanced technical analysis using zero-phase Hanning filtering for day trading signals**
 
 Perfect for the trading lesson: **"SCAN LONGER before entry"** - provides precise entry/exit points

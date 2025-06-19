@@ -36,6 +36,10 @@ if __name__ == "__main__" or not __package__:
     from alpaca_mcp_server.tools.plot_py_tool import (
         generate_stock_plot as plot_py_generate_stock_plot,
     )
+    from alpaca_mcp_server.tools.cleanup_tool import (
+        cleanup_server,
+        list_cleanup_candidates,
+    )
     from alpaca_mcp_server.prompts import (
         account_analysis_prompt,
         position_management_prompt,
@@ -57,12 +61,17 @@ else:
         asset_tools,
         corporate_action_tools,
         streaming_tools,
+        fastapi_monitoring_tools,
     )
     from .tools.peak_trough_analysis_tool import (
         analyze_peaks_and_troughs as peak_trough_analysis,
     )
     from .tools.plot_py_tool import (
         generate_stock_plot as plot_py_generate_stock_plot,
+    )
+    from .tools.cleanup_tool import (
+        cleanup_server,
+        list_cleanup_candidates,
     )
     from .prompts import (
         account_analysis_prompt,
@@ -332,7 +341,7 @@ async def get_stock_peak_trough_analysis(
     timeframe: str = "1Min",
     days: int = 1,
     limit: int = 1000,
-    window_len: int = 11,
+    window_len: int = 21,
     lookahead: int = 1,
     delta: float = 0.0,
     min_peak_distance: int = 5,
@@ -355,7 +364,7 @@ async def get_stock_peak_trough_analysis(
         timeframe: "1Min", "5Min", "15Min", "30Min", "1Hour" (default: "1Min")
         days: Historical days to analyze (1-30, default: 1)
         limit: Max bars to fetch (1-10000, default: 1000)
-        window_len: Hanning filter smoothing (3-101, default: 11)
+        window_len: Hanning filter smoothing (3-101, default: 21)
         lookahead: Peak detection sensitivity (1-50, default: 1)
         delta: Minimum peak amplitude (default: 0.0 for penny stocks)
         min_peak_distance: Min bars between peaks (default: 5)
@@ -370,31 +379,30 @@ async def get_stock_peak_trough_analysis(
 # Day Trading Scanner Tools
 @mcp.tool()
 async def scan_day_trading_opportunities(
-    symbols: str = "SPY,QQQ,IWM,AAPL,MSFT,NVDA,TSLA,AMC,GME,PLTR,SOFI,RIVN,LCID,NIO,XPEV,BABA,META,GOOGL,AMZN,NFLX",
-    min_trades_per_minute: int = 50,
-    min_percent_change: float = 5.0,
+    symbols: str = "ALL",
+    min_trades_per_minute: int = 500,
+    min_percent_change: float = 10.0,
     max_symbols: int = 20,
     sort_by: str = "trades",
 ) -> str:
     """
-    Scan for active day-trading opportunities using real-time market snapshots.
+    Scan for EXPLOSIVE UP-ONLY day-trading opportunities with extreme volatility.
 
-    Focused on two key metrics from professional trading analysis:
-    1. Trades per minute (activity/liquidity indicator)
-    2. Percent change (momentum indicator)
-
-    Perfect for finding explosive moves like NEHC and high-activity stocks for day trading.
-    Uses existing get_stock_snapshots tool for real-time data.
+    UPDATED FILTER CRITERIA:
+    1. ONLY UP STOCKS - No negative movers ever
+    2. Minimum +10% daily gain for consideration  
+    3. Minimum 500 trades/minute for extreme liquidity
+    4. EXPLOSIVE VOLATILITY FOCUS - Penny stocks and rocket ships preferred
 
     Args:
-        symbols: Comma-separated symbols to scan (default: popular day-trading stocks)
-        min_trades_per_minute: Minimum trades in current minute bar (default: 50)
-        min_percent_change: Minimum absolute % change from reference (default: 5.0%)
+        symbols: Comma-separated symbols to scan (default: ALL tradeable assets)
+        min_trades_per_minute: Minimum trades in current minute bar (default: 500 for extreme liquidity)
+        min_percent_change: Minimum % change from reference (default: 10.0% for explosive moves)
         max_symbols: Maximum results to return (default: 20)
         sort_by: Sort results by "trades", "percent_change", or "volume"
 
     Returns:
-        Formatted analysis with top day-trading opportunities ranked by activity and momentum.
+        Formatted analysis with EXPLOSIVE UP-ONLY trading opportunities.
     """
     from .tools.day_trading_scanner import (
         scan_day_trading_opportunities as scanner_func,
@@ -426,90 +434,6 @@ async def scan_explosive_momentum(
     from .tools.day_trading_scanner import scan_explosive_momentum as explosive_func
 
     return await explosive_func(symbols, min_percent_change)
-
-
-# Differential Trade Scanner Tools (Background Scanner Like C Program)
-@mcp.tool()
-async def start_differential_trade_scanner(
-    symbols: str = "SPY,QQQ,AAPL,MSFT,NVDA,TSLA,AMC,GME,PLTR,NIVF,HCTI,GNLN,IXHL,CVAC,CGTL",
-    min_trades_per_minute: int = 50,
-    min_percent_change: float = 5.0,
-    update_interval: int = 60,
-    max_symbols: int = 20,
-) -> str:
-    """
-    Start the differential trade scanner in the background (like the C program).
-
-    This mirrors the C program functionality:
-    1. Takes snapshots every 60 seconds
-    2. Calculates exact trade count differences
-    3. Caches previous values for comparison
-    4. Runs continuously in background
-
-    Perfect for continuous monitoring of trade activity using exact differential calculations
-    like the stock_analyzer.c program. Extracts trade counts from minute bar 'n' field.
-
-    Args:
-        symbols: Comma-separated symbols to monitor
-        min_trades_per_minute: Minimum trade count difference to include
-        min_percent_change: Minimum % change to include
-        update_interval: Seconds between scans (default: 60)
-        max_symbols: Maximum results to track
-
-    Returns:
-        Status message about scanner startup
-    """
-    return await start_differential_trade_scanner(
-        symbols, min_trades_per_minute, min_percent_change, update_interval, max_symbols
-    )
-
-
-@mcp.tool()
-async def stop_differential_trade_scanner() -> str:
-    """
-    Stop the background differential trade scanner.
-
-    Gracefully stops the background scanner while preserving the cache
-    for next startup (like the C program's cache persistence).
-
-    Returns:
-        Status message about scanner shutdown
-    """
-    return await stop_differential_trade_scanner()
-
-
-@mcp.tool()
-async def get_differential_trade_results(
-    sort_by: str = "trades_change", max_results: int = 20
-) -> str:
-    """
-    Get the latest results from the differential trade scanner.
-
-    Returns live results from the background scanner with exact trade count
-    differences calculated like the C program methodology.
-
-    Args:
-        sort_by: Sort by "trades_change", "percent_change", or "volume_change"
-        max_results: Maximum results to return
-
-    Returns:
-        Formatted results like the C program's HTML output with exact trade counts
-    """
-    return await get_differential_trade_results(sort_by, max_results)
-
-
-@mcp.tool()
-async def get_differential_scanner_status() -> str:
-    """
-    Get the current status of the differential trade scanner.
-
-    Shows scanner health, cache size, last scan time, and background task status.
-    Perfect for monitoring the background scanner's operation like the C program.
-
-    Returns:
-        Comprehensive status information about the differential scanner
-    """
-    return await get_differential_scanner_status()
 
 
 # After-Hours and Enhanced Analytics Tools
@@ -1070,7 +994,7 @@ async def generate_advanced_technical_plots(
     symbols: str,
     timeframe: str = "1Min",
     days: int = 1,
-    window_len: int = 11,
+    window_len: int = 21,
     lookahead: int = 1,
     plot_mode: str = "single",
     display_plots: bool = False,
@@ -1121,7 +1045,7 @@ async def generate_stock_plot(
     symbols: str,
     timeframe: str = "1Min",
     days: int = 1,
-    window: int = 11,
+    window: int = 21,
     lookahead: int = 1,
     feed: str = "sip",
     no_plot: bool = False,
@@ -1346,6 +1270,60 @@ async def cc_force_refresh() -> str:
 async def cc_test_simple() -> str:
     """Simple test tool for Claude Code"""
     return "✅ Claude Code can execute MCP tools successfully!"
+
+
+# ============================================================================
+# CLEANUP AND MAINTENANCE TOOLS
+# ============================================================================
+
+
+@mcp.tool()
+async def cleanup(
+    remove_logs: bool = True,
+    remove_caches: bool = True,
+    remove_backups: bool = True,
+    dry_run: bool = False
+) -> str:
+    """
+    Clean up unnecessary temporary files from the MCP server.
+    
+    This tool removes files that are NOT necessary for MCP server operations:
+    - Log files (*.log)
+    - Cache directories (.mypy_cache, .pytest_cache, __pycache__)
+    - Backup files (*.backup, *.bak, *~)
+    - PID files (*.pid)
+    - Temporary files (*.tmp, *.temp)
+    
+    PRESERVES essential files:
+    - State files in monitoring_data/
+    - Alert history in monitoring_data/alerts/
+    - Configuration files
+    - All source code and tools
+    
+    Args:
+        remove_logs: Remove all log files (default: True)
+        remove_caches: Remove cache directories (default: True)
+        remove_backups: Remove backup files (default: True)
+        dry_run: Only show what would be deleted without actually deleting (default: False)
+    
+    Returns:
+        Detailed report of cleanup operations
+    """
+    return await cleanup_server(remove_logs, remove_caches, remove_backups, dry_run)
+
+
+@mcp.tool()
+async def list_cleanup_candidates() -> str:
+    """
+    List all files that would be cleaned up without deleting them.
+    
+    This is a safe way to see what the cleanup tool would remove.
+    Equivalent to running cleanup(dry_run=True).
+    
+    Returns:
+        Report of files that can be cleaned up
+    """
+    return await list_cleanup_candidates()
 
 
 # ============================================================================

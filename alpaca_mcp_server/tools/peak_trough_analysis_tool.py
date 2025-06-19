@@ -11,6 +11,9 @@ from scipy.signal import filtfilt
 from scipy.signal.windows import hann as hanning
 import pytz
 
+# Import global configuration
+from ..config import get_technical_config
+
 # Add parent directory to path to import peakdetect
 project_root = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -109,7 +112,10 @@ def convert_to_nyc_timezone(timestamp_str):
         return timestamp_str
 
 
-def zero_phase_filter(data, window_len=11):
+def zero_phase_filter(data, window_len=None):
+    """Apply zero-phase Hanning filter with global config defaults"""
+    if window_len is None:
+        window_len = get_technical_config().hanning_window_samples
     """Apply zero-phase low-pass filter using Hanning window"""
     data = np.array(data)
 
@@ -257,7 +263,12 @@ class HistoricalDataFetcher:
             return None
 
 
-def process_bars_for_peaks(symbol, bars, window_len=11, lookahead=1):
+def process_bars_for_peaks(symbol, bars, window_len=None, lookahead=None):
+    """Process bars with global config defaults"""
+    if window_len is None:
+        window_len = get_technical_config().hanning_window_samples
+    if lookahead is None:
+        lookahead = get_technical_config().peak_trough_lookahead
     """Process bars to compute filtered close prices and detect peaks/troughs"""
     try:
         if not bars or len(bars) < lookahead * 2:
@@ -408,10 +419,10 @@ async def analyze_peaks_and_troughs(
     timeframe: str = "1Min",
     days: int = 1,
     limit: int = 1000,
-    window_len: int = 11,
-    lookahead: int = 1,
+    window_len: int = None,
+    lookahead: int = None,
     delta: float = 0.0,
-    min_peak_distance: int = 5,
+    min_peak_distance: int = None,
 ) -> str:
     """
     Enhanced peak and trough analysis for day trading signals using zero-phase filtering.
@@ -433,7 +444,7 @@ async def analyze_peaks_and_troughs(
         timeframe: Bar timeframe - "1Min", "5Min", "15Min", "30Min", "1Hour" (default: "1Min")
         days: Number of trading days of historical data (default: 1, max: 30)
         limit: Maximum number of bars to fetch (default: 1000, max: 10000)
-        window_len: Hanning filter window length - controls smoothing (default: 11, must be odd, range: 3-101)
+        window_len: Hanning filter window length - controls smoothing (default: 21, must be odd, range: 3-101)
         lookahead: Peak detection lookahead parameter (default: 1, range: 1-50)
         delta: Minimum peak/trough amplitude threshold (default: 0.0, use 0 for penny stocks)
         min_peak_distance: Minimum bars between peaks for filtering noise (default: 5)
@@ -459,13 +470,17 @@ async def analyze_peaks_and_troughs(
                 # Import the day trading scanner function
                 from .day_trading_scanner import scan_day_trading_opportunities
                 
-                # Get current active stocks from scanner
+                # Get current active stocks from scanner using global config
+                from ..config import get_trading_config, get_scanner_config
+                trading_config = get_trading_config()
+                scanner_config = get_scanner_config()
+                
                 scanner_result = await scan_day_trading_opportunities(
                     symbols="ALL",
-                    min_trades_per_minute=500,  # Use higher threshold for quality stocks
-                    min_percent_change=1.0,     # Lower threshold to get more symbols
-                    max_symbols=20,
-                    sort_by="trades"
+                    min_trades_per_minute=trading_config.trades_per_minute_threshold,
+                    min_percent_change=1.0,     # Lower threshold to get more symbols for analysis
+                    max_symbols=scanner_config.max_watchlist_size,
+                    sort_by=scanner_config.scanner_sort_method
                 )
                 
                 # Extract symbols from scanner output using improved regex pattern
@@ -508,6 +523,15 @@ async def analyze_peaks_and_troughs(
         if not symbol_list:
             return "Error: No valid symbols provided"
 
+        # Load global config defaults for None parameters
+        config = get_technical_config()
+        if window_len is None:
+            window_len = config.hanning_window_samples
+        if lookahead is None:
+            lookahead = config.peak_trough_lookahead
+        if min_peak_distance is None:
+            min_peak_distance = config.peak_trough_min_distance
+
         # Validate parameters
         if limit < 1 or limit > 10000:
             limit = min(max(limit, 1), 10000)
@@ -516,7 +540,7 @@ async def analyze_peaks_and_troughs(
             days = min(max(days, 1), 30)
 
         if window_len < 3 or window_len > 101:
-            window_len = 11
+            window_len = config.hanning_window_samples
         if window_len % 2 == 0:
             window_len += 1
 
@@ -527,7 +551,7 @@ async def analyze_peaks_and_troughs(
             delta = 0.0
 
         if min_peak_distance < 1:
-            min_peak_distance = 5
+            min_peak_distance = config.peak_trough_min_distance
 
         # Get API credentials for enhanced data fetching
         try:
