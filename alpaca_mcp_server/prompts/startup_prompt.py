@@ -6,6 +6,7 @@ import webbrowser
 import requests
 
 from ..config.global_config import get_global_config
+from ..tools.account_tools import get_positions
 from ..tools.day_trading_scanner import scan_day_trading_opportunities
 from ..tools.streaming_tools import start_global_stock_stream
 from ..utils.timezone_utils import get_eastern_time, get_eastern_time_string, get_market_time_display
@@ -140,6 +141,63 @@ async def startup() -> str:
                 fastapi_status = f"❌ Startup failed: {result.stderr[:50]}"
         except Exception as e:
             fastapi_status = f"❌ Failed to start: {str(e)[:50]}"
+
+    # Check current positions
+    positions_status = "❌ Failed to retrieve"
+    positions_summary = "No position data available"
+    position_count = 0
+    total_position_value = 0.0
+    total_unrealized_pnl = 0.0
+    
+    try:
+        positions_result = await get_positions()
+        
+        if "No open positions found" in positions_result:
+            positions_status = "✅ No open positions"
+            positions_summary = "Account is currently flat - ready for new trades"
+        else:
+            # Parse position details for summary
+            lines = positions_result.split('\n')
+            current_position = {}
+            
+            for line in lines:
+                line = line.strip()
+                if line.startswith('Symbol:'):
+                    if current_position:  # Save previous position
+                        position_count += 1
+                        total_position_value += current_position.get('market_value', 0.0)
+                        total_unrealized_pnl += current_position.get('unrealized_pl', 0.0)
+                    current_position = {'symbol': line.split(': ')[1]}
+                elif line.startswith('Market Value: $'):
+                    try:
+                        current_position['market_value'] = float(line.split('$')[1])
+                    except (IndexError, ValueError):
+                        current_position['market_value'] = 0.0
+                elif line.startswith('Unrealized P/L: $'):
+                    try:
+                        # Extract the P/L amount (before the percentage)
+                        pnl_part = line.split('$')[1].split(' ')[0]
+                        current_position['unrealized_pl'] = float(pnl_part)
+                    except (IndexError, ValueError):
+                        current_position['unrealized_pl'] = 0.0
+            
+            # Don't forget the last position
+            if current_position:
+                position_count += 1
+                total_position_value += current_position.get('market_value', 0.0)
+                total_unrealized_pnl += current_position.get('unrealized_pl', 0.0)
+            
+            if position_count > 0:
+                pnl_emoji = "🟢" if total_unrealized_pnl >= 0 else "🔴"
+                positions_status = f"✅ {position_count} open position{'s' if position_count != 1 else ''}"
+                positions_summary = f"{pnl_emoji} Total Value: ${total_position_value:,.2f} | P/L: ${total_unrealized_pnl:+,.2f}"
+            else:
+                positions_status = "✅ No open positions"
+                positions_summary = "Account is currently flat - ready for new trades"
+                
+    except Exception as e:
+        positions_status = f"❌ Error checking positions: {str(e)[:50]}"
+        positions_summary = "Unable to retrieve position data"
 
     # Use MCP day trading scanner for active stocks - scan ALL tradeable assets
     try:
@@ -290,6 +348,98 @@ async def startup() -> str:
     report.append(f"- **MCP Server**: {mcp_status}")
     report.append(f"- **FastAPI**: {fastapi_status}")
     report.append(f"- **Streaming**: {streaming_status}")
+    report.append(f"- **Positions**: {positions_status}")
+    if positions_summary != "No position data available":
+        report.append(f"  {positions_summary}")
+
+    # Add detailed position information if positions exist
+    if position_count > 0:
+        report.append("\n### 💼 Current Portfolio Positions")
+        try:
+            # Get full position details again for display
+            positions_result = await get_positions()
+            if "No open positions found" not in positions_result:
+                # Format positions into a nice table
+                lines = positions_result.split('\n')
+                current_position = {}
+                positions_data = []
+                
+                for line in lines:
+                    line = line.strip()
+                    if line.startswith('Symbol:'):
+                        if current_position:  # Save previous position
+                            positions_data.append(current_position)
+                        current_position = {'symbol': line.split(': ')[1]}
+                    elif line.startswith('Quantity:'):
+                        current_position['quantity'] = line.split(': ')[1]
+                    elif line.startswith('Current Price: $'):
+                        try:
+                            current_position['current_price'] = float(line.split('$')[1])
+                        except (IndexError, ValueError):
+                            current_position['current_price'] = 0.0
+                    elif line.startswith('Market Value: $'):
+                        try:
+                            current_position['market_value'] = float(line.split('$')[1])
+                        except (IndexError, ValueError):
+                            current_position['market_value'] = 0.0
+                    elif line.startswith('Unrealized P/L: $'):
+                        try:
+                            # Extract P/L and percentage
+                            pnl_text = line.split('$')[1]
+                            if '(' in pnl_text:
+                                pnl_amount = float(pnl_text.split(' ')[0])
+                                pnl_percent = pnl_text.split('(')[1].split(')')[0]
+                                current_position['unrealized_pl'] = pnl_amount
+                                current_position['unrealized_pl_percent'] = pnl_percent
+                            else:
+                                current_position['unrealized_pl'] = float(pnl_text)
+                                current_position['unrealized_pl_percent'] = "0.00%"
+                        except (IndexError, ValueError):
+                            current_position['unrealized_pl'] = 0.0
+                            current_position['unrealized_pl_percent'] = "0.00%"
+                
+                # Don't forget the last position
+                if current_position:
+                    positions_data.append(current_position)
+                
+                if positions_data:
+                    report.append("```")
+                    report.append(f"{'Symbol':<8} {'Qty':<12} {'Price':<10} {'Value':<12} {'P/L':<12} {'%':<8}")
+                    report.append(f"{'------':<8} {'---':<12} {'-----':<10} {'-----':<12} {'---':<12} {'---':<8}")
+                    
+                    for pos in positions_data:
+                        symbol = pos.get('symbol', 'N/A')
+                        quantity = pos.get('quantity', 'N/A')
+                        price = f"${pos.get('current_price', 0):.2f}"
+                        value = f"${pos.get('market_value', 0):,.2f}"
+                        pnl = f"${pos.get('unrealized_pl', 0):+.2f}"
+                        pnl_pct = pos.get('unrealized_pl_percent', '0.00%')
+                        
+                        # Add emoji for P/L status
+                        pnl_emoji = "🟢" if pos.get('unrealized_pl', 0) >= 0 else "🔴"
+                        
+                        report.append(f"{symbol:<8} {quantity:<12} {price:<10} {value:<12} {pnl:<12} {pnl_pct:<8} {pnl_emoji}")
+                    
+                    report.append("```")
+                    
+                    # Add portfolio summary
+                    avg_return_pct = (total_unrealized_pnl / total_position_value * 100) if total_position_value > 0 else 0
+                    portfolio_emoji = "🟢" if total_unrealized_pnl >= 0 else "🔴"
+                    
+                    report.append(f"\n**Portfolio Summary:** {portfolio_emoji}")
+                    report.append(f"- **Total Value:** ${total_position_value:,.2f}")
+                    report.append(f"- **Total P/L:** ${total_unrealized_pnl:+,.2f} ({avg_return_pct:+.2f}%)")
+                    report.append(f"- **Position Count:** {position_count}")
+                    
+                    # Add risk warning if significant positions
+                    if total_position_value > 10000:
+                        report.append(f"\n⚠️ **LARGE POSITIONS ALERT:** ${total_position_value:,.0f} at risk")
+                        report.append("- Monitor closely for profit-taking opportunities")
+                        report.append("- Follow NEVER SELL FOR LOSS discipline")
+                        if total_unrealized_pnl > 1000:
+                            report.append(f"- **${total_unrealized_pnl:,.0f} profit** - Consider scaling out at peaks")
+        except Exception as e:
+            report.append(f"❌ Error displaying position details: {str(e)[:100]}")
 
     # Determine market status dynamically - CRITICAL FOR TRADING SPEED
     now_et, tz_name = get_eastern_time()
