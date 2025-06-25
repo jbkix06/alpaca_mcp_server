@@ -1,13 +1,9 @@
 """Enhanced market clock with extended hours awareness."""
 
-from datetime import datetime, time, timezone, timedelta
+from datetime import time, timedelta
+
 from ..config.settings import get_trading_client
-
-
-def get_eastern_time():
-    """Get current time in Eastern timezone."""
-    eastern = timezone(timedelta(hours=-5))  # EST (should handle DST in production)
-    return datetime.now(eastern)
+from ..utils.timezone_utils import get_eastern_time
 
 
 async def get_extended_market_clock() -> str:
@@ -17,7 +13,7 @@ async def get_extended_market_clock() -> str:
         clock = client.get_clock()
 
         # Get current Eastern time
-        now_et = get_eastern_time()
+        now_et, tz_name = get_eastern_time()
         current_time = now_et.time()
 
         # Define trading sessions
@@ -110,14 +106,14 @@ async def get_extended_market_clock() -> str:
         return f"""
 Enhanced Market Clock
 ====================
-Current Time (ET): {now_et.strftime("%Y-%m-%d %H:%M:%S %Z")}
+Current Time (ET): {now_et.strftime(f"%Y-%m-%d %H:%M:%S {tz_name}")}
 Current Session: {session_status}
 Extended Hours: {"Yes" if extended_hours else "No"}
 Volatility: {volatility_notes[session]}
 
 Session Schedule:
 • Pre-market:  4:00 AM - 9:30 AM ET
-• Regular:     9:30 AM - 4:00 PM ET  
+• Regular:     9:30 AM - 4:00 PM ET
 • After-hours: 4:00 PM - 8:00 PM ET
 • Closed:      8:00 PM - 4:00 AM ET
 
