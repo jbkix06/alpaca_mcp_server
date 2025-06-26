@@ -1,14 +1,17 @@
 """Real-time streaming tools for day trading - fixed version."""
 
-import time
-import threading
 import asyncio
-from datetime import datetime
-from typing import List, Optional
-from collections import defaultdict
-from alpaca.data.live import StockDataStream
-from alpaca.data.enums import DataFeed
 import os
+
+# Import the actual module for modifying variables (not the settings instance)
+import sys
+import threading
+import time
+from collections import defaultdict
+from datetime import datetime
+
+from alpaca.data.enums import DataFeed
+from alpaca.data.live import StockDataStream
 
 # Import all streaming state variables directly from settings module
 from alpaca_mcp_server.config.settings import (
@@ -16,10 +19,9 @@ from alpaca_mcp_server.config.settings import (
     get_or_create_stock_buffer as _get_or_create_stock_buffer,
 )
 
-# Import the actual module for modifying variables (not the settings instance)
-import sys
 # Get the actual module from sys.modules to avoid the Settings instance shadowing
-_settings_module = sys.modules['alpaca_mcp_server.config.settings']
+_settings_module = sys.modules["alpaca_mcp_server.config.settings"]
+
 
 # Event handlers for streaming data
 async def handle_stock_trade(trade):
@@ -49,6 +51,7 @@ async def handle_stock_trade(trade):
     except Exception as e:
         print(f"Error handling stock trade: {e}")
 
+
 async def handle_stock_quote(quote):
     """Handle incoming stock quote data"""
     try:
@@ -77,6 +80,7 @@ async def handle_stock_quote(quote):
 
     except Exception as e:
         print(f"Error handling stock quote: {e}")
+
 
 async def handle_stock_bar(bar):
     """Handle incoming stock bar data"""
@@ -109,6 +113,7 @@ async def handle_stock_bar(bar):
     except Exception as e:
         print(f"Error handling stock bar: {e}")
 
+
 async def handle_stock_status(status):
     """Handle incoming stock status data"""
 
@@ -135,12 +140,13 @@ async def handle_stock_status(status):
     except Exception as e:
         print(f"Error handling stock status: {e}")
 
+
 async def start_global_stock_stream(
-    symbols: List[str],
-    data_types: List[str] = ["trades", "quotes"],
+    symbols: list[str],
+    data_types: list[str] = None,
     feed: str = "sip",
-    duration_seconds: Optional[int] = None,
-    buffer_size_per_symbol: Optional[int] = None,
+    duration_seconds: int | None = None,
+    buffer_size_per_symbol: int | None = None,
     replace_existing: bool = False,
 ) -> str:
     """
@@ -165,11 +171,13 @@ async def start_global_stock_stream(
     Returns:
         str: Confirmation with stock stream details and data access instructions
     """
+    if data_types is None:
+        data_types = ["trades", "quotes"]
     try:
         # Check if stock stream already exists
         if _settings_module._stock_stream_active and not replace_existing:
             current_symbols = set()
-            for data_type, symbol_set in _settings_module._stock_stream_subscriptions.items():
+            for _data_type, symbol_set in _settings_module._stock_stream_subscriptions.items():
                 current_symbols.update(symbol_set)
 
             return f"""
@@ -288,7 +296,9 @@ Options:
                 print("Stock stream stopped")
 
         # Start the stock stream in a background thread
-        _settings_module._stock_stream_thread = threading.Thread(target=run_stock_stream, daemon=True)
+        _settings_module._stock_stream_thread = threading.Thread(
+            target=run_stock_stream, daemon=True
+        )
         _settings_module._stock_stream_thread.start()
 
         # Wait a moment for connection
@@ -296,13 +306,9 @@ Options:
 
         # Format response
         buffer_info = (
-            "Unlimited"
-            if buffer_size_per_symbol is None
-            else f"{buffer_size_per_symbol:,} items"
+            "Unlimited" if buffer_size_per_symbol is None else f"{buffer_size_per_symbol:,} items"
         )
-        duration_info = (
-            f"{duration_seconds:,} seconds" if duration_seconds else "Indefinite"
-        )
+        duration_info = f"{duration_seconds:,} seconds" if duration_seconds else "Indefinite"
 
         return f"""
 🚀 GLOBAL STOCK STREAM STARTED SUCCESSFULLY!
@@ -317,7 +323,7 @@ Options:
 
 💾 Stock Data Access:
 └── get_stock_stream_data("AAPL", "trades") - Recent stock trades
-└── get_stock_stream_buffer_stats() - Buffer statistics  
+└── get_stock_stream_buffer_stats() - Buffer statistics
 └── list_active_stock_streams() - Current stream status
 └── get_stock_stream_analysis("NVDA", "momentum") - Real-time analysis
 
@@ -334,6 +340,7 @@ Options:
 
     except Exception as e:
         return f"Error starting global stock stream: {str(e)}"
+
 
 async def stop_global_stock_stream() -> str:
     """
@@ -381,9 +388,7 @@ async def stop_global_stock_stream() -> str:
         result += f"  Items in Buffers: {total_buffered_items:,}\n"
 
         if runtime_minutes > 0:
-            result += (
-                f"  Average Rate: {total_events / runtime_minutes:.1f} events/min\n"
-            )
+            result += f"  Average Rate: {total_events / runtime_minutes:.1f} events/min\n"
 
         # Breakdown by data type
         result += "\n📈 Event Breakdown:\n"
@@ -407,8 +412,9 @@ async def stop_global_stock_stream() -> str:
     except Exception as e:
         return f"Error stopping stock stream: {str(e)}"
 
+
 async def add_symbols_to_stock_stream(
-    symbols: List[str], data_types: Optional[List[str]] = None
+    symbols: list[str], data_types: list[str] | None = None
 ) -> str:
     """
     Add stock symbols to the existing global stock stream (if active).
@@ -424,9 +430,7 @@ async def add_symbols_to_stock_stream(
 
     try:
         if not _settings_module._stock_stream_active or not _settings_module._global_stock_stream:
-            return (
-                "No active global stock stream. Use start_global_stock_stream() first."
-            )
+            return "No active global stock stream. Use start_global_stock_stream() first."
 
         symbols = [s.upper() for s in symbols]
 
@@ -494,121 +498,143 @@ Current Stock Stream:
     except Exception as e:
         return f"Error adding symbols to stock stream: {str(e)}"
 
+
 async def stream_aware_price_monitor(symbol: str, analysis_seconds: int = 10) -> str:
     """
     Enhanced real-time price monitoring using shared stream with concurrent analysis.
     Optimized for single-stream architecture - feeds multiple concurrent processes.
-    
+
     Args:
         symbol: Stock symbol to monitor
         analysis_seconds: Seconds of recent data to analyze (default: 10)
-    
+
     Returns:
         Comprehensive streaming analysis with real-time calculations
     """
     try:
         if not _settings_module._stock_stream_active:
             return "❌ No active stream. Use start_global_stock_stream() first."
-        
+
         symbol = symbol.upper()
-        
+
         # Concurrent data pulls from single stream
         quotes_task = get_stock_stream_data(symbol, "quotes", recent_seconds=analysis_seconds)
-        trades_task = get_stock_stream_data(symbol, "trades", recent_seconds=analysis_seconds) 
-        
+        trades_task = get_stock_stream_data(symbol, "trades", recent_seconds=analysis_seconds)
+
         # Execute concurrently
-        quotes_data, trades_data = await asyncio.gather(quotes_task, trades_task, return_exceptions=True)
-        
+        quotes_data, trades_data = await asyncio.gather(
+            quotes_task, trades_task, return_exceptions=True
+        )
+
         # Extract pricing intelligence
         current_price = None
         bid_ask_spread = None
-        volume_analysis = {"total_volume": 0, "avg_trade_size": 0, "trade_count": 0, "price_range": "N/A", "last_trade_price": None}
-        
+        volume_analysis = {
+            "total_volume": 0,
+            "avg_trade_size": 0,
+            "trade_count": 0,
+            "price_range": "N/A",
+            "last_trade_price": None,
+        }
+
         # Process quotes for pricing
         if isinstance(quotes_data, str) and "Recent Quotes:" in quotes_data:
-            quote_lines = [line.strip() for line in quotes_data.split('\n') if '$' in line]
+            quote_lines = [line.strip() for line in quotes_data.split("\n") if "$" in line]
             if quote_lines:
                 last_quote = quote_lines[-1]
                 # Extract bid/ask from format like "$20.1234 x $20.5678 @ 14:30:25"
-                if ' x ' in last_quote:
-                    bid_str, ask_str = last_quote.split(' x ')[:2]
+                if " x " in last_quote:
+                    bid_str, ask_str = last_quote.split(" x ")[:2]
                     try:
-                        bid = float(bid_str.split('$')[1])
-                        ask = float(ask_str.split('$')[1])
+                        bid = float(bid_str.split("$")[1])
+                        ask = float(ask_str.split("$")[1])
                         current_price = (bid + ask) / 2
                         bid_ask_spread = ask - bid
                     except:
                         pass
-        
+
         # Process trades for volume
         if isinstance(trades_data, str) and "Recent Trades:" in trades_data:
-            trade_lines = [line.strip() for line in trades_data.split('\n') if '$' in line and ' x ' in line]
+            trade_lines = [
+                line.strip() for line in trades_data.split("\n") if "$" in line and " x " in line
+            ]
             if trade_lines:
                 total_volume = 0
                 trade_count = len(trade_lines)
                 prices = []
-                
+
                 for trade in trade_lines:
                     try:
                         # Extract from format like "$20.1234 x 1,000 @ 14:30:25"
-                        parts = trade.split(' x ')
+                        parts = trade.split(" x ")
                         if len(parts) >= 2:
-                            price = float(parts[0].split('$')[1])
-                            volume_part = parts[1].split(' @')[0].replace(',', '')
+                            price = float(parts[0].split("$")[1])
+                            volume_part = parts[1].split(" @")[0].replace(",", "")
                             volume = int(volume_part)
                             total_volume += volume
                             prices.append(price)
                     except:
                         continue
-                
+
                 volume_analysis = {
                     "total_volume": total_volume,
                     "avg_trade_size": total_volume // trade_count if trade_count > 0 else 0,
                     "trade_count": trade_count,
                     "price_range": f"${min(prices):.4f} - ${max(prices):.4f}" if prices else "N/A",
-                    "last_trade_price": prices[-1] if prices else None
+                    "last_trade_price": prices[-1] if prices else None,
                 }
-                
+
                 # Use last trade price if no quote price available
                 if current_price is None and prices:
                     current_price = prices[-1]
-        
+
         # Format intelligent response
         result = f"📊 STREAM-AWARE MONITORING: {symbol}\n"
         result += "=" * 50 + "\n\n"
-        
-        result += f"💰 Current Price: ${current_price:.4f}\n" if current_price else "💰 Current Price: Pending data\n"
-        result += f"📈 Bid-Ask Spread: ${bid_ask_spread:.4f}\n" if bid_ask_spread else "📈 Bid-Ask Spread: N/A\n"
+
+        result += (
+            f"💰 Current Price: ${current_price:.4f}\n"
+            if current_price
+            else "💰 Current Price: Pending data\n"
+        )
+        result += (
+            f"📈 Bid-Ask Spread: ${bid_ask_spread:.4f}\n"
+            if bid_ask_spread
+            else "📈 Bid-Ask Spread: N/A\n"
+        )
         result += f"📊 Volume Analysis ({analysis_seconds}s):\n"
         result += f"  └── Trades: {volume_analysis['trade_count']}\n"
         result += f"  └── Total Volume: {volume_analysis['total_volume']:,} shares\n"
         result += f"  └── Avg Trade Size: {volume_analysis['avg_trade_size']:,} shares\n"
         result += f"  └── Price Range: {volume_analysis['price_range']}\n"
-        
+
         # Real-time status indicators
-        result += f"\n⚡ Stream Health:\n"
+        result += "\n⚡ Stream Health:\n"
         result += f"  └── Data Age: <{analysis_seconds}s (real-time)\n"
-        result += f"  └── Stream Status: Active\n"
+        result += "  └── Stream Status: Active\n"
         result += f"  └── Feed Type: {_settings_module._stock_stream_config.get('feed', 'Unknown').upper()}\n"
-        
+
         # Trading signals
         if current_price and bid_ask_spread:
             spread_pct = (bid_ask_spread / current_price) * 100
-            result += f"\n🎯 Trading Conditions:\n"
-            result += f"  └── Spread: {spread_pct:.3f}% {'(Tight)' if spread_pct < 0.5 else '(Wide)'}\n"
-            trade_count = int(volume_analysis.get('trade_count', 0))
+            result += "\n🎯 Trading Conditions:\n"
+            result += (
+                f"  └── Spread: {spread_pct:.3f}% {'(Tight)' if spread_pct < 0.5 else '(Wide)'}\n"
+            )
+            trade_count = int(volume_analysis.get("trade_count", 0))
             result += f"  └── Liquidity: {'Good' if isinstance(trade_count, int) and trade_count > 5 else 'Limited'}\n"
-        
+
         return result
-        
+
     except Exception as e:
         return f"❌ Stream monitoring error: {str(e)}"
+
 
 async def get_stock_stream_data(
     symbol: str,
     data_type: str,
-    recent_seconds: Optional[int] = None,
-    limit: Optional[int] = None,
+    recent_seconds: int | None = None,
+    limit: int | None = None,
 ) -> str:
     """
     Retrieve streaming stock market data for a symbol with flexible filtering.
@@ -661,7 +687,15 @@ async def get_stock_stream_data(
 
         result += f"🔍 Filter: {time_filter}{limit_info}\n"
         result += f"📈 Results: {len(data)} items\n"
-        utilization = "100%" if buffer_stats.get('max_size') is None else f"{(buffer_stats['current_size'] / buffer_stats['max_size'] * 100):.1f}%" if buffer_stats.get('max_size', 0) > 0 else "0%"
+        utilization = (
+            "100%"
+            if buffer_stats.get("max_size") is None
+            else (
+                f"{(buffer_stats['current_size'] / buffer_stats['max_size'] * 100):.1f}%"
+                if buffer_stats.get("max_size", 0) > 0
+                else "0%"
+            )
+        )
         result += f"💾 Buffer: {buffer_stats['current_size']} total items (utilization: {utilization})\n\n"
 
         # Show recent data samples
@@ -669,14 +703,15 @@ async def get_stock_stream_data(
             result += "Recent Trades:\n"
             for i, trade in enumerate(data[-10:], 1):  # Last 10 trades
                 # Extract time portion from timestamp
-                timestamp_str = str(trade['timestamp'])
-                if 'T' in timestamp_str:
+                timestamp_str = str(trade["timestamp"])
+                if "T" in timestamp_str:
                     # ISO format: extract time part
-                    time_part = timestamp_str.split('T')[1][:12]  # HH:MM:SS.mmm
+                    time_part = timestamp_str.split("T")[1][:12]  # HH:MM:SS.mmm
                 else:
                     # Unix timestamp: convert to readable time
                     try:
                         from datetime import datetime
+
                         ts = float(timestamp_str)
                         time_part = datetime.fromtimestamp(ts).strftime("%H:%M:%S.%f")[:12]
                     except:
@@ -689,14 +724,15 @@ async def get_stock_stream_data(
                 bid = f"${quote['bid']:.4f}" if quote["bid"] else "N/A"
                 ask = f"${quote['ask']:.4f}" if quote["ask"] else "N/A"
                 # Extract time portion from timestamp
-                timestamp_str = str(quote['timestamp'])
-                if 'T' in timestamp_str:
+                timestamp_str = str(quote["timestamp"])
+                if "T" in timestamp_str:
                     # ISO format: extract time part
-                    time_part = timestamp_str.split('T')[1][:12]  # HH:MM:SS.mmm
+                    time_part = timestamp_str.split("T")[1][:12]  # HH:MM:SS.mmm
                 else:
                     # Unix timestamp: convert to readable time
                     try:
                         from datetime import datetime
+
                         ts = float(timestamp_str)
                         time_part = datetime.fromtimestamp(ts).strftime("%H:%M:%S.%f")[:12]
                     except:
@@ -723,6 +759,7 @@ async def get_stock_stream_data(
 
     except Exception as e:
         return f"Error retrieving stock stream data: {str(e)}"
+
 
 async def list_active_stock_streams() -> str:
     """
@@ -806,6 +843,7 @@ async def list_active_stock_streams() -> str:
     except Exception as e:
         return f"Error listing active stock streams: {str(e)}"
 
+
 async def get_stock_stream_buffer_stats() -> str:
     """
     Get detailed statistics about all streaming data buffers.
@@ -824,8 +862,9 @@ async def get_stock_stream_buffer_stats() -> str:
         total_buffers = len(_settings_module._stock_data_buffers)
 
         # Group by symbol
-        from typing import Dict, List, Any
-        symbol_stats: Dict[str, Dict[str, Any]] = defaultdict(
+        from typing import Any
+
+        symbol_stats: dict[str, dict[str, Any]] = defaultdict(
             lambda: {"buffers": 0, "total_items": 0, "data_types": []}
         )
 
@@ -849,16 +888,12 @@ async def get_stock_stream_buffer_stats() -> str:
         result += "📈 Per-Symbol Breakdown:\n"
         for symbol, stats in sorted(symbol_stats.items()):
             result += f"  {symbol}:\n"
-            result += (
-                f"    Buffers: {stats['buffers']} ({', '.join(str(dt) for dt in stats['data_types'])})\n"
-            )
+            result += f"    Buffers: {stats['buffers']} ({', '.join(str(dt) for dt in stats['data_types'])})\n"
             result += f"    Items: {stats['total_items']:,}\n"
-            buffers_count = stats['buffers']
-            total_items = stats['total_items'] 
+            buffers_count = stats["buffers"]
+            total_items = stats["total_items"]
             avg_per_buffer = total_items / buffers_count if buffers_count > 0 else 0
-            result += (
-                f"    Avg per Buffer: {avg_per_buffer:.1f}\n"
-            )
+            result += f"    Avg per Buffer: {avg_per_buffer:.1f}\n"
 
         # Detailed buffer info
         result += "\n🔍 Detailed Buffer Information:\n"
@@ -870,7 +905,15 @@ async def get_stock_stream_buffer_stats() -> str:
                 else "Never"
             )
             result += f"  {buffer_key}:\n"
-            utilization = "100%" if stats.get('max_size') is None else f"{(stats['current_size'] / stats['max_size'] * 100):.1f}%" if stats.get('max_size', 0) > 0 else "0%"
+            utilization = (
+                "100%"
+                if stats.get("max_size") is None
+                else (
+                    f"{(stats['current_size'] / stats['max_size'] * 100):.1f}%"
+                    if stats.get("max_size", 0) > 0
+                    else "0%"
+                )
+            )
             result += f"    Size: {utilization}\n"
             result += f"    Total Added: {stats['total_added']:,}\n"
             result += f"    Last Update: {last_update}\n"
@@ -890,43 +933,46 @@ async def get_stock_stream_buffer_stats() -> str:
     except Exception as e:
         return f"Error getting buffer statistics: {str(e)}"
 
-async def stream_optimized_order_placement(symbol: str, side: str, quantity: float, order_type: str = "limit") -> str:
+
+async def stream_optimized_order_placement(
+    symbol: str, side: str, quantity: float, order_type: str = "limit"
+) -> str:
     """
     Place order using optimal pricing from active stream.
     Single-stream architecture optimized for real-time execution.
-    
+
     Args:
         symbol: Stock symbol
         side: "buy" or "sell"
         quantity: Number of shares
         order_type: "limit", "market", etc.
-    
+
     Returns:
         Order placement result with stream-derived pricing
     """
     try:
         if not _settings_module._stock_stream_active:
             return "❌ No active stream for optimal pricing. Use start_global_stock_stream() first."
-        
+
         symbol = symbol.upper()
-        
+
         # Get real-time pricing from stream (last 5 seconds for freshest data)
         stream_quotes = await get_stock_stream_data(symbol, "quotes", recent_seconds=5)
-        
+
         # Extract optimal pricing
         optimal_price = None
-        
+
         if isinstance(stream_quotes, str) and "Recent Quotes:" in stream_quotes:
-            quote_lines = [line.strip() for line in stream_quotes.split('\n') if '$' in line]
+            quote_lines = [line.strip() for line in stream_quotes.split("\n") if "$" in line]
             if quote_lines:
                 last_quote = quote_lines[-1]
                 try:
                     # Extract bid/ask from format like "$20.1234 x $20.5678 @ 14:30:25"
-                    if ' x ' in last_quote:
-                        bid_str, ask_str = last_quote.split(' x ')[:2]
-                        bid = float(bid_str.split('$')[1])
-                        ask = float(ask_str.split('$')[1])
-                        
+                    if " x " in last_quote:
+                        bid_str, ask_str = last_quote.split(" x ")[:2]
+                        bid = float(bid_str.split("$")[1])
+                        ask = float(ask_str.split("$")[1])
+
                         # Calculate optimal limit price
                         if side.lower() == "buy":
                             optimal_price = bid  # Buy at bid for better fill
@@ -934,13 +980,17 @@ async def stream_optimized_order_placement(symbol: str, side: str, quantity: flo
                             optimal_price = ask  # Sell at ask for better fill
                 except Exception:
                     pass
-        
+
         if optimal_price is None:
             return f"❌ Unable to determine optimal price for {symbol} from stream data"
-        
+
         # Import order placement tool
-        from alpaca_mcp_server.tools.order_management_tools import place_stock_order
-        
+        from alpaca_mcp_server.tools.order_tools import format_price_for_alpaca, place_stock_order
+
+        # Format optimal price for penny stocks
+        if optimal_price is not None:
+            optimal_price = format_price_for_alpaca(optimal_price, optimal_price)
+
         # Execute with stream-derived pricing
         order_result = await place_stock_order(
             symbol=symbol,
@@ -948,25 +998,27 @@ async def stream_optimized_order_placement(symbol: str, side: str, quantity: flo
             quantity=quantity,
             order_type=order_type,
             limit_price=optimal_price if order_type == "limit" else None,
-            time_in_force="ioc"  # Immediate or Cancel for speed
+            time_in_force="day",  # Use DAY for extended hours compatibility
+            extended_hours=True,  # Enable extended hours
         )
-        
+
         # Enhanced response with stream context
-        result = f"🎯 STREAM-OPTIMIZED ORDER PLACEMENT\n"
+        result = "🎯 STREAM-OPTIMIZED ORDER PLACEMENT\n"
         result += "=" * 45 + "\n\n"
-        result += f"📊 Stream Analysis:\n"
+        result += "📊 Stream Analysis:\n"
         result += f"  └── Symbol: {symbol}\n"
         result += f"  └── Optimal Price: ${optimal_price:.4f}\n"
         result += f"  └── Order Type: {order_type.upper()}\n"
-        result += f"  └── Execution: IOC (Fast Fill)\n\n"
-        
+        result += "  └── Execution: IOC (Fast Fill)\n\n"
+
         result += "📋 Order Result:\n"
         result += order_result.replace("\n", "\n  ")  # Indent the order result
-        
+
         return result
-        
+
     except Exception as e:
         return f"❌ Stream-optimized order error: {str(e)}"
+
 
 async def clear_stock_stream_buffers() -> str:
     """

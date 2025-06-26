@@ -1,27 +1,133 @@
 """Order management tools for Alpaca MCP Server."""
 
 import time
-from typing import Optional, Union, List, Dict, Any
+from typing import Any
+
 from ..config.settings import get_trading_client
 
+
+def format_price_for_alpaca(price: float, current_price: float | None = None) -> float:
+    """
+    Format price according to Alpaca's decimal place requirements.
+
+    Args:
+        price: The price to format
+        current_price: Optional current stock price for context
+
+    Returns:
+        Properly formatted price (4 decimal places for penny stocks, 2 for >$1)
+    """
+    if price is None:
+        return None
+
+    # Use current_price if available, otherwise use the limit price itself
+    reference_price = current_price if current_price is not None else price
+
+    if reference_price < 5.00:
+        # Penny stocks: 4 decimal places
+        return float(f"{price:.4f}")
+    else:
+        # Regular stocks: 2 decimal places
+        return float(f"{price:.2f}")
+
+
+async def get_current_stock_price(symbol: str) -> float | None:
+    """
+    Get current stock price for decimal place determination.
+
+    Args:
+        symbol: Stock symbol
+
+    Returns:
+        Current price or None if unavailable
+    """
+    try:
+        from ..tools.market_data_tools import get_stock_quote
+
+        quote_result = await get_stock_quote(symbol)
+
+        # Extract price from quote result string
+        if "Last Trade:" in quote_result:
+            for line in quote_result.split("\n"):
+                if "Last Trade:" in line and "$" in line:
+                    price_str = line.split("$")[1].split()[0]
+                    return float(price_str)
+    except Exception:
+        pass
+
+    return None
+
+
+async def get_position_average_price(symbol: str) -> float | None:
+    """
+    Get the average entry price for a current position.
+    
+    Args:
+        symbol: Stock symbol to check
+        
+    Returns:
+        Average entry price or None if no position exists
+    """
+    try:
+        client = get_trading_client()
+        positions = client.get_all_positions()
+        
+        for position in positions:
+            if position.symbol == symbol:
+                return float(position.avg_entry_price)
+        
+        return None
+    except Exception:
+        return None
+
+
+async def validate_sell_order_for_profit(symbol: str, sell_price: float) -> tuple[bool, str]:
+    """
+    Validate that a sell order will result in a profit.
+    
+    Args:
+        symbol: Stock symbol
+        sell_price: Proposed sell price
+        
+    Returns:
+        Tuple of (is_valid, message)
+    """
+    try:
+        avg_price = await get_position_average_price(symbol)
+        
+        if avg_price is None:
+            return True, "No position found - sell order allowed"
+        
+        if sell_price <= avg_price:
+            return False, f"❌ LOSS PREVENTION: Sell price ${sell_price:.4f} is below average cost ${avg_price:.4f}. NEVER SELL FOR A LOSS!"
+        
+        profit_per_share = sell_price - avg_price
+        profit_pct = (profit_per_share / avg_price) * 100
+        
+        return True, f"✅ PROFIT CONFIRMED: Sell price ${sell_price:.4f} is ${profit_per_share:.4f} (+{profit_pct:.2f}%) above cost ${avg_price:.4f}"
+        
+    except Exception as e:
+        return False, f"Error validating sell order: {str(e)}"
+
+
 # Alpaca imports for order management
+from alpaca.common.exceptions import APIError
+from alpaca.trading.enums import (
+    OrderClass,
+    OrderSide,
+    OrderType,
+    QueryOrderStatus,
+    TimeInForce,
+)
 from alpaca.trading.requests import (
     GetOrdersRequest,
-    MarketOrderRequest,
     LimitOrderRequest,
-    StopOrderRequest,
-    StopLimitOrderRequest,
-    TrailingStopOrderRequest,
+    MarketOrderRequest,
     OptionLegRequest,
+    StopLimitOrderRequest,
+    StopOrderRequest,
+    TrailingStopOrderRequest,
 )
-from alpaca.trading.enums import (
-    OrderSide,
-    TimeInForce,
-    QueryOrderStatus,
-    OrderType,
-    OrderClass,
-)
-from alpaca.common.exceptions import APIError
 
 
 async def get_orders(status: str = "all", limit: int = 10) -> str:
@@ -77,7 +183,11 @@ Submitted At: {order.submitted_at}"""
                 result += f"\nFilled At: {order.filled_at}"
 
             if hasattr(order, "filled_avg_price") and order.filled_avg_price:
-                result += f"\nFilled Price: ${float(order.filled_avg_price):.2f}"
+                filled_price = float(order.filled_avg_price)
+                if filled_price < 1.00:
+                    result += f"\nFilled Price: ${filled_price:.4f}"
+                else:
+                    result += f"\nFilled Price: ${filled_price:.2f}"
 
             result += "\n-----------------------------------\n"
 
@@ -93,12 +203,12 @@ async def place_stock_order(
     quantity: float,
     order_type: str = "market",
     time_in_force: str = "day",
-    limit_price: Optional[float] = None,
-    stop_price: Optional[float] = None,
-    trail_price: Optional[float] = None,
-    trail_percent: Optional[float] = None,
+    limit_price: float | None = None,
+    stop_price: float | None = None,
+    trail_price: float | None = None,
+    trail_percent: float | None = None,
     extended_hours: bool = False,
-    client_order_id: Optional[str] = None,
+    client_order_id: str | None = None,
 ) -> str:
     """
     Places an order of any supported type (MARKET, LIMIT, STOP, STOP_LIMIT, TRAILING_STOP) using the correct Alpaca request class.
@@ -122,6 +232,23 @@ async def place_stock_order(
     try:
         client = get_trading_client()
 
+        # Get current stock price for proper decimal formatting
+        current_price = await get_current_stock_price(symbol)
+
+        # Format prices according to Alpaca requirements
+        if limit_price is not None:
+            limit_price = format_price_for_alpaca(limit_price, current_price)
+        if stop_price is not None:
+            stop_price = format_price_for_alpaca(stop_price, current_price)
+        if trail_price is not None:
+            trail_price = format_price_for_alpaca(trail_price, current_price)
+
+        # CRITICAL: Validate sell orders to prevent losses
+        if side.lower() == "sell" and limit_price is not None:
+            is_valid, message = await validate_sell_order_for_profit(symbol, limit_price)
+            if not is_valid:
+                return message
+
         # Validate side
         if side.lower() == "buy":
             order_side = OrderSide.BUY
@@ -138,7 +265,13 @@ async def place_stock_order(
 
         # Validate order_type and create appropriate request
         order_type_upper = order_type.upper()
-        order_data: Union[MarketOrderRequest, LimitOrderRequest, StopOrderRequest, StopLimitOrderRequest, TrailingStopOrderRequest]
+        order_data: (
+            MarketOrderRequest
+            | LimitOrderRequest
+            | StopOrderRequest
+            | StopLimitOrderRequest
+            | TrailingStopOrderRequest
+        )
         if order_type_upper == "MARKET":
             order_data = MarketOrderRequest(
                 symbol=symbol,
@@ -290,8 +423,8 @@ Status: {status}"""
 
 
 async def place_option_market_order(
-    legs: List[Dict[str, Any]],
-    order_class: Optional[Union[str, OrderClass]] = None,
+    legs: list[dict[str, Any]],
+    order_class: str | OrderClass | None = None,
     quantity: int = 1,
     time_in_force: TimeInForce = TimeInForce.DAY,
     extended_hours: bool = False,
@@ -417,10 +550,7 @@ To enable options trading:
 
 Once approved, you'll be able to place options orders."""
 
-        elif (
-            "42110000" in error_message
-            or "insufficient option level" in error_message.lower()
-        ):
+        elif "42110000" in error_message or "insufficient option level" in error_message.lower():
             return """❌ Insufficient Options Trading Level
 
 Your current options trading level doesn't allow this strategy.
@@ -428,7 +558,7 @@ Your current options trading level doesn't allow this strategy.
 Options Trading Levels:
 • Level 1: Covered calls, cash-secured puts
 • Level 2: Long calls/puts, protective strategies
-• Level 3: Spreads, strangles, straddles  
+• Level 3: Spreads, strangles, straddles
 • Level 4: Naked calls/puts, advanced strategies
 
 To upgrade your options level:
@@ -449,7 +579,7 @@ The options order failed validation. Common issues:
 
 Please verify:
 1. Option symbols are correctly formatted
-2. Expiration dates are valid and in the future  
+2. Expiration dates are valid and in the future
 3. Strike prices exist for the underlying
 4. Account has sufficient funds"""
 
@@ -461,7 +591,7 @@ Your account doesn't have enough buying power for this options order.
 For options orders you need:
 • Buying calls: Full premium amount
 • Selling calls: Margin requirement or underlying shares
-• Buying puts: Full premium amount  
+• Buying puts: Full premium amount
 • Selling puts: Cash equal to strike × 100
 
 Check your buying power with: get_account_info()"""
