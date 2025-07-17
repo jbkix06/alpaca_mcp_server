@@ -11,3 +11,6 @@ dependencies = [
     "mcp",
     "python-dotenv"
 ]
+
+[project.scripts]
+your-cli-command = "alpaca_mcp_server:main"
