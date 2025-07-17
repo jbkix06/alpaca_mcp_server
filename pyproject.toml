@@ -2,7 +2,7 @@
 name = "python-template"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <jonathan.m.brooks@gmail.com>"]
+authors = ["jbrooks"]
 requires-python = ">=3.12"
 dependencies = [
     "agents>=1.4.0",
