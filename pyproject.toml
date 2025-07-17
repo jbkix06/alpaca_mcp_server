@@ -14,4 +14,4 @@ dependencies = [
 ]
 
 [project.scripts]
-alpaca-mcp = "alpaca_mcp_server:main"
+alpaca-mcp = "alpaca_mcp_server:mcp.run"
