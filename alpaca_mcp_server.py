@@ -57,14 +57,18 @@ from alpaca.trading.requests import (
     UpdateWatchlistRequest,
 )
 from mcp.server.fastmcp import FastMCP
-
+class UserAgentMixin:
+    def _get_default_headers(self) -> dict:
+        headers = self._get_auth_headers()
+        headers["User-Agent"] = USER_AGENT
+        return headers
 # Configure Python path for local imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
 github_core_path = os.path.join(current_dir, '.github', 'core')
 if github_core_path not in sys.path:
     sys.path.insert(0, github_core_path)
 # Import the UserAgentMixin
-from user_agent_mixin import UserAgentMixin
+#from user_agent_mixin import UserAgentMixin
 # Define new classes using the mixin
 class TradingClientSigned(UserAgentMixin, TradingClient): pass
 class StockHistoricalDataClientSigned(UserAgentMixin, StockHistoricalDataClient): pass
