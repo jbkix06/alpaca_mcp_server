@@ -1,0 +1,13 @@
+[project]
+name = "python-template"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+requires-python = ">=3.12"
+dependencies = [
+    "agents>=1.4.0",
+    "openai-agents>=0.0.11",
+    "alpaca-py",
+    "mcp",
+    "python-dotenv"
+]
