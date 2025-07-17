@@ -9,8 +9,9 @@ dependencies = [
     "openai-agents>=0.0.11",
     "alpaca-py",
     "mcp",
-    "python-dotenv"
+    "python-dotenv",
+    "user_agent_mixin"
 ]
 
 [project.scripts]
-your-cli-command = "alpaca_mcp_server:main"
+alpaca-mcp = "alpaca_mcp_server:main"
