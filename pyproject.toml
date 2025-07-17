@@ -10,7 +10,7 @@ dependencies = [
     "alpaca-py",
     "mcp",
     "python-dotenv",
-    "user_agent_mixin"
+    "Werkzeug"
 ]
 
 [project.scripts]
